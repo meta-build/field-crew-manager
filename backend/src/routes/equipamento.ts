@@ -16,4 +16,6 @@ routes.get('/equipamentos', (req: Request, res: Response) => {
 
 routes.post('/equipamentos', formDataMiddleware, EquipamentoController.new);
 
+routes.put('/equipamentos', formDataMiddleware, EquipamentoController.update);
+
 export default routes;

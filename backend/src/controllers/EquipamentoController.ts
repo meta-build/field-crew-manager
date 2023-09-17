@@ -113,10 +113,86 @@ class EquipamentoController {
 
     // obs.: armazenar url das imagens no banco de dados referente ao equipamento que está sendo cadastrado, as urls estão armazenadas no array imagensUrl
     // processo para inserção dos dados no campo de dados
-
-
+    
+    
+    
     // pegar id do equipamento recém criado e armazenar na variável abaixo
-    const id = 'asqda'
+    const id = 'asqda';
+
+    return res.status(200).json({ id });
+  }
+  
+  public async update(req: RequestFiles, res: Response) {
+    const { id } = req.query;
+
+    if (!id) {
+      return res.status(400).json({ error: 'ID não informado.' });
+    }
+    
+    // validar se ID existe, se não existir, deve retornar true na condição do if abaixo
+    if (false) {
+      return res.status(404).json({ error: 'Equipamento não encontrado.' });
+    }
+
+    // informações básicas do equipamento
+    const { tipo, serial, cidade, obs } = req.body;
+  
+    // validação das informações recebidas
+    if (!tipo) {
+      return res.status(400).json({ error: 'campo "Tipo" não informado.' });
+    }
+    if (isNaN(Number(tipo))) {
+      return res.status(400).json({ error: '"Tipo" informado inválido.' });
+    }
+    if (!serial) {
+      return res.status(400).json({ error: 'campo "Serial" não informado.' });
+    }
+    if (!cidade) {
+      return res.status(400).json({ error: 'campo "Cidade" não informado.' });
+    }
+    if (!obs) {
+      return res.status(400).json({ error: 'campo "Observação" não informado.' });
+    }
+  
+    // validação se existe tipo (se não existir o tipo, deve retornar true para retornar o erro)
+    if (false) {
+      return res.status(404).json({ error: 'ID do Tipo não encontrado.' });
+    }
+  
+    // armazenamento das fotos do equipamento na api IMGUR
+    const { imgs } = req.files;
+    const imagens = Array.isArray(imgs) ? imgs : imgs ? [imgs] : [];
+  
+    if (!imagens.length) {
+      return res.status(400).json({ error: 'Equipamento precisa ter no mínimo 1 foto.' });
+    }
+    const imagensUrl = [];
+  
+    for (const img of imagens) {
+      const imgName = `${uuidv4()}.jpg`;
+      const imgBuffer = fs.readFileSync(img.path);
+      const imgBlob = new Blob([imgBuffer], { type: 'image/jpeg' });
+  
+      const formData = new FormData();
+      formData.append('image', imgBlob, imgName);
+  
+      try {
+        const resp = await axios.post(
+          'https://api.imgur.com/3/image',
+          formData,
+          { headers: { 'Authorization': `Client-ID ${process.env.IMGUR_CLIENT_ID}` } }
+        );
+        const url = resp.data.data.link;
+        imagensUrl.push(url);
+      } catch (err) {
+        return res.status(500).json({ error: err });
+      }
+    }
+  
+    // obs.: armazenar url das imagens no banco de dados referente ao equipamento que está sendo cadastrado, as urls estão armazenadas no array imagensUrl
+    // processo para edição dos dados no campo de dados
+
+
 
     return res.status(200).json({ id });
   }
