@@ -196,6 +196,52 @@ class EquipamentoController {
 
     return res.status(200).json({ id });
   }
+
+  public async active (req: Request, res: Response) {
+    const { id } = req.query;
+
+    if (!id) {
+      return res.status(400).json({ error: 'ID não informado.' });
+    }
+    
+    // validar se ID existe, se não existir, deve retornar true na condição do if abaixo
+    if (false) {
+      return res.status(404).json({ error: 'Equipamento não encontrado.' });
+    }
+
+    // se equipamento já estiver ativo, condição do if abaixo deve ser true
+    if (false) {
+      return res.status(409).json({ error: 'Equipamento já está ativo.' });
+    }
+
+    // processo para ativar equipamento
+
+
+    return res.status(200).json({});
+  }
+
+  public async deactive (req: Request, res: Response) {
+    const { id } = req.query;
+
+    if (!id) {
+      return res.status(400).json({ error: 'ID não informado.' });
+    }
+    
+    // validar se ID existe, se não existir, deve retornar true na condição do if abaixo
+    if (false) {
+      return res.status(404).json({ error: 'Equipamento não encontrado.' });
+    }
+
+    // se equipamento já estiver inativo, condição do if abaixo deve ser true
+    if (false) {
+      return res.status(409).json({ error: 'Equipamento já está inativo.' });
+    }
+
+    // processo para desativar equipamento
+
+
+    return res.status(200).json({});
+  }
 }
 
 export default new EquipamentoController();
