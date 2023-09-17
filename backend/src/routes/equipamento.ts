@@ -1,7 +1,10 @@
 import { Router, Request, Response } from 'express';
 import EquipamentoController from '../controllers/EquipamentoController';
+import { parse } from 'express-form-data';
 
 const routes = Router();
+
+const formDataMiddleware = parse();
 
 routes.get('/equipamentos', (req: Request, res: Response) => {
   if (req.query.id) {
@@ -10,5 +13,7 @@ routes.get('/equipamentos', (req: Request, res: Response) => {
 
   return EquipamentoController.getEquipamentos(req, res);
 });
+
+routes.post('/equipamentos', formDataMiddleware, EquipamentoController.new);
 
 export default routes;
