@@ -6,6 +6,6 @@ const routes = Router();
 
 routes.use(equipamentos);
 routes.use(tipo);
-routes.get('/teste', (req: Request, res: Response) => res.json({ test: 'teste de rota' }));
+routes.use((req: Request, res: Response) => res.status(404).json({ error: 'Requisição desconhecida.' }));
 
 export default routes;
