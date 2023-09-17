@@ -82,6 +82,9 @@ class EquipamentoController {
     }
 
     // armazenamento das fotos do equipamento na api IMGUR
+    if (!req.files) {
+      return res.status(400).json({ error: 'Equipamento precisa ter no mínimo 1 foto.' });
+    }
     const { imgs } = req.files;
     const imagens = Array.isArray(imgs) ? imgs : imgs ? [imgs] : [];
 
