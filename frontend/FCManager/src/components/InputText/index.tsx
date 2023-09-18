@@ -7,8 +7,13 @@ import {
   TextInput,
   TextInputChangeEventData,
 } from 'react-native';
+import colors from '../../styles/variables';
 
-const InputText = () => {
+interface Props {
+  color: 'gray' | 'white';
+}
+
+const InputText = (props: Props) => {
   const [value, Setvalue] = useState<string>('');
   const handleOnChangeInput = (
     event: NativeSyntheticEvent<TextInputChangeEventData>,
@@ -21,19 +26,28 @@ const InputText = () => {
       <TextInput
         onChange={handleOnChangeInput}
         value={value}
-        style={styles.inputgray}
+        style={styles[props.color]}
         placeholder="Pesquisar por tipo..."
-        placeholderTextColor="gray"
+        placeholderTextColor={colors.light_gray_2}
       />
     </SafeAreaView>
   );
 };
 
+const inputStyles = {
+  borderRadius: 10,
+  padding: 12,
+  color: colors.dark_gray,
+};
+
 const styles = StyleSheet.create({
-  inputgray: {
-    backgroundColor: '#BFBFBF',
-    color: 'black',
-    borderRadius: 10,
+  gray: {
+    ...inputStyles,
+    backgroundColor: colors.white_2,
+  },
+  white: {
+    ...inputStyles,
+    backgroundColor: colors.white,
   },
 });
 
