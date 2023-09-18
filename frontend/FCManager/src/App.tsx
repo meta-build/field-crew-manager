@@ -1,6 +1,6 @@
-import {SafeAreaView, Text} from 'react-native';
+import {SafeAreaView} from 'react-native';
 import React from 'react';
-import Inputgraynormal from './components/input-text-gray-n';
+import Inputgraynormal from './components/InputText';
 
 const App = () => {
   return (
