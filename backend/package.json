@@ -5,10 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev src/index.ts",
-    "start": "ts-node src/index.ts",
-    "migration:generate": "typeorm-ts-node-commonjs -d ./src/data-source.ts migration:generate ./src/migrations/default",
-    "migration:run": "typeorm-ts-node-commonjs -d ./src/data-source.ts migration:run",
-    "migration:revert": "typeorm-ts-node-commonjs -d ./src/data-source.ts migration:revert"
+    "start": "nodemon src/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -24,10 +21,13 @@
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "blob": "^0.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.5.2",
+    "nodemon": "^3.0.1",
     "pg": "^8.11.3",
     "typeorm": "^0.3.17"
   }
