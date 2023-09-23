@@ -40,9 +40,16 @@ interface Props {
   placeholder: string;
   onSelect: (value: string) => void;
   enable?: boolean;
+  color?: 'white' | 'gray';
 }
 
-function Dropdown({items, placeholder, onSelect, enable = true}: Props) {
+function Dropdown({
+  items,
+  placeholder,
+  onSelect,
+  enable = true,
+  color = 'white',
+}: Props) {
   const [open, setOpen] = useState(false);
   const [selectedLabel, setSelectedLabel] = useState('');
 
@@ -58,6 +65,7 @@ function Dropdown({items, placeholder, onSelect, enable = true}: Props) {
         disabled={!enable}
         style={[
           styles.button,
+          color === 'gray' ? {backgroundColor: colors.white_2} : {},
           !enable ? {backgroundColor: colors.light_gray_2} : {},
         ]}
         onPress={() => setOpen(!open)}>
@@ -71,7 +79,10 @@ function Dropdown({items, placeholder, onSelect, enable = true}: Props) {
 
       {open && (
         <FlatList
-          style={styles.list}
+          style={[
+            styles.list,
+            color === 'gray' ? {backgroundColor: colors.white_2} : {},
+          ]}
           data={items}
           renderItem={item => (
             <DropdownItem
