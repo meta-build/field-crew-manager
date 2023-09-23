@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import * as dotenv from 'dotenv';
+import equipamentSchema from "../models/equipamentSchema";
 
 dotenv.config();
 
@@ -27,6 +28,16 @@ class EquipamentoController {
     // preencher array abaixo
     const itens = [];
 
+    try{
+      const equipamento = await equipamentSchema.find();
+      return res.json(equipamento);
+    } catch (error) {
+      res.status(400).json({
+        error: "something wrong happened",
+        message: error
+      });
+    }
+
     const backPage = Number(page) == 1 ? undefined : (Number(page) - 1);
     // se quant. itens <= 15 após paginação, nextPage = undefined
     const nextPage = 1;
@@ -44,15 +55,15 @@ class EquipamentoController {
   }
 
   public async getEquipamentosById(req: Request, res: Response) {
-    const { id } = req.query;
-
-    // lógica para retornar equipamento por ID
-
-    // se equipamento encontrado: status = 200; se equipamento NÃO encontrado: status = 404;
-    const status = 200;
-    const equipamento = {};
-
-    return res.status(status).json(equipamento);
+    try{
+      const equipamento = await equipamentSchema.findById(req.params.id);
+      return res.json(equipamento);
+    } catch (error) {
+      res.status(400).json({
+        error: "something wrong happened",
+        message: error
+      });
+    }
   }
 
   public async new(req: RequestFiles, res: Response) {
@@ -112,6 +123,16 @@ class EquipamentoController {
       } catch (err) {
         return res.status(500).json({ error: err });
       }
+    }
+
+    try{
+      const equipamento = await equipamentSchema.create({tipo, serial, cidade, obs});
+      return res.json(equipamento);
+    } catch (error) {
+      res.status(400).json({
+        error: "something wrong happened",
+        message: error
+      });
     }
 
     // obs.: armazenar url das imagens no banco de dados referente ao equipamento que está sendo cadastrado, as urls estão armazenadas no array imagensUrl

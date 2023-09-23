@@ -6,13 +6,9 @@ const routes = Router();
 
 const formDataMiddleware = parse();
 
-routes.get('/equipamentos', (req: Request, res: Response) => {
-  if (req.query.id) {
-    return EquipamentoController.getEquipamentosById(req, res);
-  }
+routes.get('/equipamentos', EquipamentoController.getEquipamentos);
 
-  return EquipamentoController.getEquipamentos(req, res);
-});
+routes.get('/equipamentos/:id', EquipamentoController.getEquipamentosById);
 
 routes.post('/equipamentos', formDataMiddleware, EquipamentoController.new);
 

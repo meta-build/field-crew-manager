@@ -5,10 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev src/index.ts",
-    "start": "ts-node src/index.ts",
-    "migration:generate": "typeorm-ts-node-commonjs -d ./src/data-source.ts migration:generate ./src/migrations/default",
-    "migration:run": "typeorm-ts-node-commonjs -d ./src/data-source.ts migration:run",
-    "migration:revert": "typeorm-ts-node-commonjs -d ./src/data-source.ts migration:revert"
+    "start": "ts-node src/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -32,6 +29,8 @@
     "express": "^4.18.2",
     "express-form-data": "^2.0.22",
     "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.5.2",
+    "nodemon": "^3.0.1",
     "pg": "^8.11.3",
     "typeorm": "^0.3.17",
     "uuid": "^9.0.1"
