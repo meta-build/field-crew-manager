@@ -39,9 +39,10 @@ interface Props {
   items: {label: string; value: string}[];
   placeholder: string;
   onSelect: (value: string) => void;
+  enable?: boolean;
 }
 
-function Dropdown({items, placeholder, onSelect}: Props) {
+function Dropdown({items, placeholder, onSelect, enable = true}: Props) {
   const [open, setOpen] = useState(false);
   const [selectedLabel, setSelectedLabel] = useState('');
 
@@ -53,14 +54,14 @@ function Dropdown({items, placeholder, onSelect}: Props) {
 
   return (
     <View style={styles.container}>
-      <Pressable style={styles.button} onPress={() => setOpen(!open)}>
-        <Text
-          style={[
-            styles.buttonText,
-            !selectedLabel && styles.buttonPlaceholder,
-          ]}>
-          {selectedLabel || placeholder}
-        </Text>
+      <Pressable
+        disabled={!enable}
+        style={[
+          styles.button,
+          !enable ? {backgroundColor: colors.light_gray_2} : {},
+        ]}
+        onPress={() => setOpen(!open)}>
+        <Text style={styles.buttonText}>{selectedLabel || placeholder}</Text>
         {open ? (
           <ArrowUp style={styles.buttonIcon} width={14} height={14} />
         ) : (
