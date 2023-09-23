@@ -126,6 +126,7 @@ const styles = StyleSheet.create({
   },
   itemText: {
     color: colors.dark_gray,
+    marginLeft: 8,
   },
 });
 
