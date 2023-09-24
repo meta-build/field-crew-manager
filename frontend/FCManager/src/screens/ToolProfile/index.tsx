@@ -27,6 +27,18 @@ function ToolProfile({navigation, route}: any) {
 
   const status = 'ativo';
 
+  const edit = () => {
+    console.log('editar');
+  };
+
+  const activate = () => {
+    console.log('ativar');
+  };
+
+  const deactivate = () => {
+    console.log('desativar');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Header text="Equipamentos" />
@@ -53,13 +65,21 @@ function ToolProfile({navigation, route}: any) {
         </View>
         <View style={styles.btnView}>
           <View style={styles.btn}>
-            <Btn styleType="outlined" title="Editar" />
+            <Btn onPress={() => edit()} styleType="outlined" title="Editar" />
           </View>
           <View style={styles.btn}>
             {status === 'ativo' ? (
-              <Btn styleType="alert" title="Desativar" />
+              <Btn
+                onPress={() => deactivate()}
+                styleType="alert"
+                title="Desativar"
+              />
             ) : (
-              <Btn styleType="filled" title="Ativar" />
+              <Btn
+                onPress={() => activate()}
+                styleType="filled"
+                title="Ativar"
+              />
             )}
           </View>
         </View>
