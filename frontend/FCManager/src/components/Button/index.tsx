@@ -1,18 +1,21 @@
-import React from 'react';
+import React, {FunctionComponent} from 'react';
 import {Pressable, PressableProps, StyleSheet, Text} from 'react-native';
 import colors from '../../styles/variables';
+import {SvgProps} from 'react-native-svg';
 
 interface Props extends PressableProps {
   styleType: 'filled' | 'outlined' | 'blank' | 'alert';
   enable?: boolean;
-  title: string;
+  title?: string;
+  icon?: FunctionComponent<SvgProps>;
 }
 
-const Btn = ({title, enable = true, styleType, ...props}: Props) => {
+const Btn = ({icon, title, enable = true, styleType, ...props}: Props) => {
   const styles = StyleSheet.create({
     btn: {
       borderRadius: 10,
       alignItems: 'center',
+      justifyContent: 'center',
       padding: 10,
     },
     filled: {
@@ -41,12 +44,24 @@ const Btn = ({title, enable = true, styleType, ...props}: Props) => {
     text_alert: {color: enable ? colors.white : colors.light_gray_1},
   });
 
+  const contentMiddleware = () => {
+    if (!title) {
+      if (!icon) {
+        return <></>;
+      }
+      return <>{icon}</>;
+    }
+    return (
+      <Text style={[styles.text, styles[`text_${styleType}`]]}>{title}</Text>
+    );
+  };
+
   return (
     <Pressable
       disabled={!enable}
       onPress={props.onPress}
       style={[styles.btn, styles[styleType]]}>
-      <Text style={[styles.text, styles[`text_${styleType}`]]}> {title}</Text>
+      {contentMiddleware()}
     </Pressable>
   );
 };
