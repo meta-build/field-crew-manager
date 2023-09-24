@@ -5,26 +5,28 @@ import colors from '../../styles/variables';
 interface Props {
   text: string;
   color: 'green' | 'gray' | 'lightGreen';
+  align?: 'left' | 'center' | 'right' | 'justify';
 }
 
-function Title({text, color}: Props) {
+function Title({text, color, align = 'left'}: Props) {
+  const styles = StyleSheet.create({
+    title: {
+      fontWeight: 'bold',
+      fontSize: 24,
+      textAlign: align,
+    },
+    green: {
+      color: colors.green_2,
+    },
+    gray: {
+      color: colors.dark_gray,
+    },
+    lightGreen: {
+      color: colors.green_1,
+    },
+  });
+
   return <Text style={[styles.title, styles[color]]}>{text}</Text>;
 }
-
-const styles = StyleSheet.create({
-  title: {
-    fontWeight: 'bold',
-    fontSize: 24,
-  },
-  green: {
-    color: colors.green_2,
-  },
-  gray: {
-    color: colors.dark_gray,
-  },
-  lightGreen: {
-    color: colors.green_1,
-  },
-});
 
 export default Title;
