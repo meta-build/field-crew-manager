@@ -15,7 +15,7 @@ import ToolItem from '../../components/ToolItem';
 
 const {width, height} = Dimensions.get('window');
 
-function ToolList() {
+function ToolList({navigation}: any) {
   const openFilter = () => {
     console.log('filter');
   };
@@ -25,7 +25,7 @@ function ToolList() {
   };
 
   const openItem = (serie: string) => {
-    console.log(serie);
+    navigation.navigate('ToolProfile', {id: serie});
   };
 
   const lista: {
