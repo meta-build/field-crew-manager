@@ -10,6 +10,9 @@ const colors = {
   dark_gray: '#656565',
   green_1: '#81DC0D',
   green_2: '#579607',
+  green_3: '#80B43D',
+  alert_1: '#FF3D3D',
+  alert_3: '#BB5C5C',
 };
 
 export default colors;
