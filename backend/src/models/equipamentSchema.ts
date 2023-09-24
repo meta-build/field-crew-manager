@@ -2,23 +2,23 @@ import mongoose from "mongoose";
 
 const equipamentSchema = new mongoose.Schema({
     tipo: {
-        type: Number,
-        require: true,
+        type: Number
     },
 
     serial: {
-        type: String,
-        require: true
+        type: String
     },
 
     cidade: {
-        type: String,
-        require: true,
+        type: String
     },
 
     obs: {
-        type: String,
-        require: true,
+        type: String
+    },
+
+    isActive: {
+        type: Boolean
     }
 });
 

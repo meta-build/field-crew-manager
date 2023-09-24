@@ -228,7 +228,8 @@ class EquipamentoController {
   }
 
   public async active (req: Request, res: Response) {
-    const { id } = req.query;
+    const { id } = req.params;
+
 
     if (!id) {
       return res.status(400).json({ error: 'ID não informado.' });
@@ -245,12 +246,24 @@ class EquipamentoController {
     }
 
     // processo para ativar equipamento
+    try {
+      const equipamento = await equipamentSchema.findByIdAndUpdate(id, req.body);
+      if (equipamento.isActive === true) {
+        return res.json({
+          message: "Equipamento ativado"
+        }); 
+      } return res.json(equipamento);
+    } catch (error) {
+      res.status(400).json({
+        error: "não foi possivel ativar",
+        message: error
+      });
+    }
 
-    
   }
 
   public async desactive (req: Request, res: Response) {
-    const { id } = req.query;
+    const { id } = req.params;
 
     if (!id) {
       return res.status(400).json({ error: 'ID não informado.' });
@@ -267,9 +280,18 @@ class EquipamentoController {
     }
 
     // processo para desativar equipamento
-
-
-    return res.status(200).json({});
+    try {
+      const equipamento = await equipamentSchema.findByIdAndUpdate(id, req.body);
+      if (equipamento.isActive === false) {
+        console.log("equipamento desativado")
+      }
+      return res.json(equipamento);
+    } catch (error) {
+      res.status(400).json({
+        error: "não foi possivel desativar",
+        message: error
+      });
+    }
   }
 }
 
