@@ -1,15 +1,18 @@
 import React from 'react';
 import {
   SafeAreaView,
+  StyleProp,
   StyleSheet,
   TextInput,
   TextInputProps,
+  TextStyle,
 } from 'react-native';
 import colors from '../../styles/variables';
 
 interface Props extends TextInputProps {
   color: 'gray' | 'white';
   enable?: boolean;
+  style?: StyleProp<TextStyle>;
 }
 
 const InputText = ({enable = true, color, ...props}: Props) => {
@@ -33,16 +36,14 @@ const InputText = ({enable = true, color, ...props}: Props) => {
   });
 
   return (
-    <SafeAreaView>
-      <TextInput
-        style={styles[color]}
-        placeholderTextColor={colors.light_gray_2}
-        onChange={props.onChange}
-        value={props.value}
-        placeholder={props.placeholder}
-        editable={enable}
-      />
-    </SafeAreaView>
+    <TextInput
+      style={[styles[color], props.style]}
+      placeholderTextColor={colors.light_gray_2}
+      onChange={props.onChange}
+      value={props.value}
+      placeholder={props.placeholder}
+      editable={enable}
+    />
   );
 };
 
