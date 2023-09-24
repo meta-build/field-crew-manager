@@ -16,6 +16,6 @@ routes.put('/equipamentos/:id', formDataMiddleware, EquipamentoController.update
 
 routes.put('/equipamentos/ativar', EquipamentoController.active);
 
-routes.put('/equipamentos/desativar', EquipamentoController.active);
+routes.put('/equipamentos/desativar', EquipamentoController.desactive);
 
 export default routes;

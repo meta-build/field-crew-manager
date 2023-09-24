@@ -246,11 +246,10 @@ class EquipamentoController {
 
     // processo para ativar equipamento
 
-
-    return res.status(200).json({});
+    
   }
 
-  public async deactive (req: Request, res: Response) {
+  public async desactive (req: Request, res: Response) {
     const { id } = req.query;
 
     if (!id) {
