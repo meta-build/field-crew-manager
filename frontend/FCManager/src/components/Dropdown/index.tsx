@@ -39,9 +39,17 @@ interface Props {
   items: {label: string; value: string}[];
   placeholder: string;
   onSelect: (value: string) => void;
+  enable?: boolean;
+  color?: 'white' | 'gray';
 }
 
-function Dropdown({items, placeholder, onSelect}: Props) {
+function Dropdown({
+  items,
+  placeholder,
+  onSelect,
+  enable = true,
+  color = 'white',
+}: Props) {
   const [open, setOpen] = useState(false);
   const [selectedLabel, setSelectedLabel] = useState('');
 
@@ -53,14 +61,15 @@ function Dropdown({items, placeholder, onSelect}: Props) {
 
   return (
     <View style={styles.container}>
-      <Pressable style={styles.button} onPress={() => setOpen(!open)}>
-        <Text
-          style={[
-            styles.buttonText,
-            !selectedLabel && styles.buttonPlaceholder,
-          ]}>
-          {selectedLabel || placeholder}
-        </Text>
+      <Pressable
+        disabled={!enable}
+        style={[
+          styles.button,
+          color === 'gray' ? {backgroundColor: colors.white_2} : {},
+          !enable ? {backgroundColor: colors.light_gray_2} : {},
+        ]}
+        onPress={() => setOpen(!open)}>
+        <Text style={styles.buttonText}>{selectedLabel || placeholder}</Text>
         {open ? (
           <ArrowUp style={styles.buttonIcon} width={14} height={14} />
         ) : (
@@ -70,7 +79,10 @@ function Dropdown({items, placeholder, onSelect}: Props) {
 
       {open && (
         <FlatList
-          style={styles.list}
+          style={[
+            styles.list,
+            color === 'gray' ? {backgroundColor: colors.white_2} : {},
+          ]}
           data={items}
           renderItem={item => (
             <DropdownItem
@@ -126,6 +138,7 @@ const styles = StyleSheet.create({
   },
   itemText: {
     color: colors.dark_gray,
+    marginLeft: 8,
   },
 });
 
