@@ -16,11 +16,10 @@ const Btn = ({icon, title, enable = true, styleType, ...props}: Props) => {
       borderRadius: 10,
       alignItems: 'center',
       justifyContent: 'center',
-      padding: 10,
+      padding: 12,
     },
     filled: {
       backgroundColor: enable ? colors.green_1 : colors.green_3,
-      minWidth: 300,
     },
     outlined: {
       padding: 8,
