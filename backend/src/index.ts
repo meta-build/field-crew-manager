@@ -10,7 +10,9 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-mongoose.connect(process.env.CNN);
 app.use(routes);
 app.use(cors<Request>);
+
+require("../src/database/index");
+
 app.listen(3001, () => console.log('rodando na porta 3001'));
