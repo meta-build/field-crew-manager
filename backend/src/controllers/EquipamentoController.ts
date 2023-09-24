@@ -147,7 +147,7 @@ class EquipamentoController {
   }
   
   public async update(req: RequestFiles, res: Response) {
-    const { id } = req.params;
+    const { id } = req.query;
 
     if (!id) {
       return res.status(400).json({ error: 'ID não informado.' });
@@ -216,15 +216,9 @@ class EquipamentoController {
     // obs.: armazenar url das imagens no banco de dados referente ao equipamento que está sendo cadastrado, as urls estão armazenadas no array imagensUrl
     // processo para edição dos dados no campo de dados
 
-    try{
-      const equipamento = await equipamentSchema.findByIdAndUpdate(id, req.body);
-      return res.json(equipamento);
-    } catch (error) {
-      res.status(400).json({
-        error: "something wrong happened",
-        message: error
-      });
-    }
+
+
+    return res.status(200).json({ id });
   }
 
   public async active (req: Request, res: Response) {
