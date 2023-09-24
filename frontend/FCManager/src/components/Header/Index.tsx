@@ -2,10 +2,14 @@ import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import colors from '../../styles/variables';
 
-const Header = () => {
+interface Props {
+  text: string;
+}
+
+const Header = ({text}: Props) => {
   return (
     <View style={styles.header}>
-      <Text style={styles.h1}>ola</Text>
+      <Text style={styles.h1}>{text}</Text>
     </View>
   );
 };
