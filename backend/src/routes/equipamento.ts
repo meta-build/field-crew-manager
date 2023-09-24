@@ -12,7 +12,7 @@ routes.get('/equipamentos/:id', EquipamentoController.getEquipamentosById);
 
 routes.post('/equipamentos', formDataMiddleware, EquipamentoController.new);
 
-routes.put('/equipamentos', formDataMiddleware, EquipamentoController.update);
+routes.put('/equipamentos/:id', formDataMiddleware, EquipamentoController.update);
 
 routes.put('/equipamentos/ativar', EquipamentoController.active);
 
