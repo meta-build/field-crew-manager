@@ -15,6 +15,8 @@ import Checkbox from '../../components/Checkbox';
 import InputText from '../../components/InputText';
 import Dropdown from '../../components/Dropdown';
 import Btn from '../../components/Button';
+import BottomModal from '../../components/BottomModal';
+import Title from '../../components/Title';
 
 const {width, height} = Dimensions.get('window');
 
@@ -28,6 +30,8 @@ function NewTool({navigation}: any) {
   const [selectedTypeValue, setSelectedTypeValue] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
 
+  const [confirmModal, setConfirmModal] = useState(false);
+
   const types = [{label: 'tipo 1', value: '123'}];
   const cities = [{label: 'sjc', value: 'sjc'}];
 
@@ -35,89 +39,112 @@ function NewTool({navigation}: any) {
     console.log('criar');
   };
 
+  const confirm = () => {
+    setConfirmModal(true);
+  };
+
   const cancel = () => {
     navigation.goBack();
   };
 
   return (
-    <KeyboardAvoidingView>
-      <SafeAreaView style={styles.container}>
-        <Header text="Novo Equipamento" />
-        <ScrollView>
-          <View style={styles.content}>
-            <Panel>
-              <Text style={styles.panel_label}>Fotos</Text>
-              <InputImage
-                onAddImage={imgsUris => {
-                  const tempArr = [...imgs, ...imgsUris];
-                  setImgs(tempArr);
-                }}
-                onRemoveImage={imgUri => {
-                  const tempArr = imgs.filter(img => img !== imgUri);
-                  setImgs(tempArr);
-                }}
-                imgs={imgs}
-              />
-            </Panel>
-            <Panel>
-              <Text style={styles.panel_label}>Tipo de equipamento</Text>
-              {newType ? (
-                <InputText color="gray" placeholder="Novo tipo" />
-              ) : (
-                <Dropdown
-                  items={types}
-                  placeholder="Tipo"
-                  color="gray"
-                  onSelect={value => setSelectedTypeValue(value)}
+    <>
+      <KeyboardAvoidingView>
+        <SafeAreaView style={styles.container}>
+          <Header text="Novo Equipamento" />
+          <ScrollView>
+            <View style={styles.content}>
+              <Panel>
+                <Text style={styles.panel_label}>Fotos</Text>
+                <InputImage
+                  onAddImage={imgsUris => {
+                    const tempArr = [...imgs, ...imgsUris];
+                    setImgs(tempArr);
+                  }}
+                  onRemoveImage={imgUri => {
+                    const tempArr = imgs.filter(img => img !== imgUri);
+                    setImgs(tempArr);
+                  }}
+                  imgs={imgs}
                 />
-              )}
-              <Checkbox
-                checked={newType}
-                onPress={() => setNewType(!newType)}
-                text="Novo tipo de equipamento"
-              />
-            </Panel>
-            <Panel style={styles.fill}>
-              <Text style={styles.panel_label}>Demais informações</Text>
-              <View>
-                <Text style={styles.label}>N° Serial</Text>
-                <InputText color="gray" />
-              </View>
-              <View>
-                <Text style={styles.label}>Cidade</Text>
-                <Dropdown
-                  items={cities}
-                  placeholder="Escolha a cidade"
-                  color="gray"
-                  onSelect={value => setSelectedCity(value)}
+              </Panel>
+              <Panel>
+                <Text style={styles.panel_label}>Tipo de equipamento</Text>
+                {newType ? (
+                  <InputText color="gray" placeholder="Novo tipo" />
+                ) : (
+                  <Dropdown
+                    items={types}
+                    placeholder="Tipo"
+                    color="gray"
+                    onSelect={value => setSelectedTypeValue(value)}
+                  />
+                )}
+                <Checkbox
+                  checked={newType}
+                  onPress={() => setNewType(!newType)}
+                  text="Novo tipo de equipamento"
+                />
+              </Panel>
+              <Panel style={styles.fill}>
+                <Text style={styles.panel_label}>Demais informações</Text>
+                <View>
+                  <Text style={styles.label}>N° Serial</Text>
+                  <InputText color="gray" />
+                </View>
+                <View>
+                  <Text style={styles.label}>Cidade</Text>
+                  <Dropdown
+                    items={cities}
+                    placeholder="Escolha a cidade"
+                    color="gray"
+                    onSelect={value => setSelectedCity(value)}
+                  />
+                </View>
+                <View style={[styles.obsView, styles.fill]}>
+                  <Text style={styles.label}>Observações</Text>
+                  <InputText
+                    textAlignVertical="top"
+                    style={styles.fill}
+                    multiline
+                    color="gray"
+                  />
+                </View>
+              </Panel>
+              <View style={styles.btnView}>
+                <Btn
+                  onPress={() => confirm()}
+                  styleType="filled"
+                  title="Cadastrar"
+                />
+                <Btn
+                  onPress={() => cancel()}
+                  styleType="outlined"
+                  title="Cancelar"
                 />
               </View>
-              <View style={[styles.obsView, styles.fill]}>
-                <Text style={styles.label}>Observações</Text>
-                <InputText
-                  textAlignVertical="top"
-                  style={styles.fill}
-                  multiline
-                  color="gray"
-                />
-              </View>
-            </Panel>
-            <View style={styles.btnView}>
-              <Btn
-                onPress={() => create()}
-                styleType="filled"
-                title="Confirmar"
-              />
-              <Btn
-                onPress={() => cancel()}
-                styleType="outlined"
-                title="Cancelar"
-              />
             </View>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+          </ScrollView>
+        </SafeAreaView>
+      </KeyboardAvoidingView>
+      <BottomModal
+        onPressOutside={() => setConfirmModal(false)}
+        visible={confirmModal}>
+        <Title
+          color="green"
+          text="Cadastrar novo equipamento?"
+          align="center"
+        />
+        <View style={styles.confirmBtnView}>
+          <Btn styleType="filled" title="Confirmar" onPress={() => create()} />
+          <Btn
+            styleType="outlined"
+            title="Cancelar"
+            onPress={() => setConfirmModal(false)}
+          />
+        </View>
+      </BottomModal>
+    </>
   );
 }
 
@@ -158,6 +185,10 @@ const styles = StyleSheet.create({
   },
   obsView: {
     flexDirection: 'column',
+  },
+  confirmBtnView: {
+    gap: 12,
+    marginTop: 36,
   },
 });
 
