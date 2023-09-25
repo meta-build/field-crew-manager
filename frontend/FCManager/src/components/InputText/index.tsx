@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  SafeAreaView,
   StyleProp,
   StyleSheet,
   TextInput,
@@ -43,6 +42,8 @@ const InputText = ({enable = true, color, ...props}: Props) => {
       value={props.value}
       placeholder={props.placeholder}
       editable={enable}
+      multiline={props.multiline}
+      textAlignVertical="top"
     />
   );
 };
