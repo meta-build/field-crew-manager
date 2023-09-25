@@ -21,7 +21,7 @@ function ToolList({navigation}: any) {
   };
 
   const openNewTool = () => {
-    console.log('new tool');
+    navigation.navigate('NewTool');
   };
 
   const openItem = (serie: string) => {
