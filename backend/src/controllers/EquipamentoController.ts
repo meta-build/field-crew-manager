@@ -11,7 +11,7 @@ interface RequestFiles extends Request {
   files: any[] | any;
 }
 class EquipamentoController {
-  public async getEquipamentos(req: Request, res: Response) {
+  public async getEquipamentos(req: RequestFiles, res: Response) {
     const { status, page = '1' } = req.query;
     const tipo = decodeURIComponent(req.query.tipo as string);
     const cidade = decodeURIComponent(req.query.cidade as string);
@@ -31,6 +31,7 @@ class EquipamentoController {
     try{
       const equipamento = await equipamentSchema.find();
       return res.json(equipamento);
+      
     } catch (error) {
       res.status(400).json({
         error: "something wrong happened",
@@ -96,13 +97,13 @@ class EquipamentoController {
     if (!req.files) {
       return res.status(400).json({ error: 'Equipamento precisa ter no mínimo 1 foto.' });
     }
-    const { imgs } = req.files;
-    const imagens = Array.isArray(imgs) ? imgs : imgs ? [imgs] : [];
+    const { imgsfiles } = req.files;
+    const imagens = Array.isArray(imgsfiles) ? imgsfiles : imgsfiles ? [imgsfiles] : [];
 
     if (!imagens.length) {
       return res.status(400).json({ error: 'Equipamento precisa ter no mínimo 1 foto.' });
     }
-    const imagensUrl = [];
+    const imgs = [];
 
     for (const img of imagens) {
       const imgName = `${uuidv4()}.jpg`;
@@ -119,14 +120,14 @@ class EquipamentoController {
           { headers: { 'Authorization': `Client-ID ${process.env.IMGUR_CLIENT_ID}` } }
         );
         const url = resp.data.data.link;
-        imagensUrl.push(url);
+        imgs.push(url);
       } catch (err) {
         return res.status(500).json({ error: err });
       }
     }
 
     try{
-      const equipamento = await equipamentSchema.create({tipo, serial, cidade, obs});
+      const equipamento = await equipamentSchema.create({tipo, serial, cidade, obs, imgs});
       return res.json(equipamento);
     } catch (error) {
       res.status(400).json({

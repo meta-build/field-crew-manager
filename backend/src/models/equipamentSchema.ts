@@ -19,6 +19,10 @@ const equipamentSchema = new mongoose.Schema({
 
     isActive: {
         type: Boolean
+    },
+
+    imgs: {
+        type: [String]
     }
 });
 

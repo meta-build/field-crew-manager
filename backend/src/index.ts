@@ -2,7 +2,6 @@ import * as express from 'express';
 import * as cors from 'cors';
 import { Request } from "express";
 import routes from './routes';
-import mongoose from 'mongoose';
 
 require('dotenv').config()
 
