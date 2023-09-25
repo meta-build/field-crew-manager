@@ -4,6 +4,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Home from './screens/Home';
 import ToolList from './screens/ToolList';
 import ToolProfile from './screens/ToolProfile';
+import NewTool from './screens/NewTool';
 
 const Stack = createNativeStackNavigator();
 
@@ -18,6 +19,7 @@ const App = () => {
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="ToolList" component={ToolList} />
         <Stack.Screen name="ToolProfile" component={ToolProfile} />
+        <Stack.Screen name="NewTool" component={NewTool} />
       </Stack.Navigator>
     </NavigationContainer>
   );
