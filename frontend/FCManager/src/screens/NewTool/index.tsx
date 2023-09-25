@@ -94,7 +94,12 @@ function NewTool({navigation}: any) {
               </View>
               <View style={[styles.obsView, styles.fill]}>
                 <Text style={styles.label}>Observações</Text>
-                <InputText style={styles.fill} multiline color="gray" />
+                <InputText
+                  textAlignVertical="top"
+                  style={styles.fill}
+                  multiline
+                  color="gray"
+                />
               </View>
             </Panel>
             <View style={styles.btnView}>

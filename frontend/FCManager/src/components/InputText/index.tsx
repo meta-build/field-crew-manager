@@ -43,7 +43,7 @@ const InputText = ({enable = true, color, ...props}: Props) => {
       placeholder={props.placeholder}
       editable={enable}
       multiline={props.multiline}
-      textAlignVertical="top"
+      textAlignVertical={props.textAlignVertical}
     />
   );
 };
