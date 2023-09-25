@@ -22,10 +22,10 @@ const Btn = ({icon, title, enable = true, styleType, ...props}: Props) => {
       backgroundColor: enable ? colors.green_1 : colors.green_3,
     },
     outlined: {
-      padding: 8,
+      padding: 10,
       backgroundColor: enable ? colors.white : colors.light_gray_1,
       borderColor: enable ? colors.green_1 : colors.green_3,
-      borderWidth: 4,
+      borderWidth: 2,
     },
     blank: {
       backgroundColor: enable ? colors.white : colors.light_gray_1,
