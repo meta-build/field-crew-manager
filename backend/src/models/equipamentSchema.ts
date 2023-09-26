@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const equipamentSchema = new mongoose.Schema({
     tipo: {
-        type: Number
+        type: String
     },
 
     serial: {
@@ -26,4 +26,4 @@ const equipamentSchema = new mongoose.Schema({
     }
 });
 
-export default mongoose.model("equipamentSchema", equipamentSchema);
+export default mongoose.model("equipamentos", equipamentSchema);
