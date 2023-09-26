@@ -29,10 +29,10 @@ class EquipamentoController {
     // preencher array abaixo
     const itens = [];
 
-    try{
+    try {
       const equipamento = await equipamentSchema.find();
       return res.json(equipamento);
-      
+
     } catch (error) {
       res.status(400).json({
         error: "something wrong happened",
@@ -57,7 +57,7 @@ class EquipamentoController {
   }
 
   public async getEquipamentosById(req: Request, res: Response) {
-    try{
+    try {
       const equipamento = await equipamentSchema.findById(req.params.id);
       return res.json(equipamento);
     } catch (error) {
@@ -84,7 +84,7 @@ class EquipamentoController {
     if (!cidade) {
       return res.status(400).json({ error: 'campo "Cidade" não informado.' });
     }
-    
+
     if (!obs) {
       return res.status(400).json({ error: 'campo "Observação" não informado.' });
     }
@@ -98,6 +98,89 @@ class EquipamentoController {
       if (!req.files) {
         return res.status(400).json({ error: 'Equipamento precisa ter no mínimo 1 foto.' });
       }
+      const { images } = req.files;
+      const imagens = Array.isArray(images) ? images : images ? [images] : [];
+
+      if (!imagens.length) {
+        return res.status(400).json({ error: 'Equipamento precisa ter no mínimo 1 foto.' });
+      }
+      const imgs = [];
+
+      for (const img of imagens) {
+        const imgName = `${uuidv4()}.jpg`;
+        const imgBuffer = fs.readFileSync(img.path);
+        const imgBlob = new Blob([imgBuffer], { type: 'image/jpeg' });
+
+        const formData = new FormData();
+        formData.append('image', imgBlob, imgName);
+
+        try {
+          const resp = await axios.post(
+            'https://api.imgur.com/3/image',
+            formData,
+            { headers: { 'Authorization': `Client-ID ${process.env.IMGUR_CLIENT_ID}` } }
+          );
+          const url = resp.data.data.link;
+          imgs.push(url);
+        } catch (err) {
+          return res.status(500).json({ error: err });
+        }
+      }
+
+      try {
+        const equipamento = await equipamentSchema.create({ tipoId, serial, cidade, obs, imgs });
+
+        const id = equipamento._id;
+        return res.status(200).json({ id });
+      } catch (error) {
+        res.status(500).json({
+          error
+        });
+      }
+    } catch (err) {
+      if (err.name == "CastError") {
+        return res.status(404).json({ error: 'ID do Tipo não encontrado.' });
+      }
+      return res.status(500).json({ err });
+    }
+  }
+
+  public async update(req: RequestFiles, res: Response) {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: 'ID não informado.' });
+    }
+
+    try {
+      const { tipo, serial, cidade, obs } = req.body;
+  
+      // validação das informações recebidas
+      if (!tipo) {
+        return res.status(400).json({ error: 'campo "Tipo" não informado.' });
+      }
+
+      if (!serial) {
+        return res.status(400).json({ error: 'campo "Serial" não informado.' });
+      }
+      if (!cidade) {
+        return res.status(400).json({ error: 'campo "Cidade" não informado.' });
+      }
+      if (!obs) {
+        return res.status(400).json({ error: 'campo "Observação" não informado.' });
+      }
+  
+      // validação se existe tipo (se não existir o tipo, deve retornar true para retornar o erro)
+      try {
+        await equipmentTypeSchema.findById(tipo);
+      } catch (error) {
+        if (error.name == "CastError") {
+          return res.status(404).json({ error: 'ID do Tipo não encontrado.' });
+        }
+        return res.status(500).json({ error });
+      }
+  
+      // armazenamento das fotos do equipamento na api IMGUR
       const { images } = req.files;
       const imagens = Array.isArray(images) ? images : images ? [images] : [];
   
@@ -126,114 +209,26 @@ class EquipamentoController {
           return res.status(500).json({ error: err });
         }
       }
-  
-      try{
-        const equipamento = await equipamentSchema.create({tipoId, serial, cidade, obs, imgs});
-        
-        const id = equipamento._id;
-        return res.status(200).json({ id });
-      } catch (error) {
-        res.status(500).json({
-          error
-        });
-      }
+
+      const equipamento = await equipamentSchema.findByIdAndUpdate(id, { tipo, serial, cidade, obs, imgs });
+      return res.status(200).json({ id: equipamento._id });
     } catch (err) {
+      // validar se ID existe, se não existir, deve retornar true na condição do if abaixo
       if (err.name == "CastError") {
-        return res.status(404).json({ error: 'ID do Tipo não encontrado.' });
+        return res.status(404).json({ error: 'Equipamento não encontrado.' });
       }
       return res.status(500).json({ err });
     }
   }
-  
-  public async update(req: RequestFiles, res: Response) {
-    const { id } = req.params;
 
-    if (!id) {
-      return res.status(400).json({ error: 'ID não informado.' });
-    }
-    
-    // validar se ID existe, se não existir, deve retornar true na condição do if abaixo
-    if (false) {
-      return res.status(404).json({ error: 'Equipamento não encontrado.' });
-    }
-
-    // informações básicas do equipamento
-    const { tipo, serial, cidade, obs } = req.body;
-  
-    // validação das informações recebidas
-    if (!tipo) {
-      return res.status(400).json({ error: 'campo "Tipo" não informado.' });
-    }
-    if (isNaN(Number(tipo))) {
-      return res.status(400).json({ error: '"Tipo" informado inválido.' });
-    }
-    if (!serial) {
-      return res.status(400).json({ error: 'campo "Serial" não informado.' });
-    }
-    if (!cidade) {
-      return res.status(400).json({ error: 'campo "Cidade" não informado.' });
-    }
-    if (!obs) {
-      return res.status(400).json({ error: 'campo "Observação" não informado.' });
-    }
-  
-    // validação se existe tipo (se não existir o tipo, deve retornar true para retornar o erro)
-    if (false) {
-      return res.status(404).json({ error: 'ID do Tipo não encontrado.' });
-    }
-  
-    // armazenamento das fotos do equipamento na api IMGUR
-    const { imgs } = req.files;
-    const imagens = Array.isArray(imgs) ? imgs : imgs ? [imgs] : [];
-  
-    if (!imagens.length) {
-      return res.status(400).json({ error: 'Equipamento precisa ter no mínimo 1 foto.' });
-    }
-    const imagensUrl = [];
-  
-    for (const img of imagens) {
-      const imgName = `${uuidv4()}.jpg`;
-      const imgBuffer = fs.readFileSync(img.path);
-      const imgBlob = new Blob([imgBuffer], { type: 'image/jpeg' });
-  
-      const formData = new FormData();
-      formData.append('image', imgBlob, imgName);
-  
-      try {
-        const resp = await axios.post(
-          'https://api.imgur.com/3/image',
-          formData,
-          { headers: { 'Authorization': `Client-ID ${process.env.IMGUR_CLIENT_ID}` } }
-        );
-        const url = resp.data.data.link;
-        imagensUrl.push(url);
-      } catch (err) {
-        return res.status(500).json({ error: err });
-      }
-    }
-  
-    // obs.: armazenar url das imagens no banco de dados referente ao equipamento que está sendo cadastrado, as urls estão armazenadas no array imagensUrl
-    // processo para edição dos dados no campo de dados
-
-    try{
-      const equipamento = await equipamentSchema.findByIdAndUpdate(id, req.body);
-      return res.json(equipamento);
-    } catch (error) {
-      res.status(400).json({
-        error: "something wrong happened",
-        message: error
-      });
-    }
-  }
-
-  public async active (req: Request, res: Response) {
+  public async active(req: Request, res: Response) {
     const { id } = req.params;
 
 
     if (!id) {
       return res.status(400).json({ error: 'ID não informado.' });
     }
-    
+
     // validar se ID existe, se não existir, deve retornar true na condição do if abaixo
     if (false) {
       return res.status(404).json({ error: 'Equipamento não encontrado.' });
@@ -250,7 +245,7 @@ class EquipamentoController {
       if (equipamento.isActive === true) {
         return res.json({
           message: "Equipamento ativado"
-        }); 
+        });
       } return res.json(equipamento);
     } catch (error) {
       res.status(400).json({
@@ -261,13 +256,13 @@ class EquipamentoController {
 
   }
 
-  public async desactive (req: Request, res: Response) {
+  public async desactive(req: Request, res: Response) {
     const { id } = req.params;
 
     if (!id) {
       return res.status(400).json({ error: 'ID não informado.' });
     }
-    
+
     // validar se ID existe, se não existir, deve retornar true na condição do if abaixo
     if (false) {
       return res.status(404).json({ error: 'Equipamento não encontrado.' });
