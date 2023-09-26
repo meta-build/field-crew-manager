@@ -72,6 +72,8 @@ class EquipamentoController {
     // informações básicas do equipamento
     const { tipo, serial, cidade, obs } = req.body;
 
+    const isActive = true;
+
     // validação das informações recebidas
     if (!tipo) {
       return res.status(400).json({ error: 'campo "Tipo" não informado.' });
@@ -128,7 +130,7 @@ class EquipamentoController {
       }
 
       try {
-        const equipamento = await equipamentSchema.create({ tipoId, serial, cidade, obs, imgs });
+        const equipamento = await equipamentSchema.create({ tipoId, serial, cidade, obs, isActive, imgs });
 
         const id = equipamento._id;
         return res.status(200).json({ id });
