@@ -5,7 +5,19 @@ import equipmentTypeSchema from "../models/equipmentTypeSchema";
 dotenv.config();
 
 class TipoController {
-  public async getTipos(req: Request, res: Response) {}
+  public async getTipos(req: Request, res: Response) {
+    try {
+      const tiposArr = await equipmentTypeSchema.find();
+      const tipos = tiposArr.map(item => ({
+        id: item._id,
+        value: item.value
+      }));
+
+      return res.status(200).json(tipos);
+    } catch (error) {
+      return res.status(500).json({ error });
+    }
+  }
 
   public async new(req: Request, res: Response) {
     // informações básicas do equipamento
