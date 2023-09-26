@@ -13,47 +13,48 @@ interface RequestFiles extends Request {
 }
 class EquipamentoController {
   public async getEquipamentos(req: RequestFiles, res: Response) {
-    const { status, page = '1' } = req.query;
-    const tipo = decodeURIComponent(req.query.tipo as string);
+    const { status, tipo } = req.query;
     const cidade = decodeURIComponent(req.query.cidade as string);
-
-    if (isNaN(Number(page))) {
-      return res.status(400).json({ error: 'Parâmetro "page" inválido.' });
-    }
 
     if (status && status !== 'ativo' && status !== 'inativo') {
       return res.status(400).json({ error: 'Parâmetro "status" inválido.' });
     }
 
-    // lógica para retornar itens; filtrar por status, tipo e cidade. Pegar 15 equipamentos no máximo e seguir paginação (recebida pelo valor "page")
-    // preencher array abaixo
-    const itens = [];
-
     try {
-      const equipamento = await equipamentSchema.find();
-      return res.json(equipamento);
-
+      await equipmentTypeSchema.findById(tipo);
     } catch (error) {
-      res.status(400).json({
-        error: "something wrong happened",
-        message: error
-      });
+      if (error.name == "CastError") {
+        return res.status(404).json({ error: 'ID do Tipo não encontrado.' });
+      }
+      return res.status(500).json({ error });
     }
 
-    const backPage = Number(page) == 1 ? undefined : (Number(page) - 1);
-    // se quant. itens <= 15 após paginação, nextPage = undefined
-    const nextPage = 1;
+    try {
+      const equipamentos = await equipamentSchema.find();
+      const itens = equipamentos
+        .filter(equip => {
+          const cidadeFilter = cidade !== 'undefined' ? cidade == equip.cidade : true;
+          const statusFilter = Boolean(status) ? (status == 'ativo' ? equip.isActive : !equip.isActive) : true;
+          const tipoFilter = Boolean(tipo) ? tipo == equip.tipo.id : true;
 
-    const templateEndpoint = `/equipamentos?status=${status || ''}&tipo=${tipo !== 'undefined' ? encodeURIComponent(tipo) : ''}&cidade=${cidade !== 'undefined' ? encodeURIComponent(cidade) : ''}&page=`;
-
-    res.status(200).json({
-      values: itens,
-      metadata: {
-        itens: itens.length,
-        backPageEndpoint: backPage ? templateEndpoint + backPage : undefined,
-        nextPageEndpoint: nextPage ? templateEndpoint + nextPage : undefined
-      }
-    });
+          return cidadeFilter && statusFilter && tipoFilter;
+        })
+        .map(equip => ({
+          id: equip._id,
+          tipo: equip.tipo,
+          serial: equip.serial,
+          status: equip.isActive ? 'ativo' : 'inativo',
+          img: equip.imgs[0],
+        }));
+      res.status(200).json({
+        values: itens,
+        metadata: {
+          itens: itens.length,
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ error });
+    }
   }
 
   public async getEquipamentosById(req: Request, res: Response) {
@@ -130,7 +131,17 @@ class EquipamentoController {
       }
 
       try {
-        const equipamento = await equipamentSchema.create({ tipoId, serial, cidade, obs, isActive, imgs });
+        const equipamento = await equipamentSchema.create({
+          tipo: {
+            id: tipoId,
+            value: tipoObj.value
+          },
+          serial,
+          cidade,
+          obs,
+          isActive,
+          imgs
+        });
 
         const id = equipamento._id;
         return res.status(200).json({ id });
