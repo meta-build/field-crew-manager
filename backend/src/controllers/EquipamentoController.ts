@@ -58,14 +58,24 @@ class EquipamentoController {
   }
 
   public async getEquipamentosById(req: Request, res: Response) {
+    const { id } = req.params;
+
     try {
-      const equipamento = await equipamentSchema.findById(req.params.id);
-      return res.json(equipamento);
-    } catch (error) {
-      res.status(400).json({
-        error: "something wrong happened",
-        message: error
+      const equipamento = await equipamentSchema.findById(id);
+      return res.status(200).json({
+        id: equipamento._id,
+        tipo: equipamento.tipo,
+        serial: equipamento.serial,
+        cidade: equipamento.cidade,
+        obs: equipamento.obs,
+        status: equipamento.isActive ? 'ativo' : 'inativo',
+        imgs: equipamento.imgs,
       });
+    } catch (error) {
+      if (error.name == "CastError") {
+        return res.status(404).json({ error: 'Equipamento não encontrado.' });
+      }
+      return res.status(500).json({ error });
     }
   }
 
