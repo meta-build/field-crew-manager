@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 
 const equipamentSchema = new mongoose.Schema({
     tipo: {
-        type: String
+        id: String,
+        value: String,
     },
 
     serial: {
