@@ -156,7 +156,7 @@ class EquipamentoController {
 
     try {
       const { tipo, serial, cidade, obs } = req.body;
-  
+
       // validação das informações recebidas
       if (!tipo) {
         return res.status(400).json({ error: 'campo "Tipo" não informado.' });
@@ -171,7 +171,7 @@ class EquipamentoController {
       if (!obs) {
         return res.status(400).json({ error: 'campo "Observação" não informado.' });
       }
-  
+
       // validação se existe tipo (se não existir o tipo, deve retornar true para retornar o erro)
       try {
         await equipmentTypeSchema.findById(tipo);
@@ -181,24 +181,24 @@ class EquipamentoController {
         }
         return res.status(500).json({ error });
       }
-  
+
       // armazenamento das fotos do equipamento na api IMGUR
       const { images } = req.files;
       const imagens = Array.isArray(images) ? images : images ? [images] : [];
-  
+
       if (!imagens.length) {
         return res.status(400).json({ error: 'Equipamento precisa ter no mínimo 1 foto.' });
       }
       const imgs = [];
-  
+
       for (const img of imagens) {
         const imgName = `${uuidv4()}.jpg`;
         const imgBuffer = fs.readFileSync(img.path);
         const imgBlob = new Blob([imgBuffer], { type: 'image/jpeg' });
-  
+
         const formData = new FormData();
         formData.append('image', imgBlob, imgName);
-  
+
         try {
           const resp = await axios.post(
             'https://api.imgur.com/3/image',
@@ -226,36 +226,28 @@ class EquipamentoController {
   public async active(req: Request, res: Response) {
     const { id } = req.params;
 
-
     if (!id) {
       return res.status(400).json({ error: 'ID não informado.' });
     }
 
-    // validar se ID existe, se não existir, deve retornar true na condição do if abaixo
-    if (false) {
-      return res.status(404).json({ error: 'Equipamento não encontrado.' });
-    }
-
-    // se equipamento já estiver ativo, condição do if abaixo deve ser true
-    if (false) {
-      return res.status(409).json({ error: 'Equipamento já está ativo.' });
-    }
-
-    // processo para ativar equipamento
     try {
-      const equipamento = await equipamentSchema.findByIdAndUpdate(id, req.body);
-      if (equipamento.isActive === true) {
-        return res.json({
-          message: "Equipamento ativado"
-        });
-      } return res.json(equipamento);
-    } catch (error) {
-      res.status(400).json({
-        error: "não foi possivel ativar",
-        message: error
-      });
-    }
+      const equip = await equipamentSchema.findById(id);
 
+      // se equipamento já estiver ativo, condição do if abaixo deve ser true
+      if (equip.isActive) {
+        return res.status(409).json({ error: 'Equipamento já está ativo.' });
+      }
+
+      const isActive = false;
+      const equipamento = await equipamentSchema.findByIdAndUpdate(id, { isActive });
+      return res.status(200).json({ id: equipamento._id });
+    } catch (err) {
+      // validar se ID existe, se não existir, deve retornar true na condição do if abaixo
+      if (err.name == "CastError") {
+        return res.status(404).json({ error: 'Equipamento não encontrado.' });
+      }
+      return res.status(500).json({ err });
+    }
   }
 
   public async desactive(req: Request, res: Response) {
@@ -265,28 +257,23 @@ class EquipamentoController {
       return res.status(400).json({ error: 'ID não informado.' });
     }
 
-    // validar se ID existe, se não existir, deve retornar true na condição do if abaixo
-    if (false) {
-      return res.status(404).json({ error: 'Equipamento não encontrado.' });
-    }
-
-    // se equipamento já estiver inativo, condição do if abaixo deve ser true
-    if (false) {
-      return res.status(409).json({ error: 'Equipamento já está inativo.' });
-    }
-
-    // processo para desativar equipamento
     try {
-      const equipamento = await equipamentSchema.findByIdAndUpdate(id, req.body);
-      if (equipamento.isActive === false) {
-        console.log("equipamento desativado")
+      const equip = await equipamentSchema.findById(id);
+
+      // se equipamento já estiver ativo, condição do if abaixo deve ser true
+      if (!equip.isActive) {
+        return res.status(409).json({ error: 'Equipamento já está inativo.' });
       }
-      return res.json(equipamento);
-    } catch (error) {
-      res.status(400).json({
-        error: "não foi possivel desativar",
-        message: error
-      });
+
+      const isActive = false;
+      const equipamento = await equipamentSchema.findByIdAndUpdate(id, { isActive });
+      return res.status(200).json({ id: equipamento._id });
+    } catch (err) {
+      // validar se ID existe, se não existir, deve retornar true na condição do if abaixo
+      if (err.name == "CastError") {
+        return res.status(404).json({ error: 'Equipamento não encontrado.' });
+      }
+      return res.status(500).json({ err });
     }
   }
 }
