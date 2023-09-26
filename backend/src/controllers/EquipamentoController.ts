@@ -185,52 +185,61 @@ class EquipamentoController {
 
       // validação se existe tipo (se não existir o tipo, deve retornar true para retornar o erro)
       try {
-        await equipmentTypeSchema.findById(tipo);
-      } catch (error) {
-        if (error.name == "CastError") {
-          return res.status(404).json({ error: 'ID do Tipo não encontrado.' });
+        const tipoObj = await equipmentTypeSchema.findById(tipo);
+
+        // armazenamento das fotos do equipamento na api IMGUR
+        const { images } = req.files;
+        const imagens = Array.isArray(images) ? images : images ? [images] : [];
+
+        if (!imagens.length) {
+          return res.status(400).json({ error: 'Equipamento precisa ter no mínimo 1 foto.' });
         }
-        return res.status(500).json({ error });
-      }
+        const imgs = [];
 
-      // armazenamento das fotos do equipamento na api IMGUR
-      const { images } = req.files;
-      const imagens = Array.isArray(images) ? images : images ? [images] : [];
+        for (const img of imagens) {
+          const imgName = `${uuidv4()}.jpg`;
+          const imgBuffer = fs.readFileSync(img.path);
+          const imgBlob = new Blob([imgBuffer], { type: 'image/jpeg' });
 
-      if (!imagens.length) {
-        return res.status(400).json({ error: 'Equipamento precisa ter no mínimo 1 foto.' });
-      }
-      const imgs = [];
+          const formData = new FormData();
+          formData.append('image', imgBlob, imgName);
 
-      for (const img of imagens) {
-        const imgName = `${uuidv4()}.jpg`;
-        const imgBuffer = fs.readFileSync(img.path);
-        const imgBlob = new Blob([imgBuffer], { type: 'image/jpeg' });
-
-        const formData = new FormData();
-        formData.append('image', imgBlob, imgName);
-
-        try {
-          const resp = await axios.post(
-            'https://api.imgur.com/3/image',
-            formData,
-            { headers: { 'Authorization': `Client-ID ${process.env.IMGUR_CLIENT_ID}` } }
-          );
-          const url = resp.data.data.link;
-          imgs.push(url);
-        } catch (err) {
-          return res.status(500).json({ error: err });
+          try {
+            const resp = await axios.post(
+              'https://api.imgur.com/3/image',
+              formData,
+              { headers: { 'Authorization': `Client-ID ${process.env.IMGUR_CLIENT_ID}` } }
+            );
+            const url = resp.data.data.link;
+            imgs.push(url);
+          } catch (err) {
+            return res.status(500).json({ error: err });
+          }
         }
-      }
 
-      const equipamento = await equipamentSchema.findByIdAndUpdate(id, { tipo, serial, cidade, obs, imgs });
-      return res.status(200).json({ id: equipamento._id });
-    } catch (err) {
-      // validar se ID existe, se não existir, deve retornar true na condição do if abaixo
-      if (err.name == "CastError") {
-        return res.status(404).json({ error: 'Equipamento não encontrado.' });
+        const equipamento = await equipamentSchema.findByIdAndUpdate(id, {
+          tipo: {
+            id: tipo,
+            value: tipoObj.value,
+          },
+          serial,
+          cidade,
+          obs,
+          imgs
+        });
+        return res.status(200).json({ id: equipamento._id });
+      } catch (err) {
+        // validar se ID existe, se não existir, deve retornar true na condição do if abaixo
+        if (err.name == "CastError") {
+          return res.status(404).json({ error: 'Equipamento não encontrado.' });
+        }
+        return res.status(500).json({ err });
       }
-      return res.status(500).json({ err });
+    } catch (error) {
+      if (error.name == "CastError") {
+        return res.status(404).json({ error: 'ID do Tipo não encontrado.' });
+      }
+      return res.status(500).json({ error });
     }
   }
 
