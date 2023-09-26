@@ -105,6 +105,7 @@ class EquipamentoController {
     // validação se existe tipo (se não existir o tipo, deve retornar true para retornar o erro)
     try {
       const tipoObj = await equipmentTypeSchema.findById(tipo);
+      console.log(tipoObj)
       const tipoId = tipoObj._id;
 
       // armazenamento das fotos do equipamento na api IMGUR
@@ -136,6 +137,7 @@ class EquipamentoController {
           const url = resp.data.data.link;
           imgs.push(url);
         } catch (err) {
+          console.log(err)
           return res.status(500).json({ error: err });
         }
       }
@@ -156,6 +158,7 @@ class EquipamentoController {
         const id = equipamento._id;
         return res.status(200).json({ id });
       } catch (error) {
+        console.log(error)
         res.status(500).json({
           error
         });
@@ -164,6 +167,7 @@ class EquipamentoController {
       if (err.name == "CastError") {
         return res.status(404).json({ error: 'ID do Tipo não encontrado.' });
       }
+      console.log(err)
       return res.status(500).json({ err });
     }
   }
