@@ -2,8 +2,6 @@ import { Request, Response } from "express";
 import * as dotenv from 'dotenv';
 import equipmentTypeSchema from "../models/equipmentTypeSchema";
 
-dotenv.config();
-
 class TipoController {
   public async getTipos(req: Request, res: Response) {
     try {
