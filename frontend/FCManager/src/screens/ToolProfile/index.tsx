@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Dimensions,
   SafeAreaView,
@@ -15,6 +15,8 @@ import Badget from '../../components/Badget';
 import Info from '../../components/Info';
 import Btn from '../../components/Button';
 import BottomModal from '../../components/BottomModal';
+import Equipamento from '../../services/Equipamento';
+import {Equipamento as EquipamentoType} from '../../types';
 
 const {width, height} = Dimensions.get('window');
 
@@ -22,14 +24,9 @@ function ToolProfile({navigation, route}: any) {
   const [confirmActive, setConfirmActive] = useState(false);
   const [confirmDeactive, setConfirmDeactive] = useState(false);
 
-  const imgs = [
-    'https://plus.unsplash.com/premium_photo-1669638780803-ce74f7f3ea76?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80',
-    'https://plus.unsplash.com/premium_photo-1669640021387-20bdd6d50c2b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1528&q=80',
-  ];
+  const [equipamento, setEquipamento] = useState<EquipamentoType>();
 
   const {id} = route.params;
-
-  const status = 'ativo';
 
   const edit = () => {
     console.log('editar');
@@ -43,101 +40,122 @@ function ToolProfile({navigation, route}: any) {
     setConfirmDeactive(true);
   };
 
-  const confirmActivate = () => {
-    setConfirmActive(false);
-    console.log('ativar');
+  const confirmActivate = async () => {
+    Equipamento.active(id).then(res => {
+      getEquipamento();
+      setConfirmActive(false);
+    });
   };
 
-  const confirmDeactivate = () => {
-    setConfirmDeactive(false);
-    console.log('desativar');
+  const confirmDeactivate = async () => {
+    Equipamento.deactive(id).then(res => {
+      getEquipamento();
+      setConfirmDeactive(false);
+    });
   };
 
-  return (
-    <>
-      <SafeAreaView style={styles.container}>
-        <Header text="Equipamentos" />
-        <ImageCarousel images={imgs} />
-        <ScrollView style={styles.content}>
-          <Title color="gray" text="Tipo equipamentyo" />
-          <View style={styles.info}>
-            <View style={styles.status}>
-              <Text style={styles.label}>Status:</Text>
+  const getEquipamento = () => {
+    Equipamento.getById(id).then(res => {
+      setEquipamento(res);
+    });
+  };
+
+  useEffect(() => {
+    getEquipamento();
+  }, []);
+
+  if (equipamento) {
+    return (
+      <>
+        <SafeAreaView style={styles.container}>
+          <Header text="Equipamentos" />
+          <ImageCarousel images={equipamento?.imgs as string[]} />
+          <ScrollView style={styles.content}>
+            <Title color="gray" text={equipamento?.tipo.value as string} />
+            <View style={styles.info}>
+              <View style={styles.status}>
+                <Text style={styles.label}>Status:</Text>
+                <View>
+                  <Badget
+                    status={
+                      equipamento?.status === 'ativo' ? 'active' : 'deactive'
+                    }
+                    size="small"
+                  />
+                </View>
+              </View>
+              <Info label="N° Serial" value={equipamento?.serial as string} />
+              <Info label="ID" value={id} />
               <View>
-                <Badget status="active" size="small" />
+                <Text style={styles.label}>Observações:</Text>
+                <Text style={styles.value}>{equipamento?.obs as string}</Text>
               </View>
             </View>
-            <Info label="N° Serial" value="123123" />
-            <Info label="ID" value={id} />
-            <View>
-              <Text style={styles.label}>Observações:</Text>
-              <Text style={styles.value}>
-                {
-                  'Suspendisse potenti. Vestibulum orci purususpendisse potenti. Vestibulum orci purususpendisse potenti. Vestibulum orci purususpendisse potenti. Vestibulum orci purususpendisse potenti. Vestibulum orci purususpendisse potenti. Vestibulum orci purususpendisse potenti. Vestibulum orci purususpendisse potenti. Vestibulum orci purus, tincidunt sit amet vehicula at, tempus eget turpis. Integer fringilla sem in pulvinar elementum. Aenean nec blandit est, nec porta arcu. Nulla sapien ante, rhoncus nec diam eu, interdum ultricies augue. Duis nec rutrum velit. Morbi a ullamcorper nulla. Integer volutpat ligula est, ac cursus ipsum scelerisque ut. Sed commodo eros sed tempor accumsan. Mauris posuere, odio id mattis mattis, dui nibh rutrum enim, nec euismod ex nunc at libero. Proin libero diam, consectetur sed nisi eu, aliquet laoreet risus. Ut venenatis tincidunt arcu, accumsan condimentum lorem ullamcorper vel.'
-                }
-              </Text>
-            </View>
-          </View>
-          <View style={styles.btnView}>
-            <View style={styles.btn}>
-              <Btn onPress={() => edit()} styleType="outlined" title="Editar" />
-            </View>
-            <View style={styles.btn}>
-              {status === 'ativo' ? (
+            <View style={styles.btnView}>
+              <View style={styles.btn}>
                 <Btn
-                  onPress={() => deactivate()}
-                  styleType="alert"
-                  title="Desativar"
+                  onPress={() => edit()}
+                  styleType="outlined"
+                  title="Editar"
                 />
-              ) : (
-                <Btn
-                  onPress={() => activate()}
-                  styleType="filled"
-                  title="Ativar"
-                />
-              )}
+              </View>
+              <View style={styles.btn}>
+                {equipamento?.status === 'ativo' ? (
+                  <Btn
+                    onPress={() => deactivate()}
+                    styleType="alert"
+                    title="Desativar"
+                  />
+                ) : (
+                  <Btn
+                    onPress={() => activate()}
+                    styleType="filled"
+                    title="Ativar"
+                  />
+                )}
+              </View>
             </View>
+          </ScrollView>
+        </SafeAreaView>
+
+        <BottomModal
+          visible={confirmActive}
+          onPressOutside={() => setConfirmActive(false)}>
+          <Title color="green" text="Ativar equipamento?" align="center" />
+          <View style={styles.confirmBtnView}>
+            <Btn
+              styleType="filled"
+              title="Confirmar"
+              onPress={() => confirmActivate()}
+            />
+            <Btn
+              styleType="outlined"
+              title="Cancelar"
+              onPress={() => setConfirmActive(false)}
+            />
           </View>
-        </ScrollView>
-      </SafeAreaView>
+        </BottomModal>
 
-      <BottomModal
-        visible={confirmActive}
-        onPressOutside={() => setConfirmActive(false)}>
-        <Title color="green" text="Ativar equipamento?" align="center" />
-        <View style={styles.confirmBtnView}>
-          <Btn
-            styleType="filled"
-            title="Confirmar"
-            onPress={() => confirmActivate()}
-          />
-          <Btn
-            styleType="outlined"
-            title="Cancelar"
-            onPress={() => setConfirmActive(false)}
-          />
-        </View>
-      </BottomModal>
-
-      <BottomModal
-        visible={confirmDeactive}
-        onPressOutside={() => setConfirmDeactive(false)}>
-        <Title color="green" text="Desativar equipamento?" align="center" />
-        <View style={styles.confirmBtnView}>
-          <Btn
-            styleType="alert"
-            title="Confirmar"
-            onPress={() => confirmDeactivate()}
-          />
-          <Btn
-            styleType="outlined"
-            title="Cancelar"
-            onPress={() => setConfirmDeactive(false)}
-          />
-        </View>
-      </BottomModal>
-    </>
-  );
+        <BottomModal
+          visible={confirmDeactive}
+          onPressOutside={() => setConfirmDeactive(false)}>
+          <Title color="green" text="Desativar equipamento?" align="center" />
+          <View style={styles.confirmBtnView}>
+            <Btn
+              styleType="alert"
+              title="Confirmar"
+              onPress={() => confirmDeactivate()}
+            />
+            <Btn
+              styleType="outlined"
+              title="Cancelar"
+              onPress={() => setConfirmDeactive(false)}
+            />
+          </View>
+        </BottomModal>
+      </>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
