@@ -29,7 +29,7 @@ function ToolProfile({navigation, route}: any) {
   const {id} = route.params;
 
   const edit = () => {
-    console.log('editar');
+    navigation.navigate('NewTool', {id});
   };
 
   const activate = () => {
@@ -61,7 +61,11 @@ function ToolProfile({navigation, route}: any) {
   };
 
   useEffect(() => {
-    getEquipamento();
+    const onFocus = navigation.addListener('focus', () => {
+      getEquipamento();
+    });
+
+    return onFocus;
   }, []);
 
   if (equipamento) {

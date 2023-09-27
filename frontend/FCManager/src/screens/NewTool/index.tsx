@@ -35,7 +35,9 @@ const AlertMsg = ({children}: any) => {
   return <Text style={styles.alert}>{children}</Text>;
 };
 
-function NewTool({navigation}: any) {
+function NewTool({navigation, route}: any) {
+  const params = route.params;
+
   const [imgs, setImgs] = useState<string[]>([]);
 
   const [types, setTypes] = useState<{value: string; label: string}[]>([]);
@@ -63,8 +65,6 @@ function NewTool({navigation}: any) {
   }));
 
   const create = async () => {
-    console.log('criar');
-
     let tipo = '';
     if (newTypeCheck) {
       try {
@@ -78,20 +78,39 @@ function NewTool({navigation}: any) {
       tipo = selectedTypeValue;
     }
 
-    Equipamento.new({
-      cidade: selectedCity,
-      imgs,
-      obs,
-      serial,
-      tipo,
-    })
-      .then(res => {
-        navigation.navigate('ToolProfile', {id: res.id});
-      })
-      .catch(err => {
+    if (params?.id) {
+      try {
+        await Equipamento.update(
+          {
+            cidade: selectedCity,
+            imgs,
+            obs,
+            serial,
+            tipo,
+          },
+          params.id,
+        );
+        navigation.navigate('ToolProfile', {id: params.id});
+      } catch (err) {
         console.log('erro ao criar equip');
         console.log(err);
-      });
+      }
+    } else {
+      Equipamento.new({
+        cidade: selectedCity,
+        imgs,
+        obs,
+        serial,
+        tipo,
+      })
+        .then(res => {
+          navigation.navigate('ToolProfile', {id: res.id});
+        })
+        .catch(err => {
+          console.log('erro ao criar equip');
+          console.log(err);
+        });
+    }
   };
 
   const confirm = () => {
@@ -127,6 +146,16 @@ function NewTool({navigation}: any) {
         }));
         setTypes(tipos);
       });
+
+      if (params?.id) {
+        Equipamento.getById(params.id).then(equip => {
+          setImgs(equip.imgs);
+          setSelectedTypeValue(equip.tipo.id);
+          setSerial(equip.serial);
+          setSelectedCity(equip.cidade);
+          setObs(equip.obs);
+        });
+      }
     });
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
@@ -137,7 +166,9 @@ function NewTool({navigation}: any) {
     <>
       <KeyboardAvoidingView>
         <SafeAreaView style={styles.container}>
-          <Header text="Novo Equipamento" />
+          <Header
+            text={params?.id ? 'Editar Equipamento' : 'Novo Equipamento'}
+          />
           <ScrollView>
             <View style={styles.content}>
               <Panel>
@@ -239,7 +270,7 @@ function NewTool({navigation}: any) {
                 <Btn
                   onPress={() => confirm()}
                   styleType="filled"
-                  title="Cadastrar"
+                  title={params?.id ? 'Editar' : 'Cadastrar'}
                 />
                 <Btn
                   onPress={() => cancel()}
@@ -257,7 +288,9 @@ function NewTool({navigation}: any) {
         visible={confirmModal}>
         <Title
           color="green"
-          text="Cadastrar novo equipamento?"
+          text={
+            params?.id ? 'Editar equipamento?' : 'Cadastrar novo equipamento?'
+          }
           align="center"
         />
         <View style={styles.confirmBtnView}>
