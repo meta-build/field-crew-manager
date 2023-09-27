@@ -64,6 +64,7 @@ function ToolList({navigation}: any) {
   const cancelFilter = () => {
     setCity('');
     setStatus('todos');
+    setTipoName('');
     setFilterCount(0);
     getEquipamentos('todos', '');
     setFilterModal(false);
@@ -86,8 +87,14 @@ function ToolList({navigation}: any) {
   };
 
   useEffect(() => {
-    getEquipamentos('todos', '');
-  }, [tipoName]);
+    const onFocus = navigation.addListener('focus', () => {
+      cancelFilter();
+    });
+
+    getEquipamentos(status, city);
+    // Return the function to unsubscribe from the event so it gets removed on unmount
+    return onFocus;
+  }, [tipoName, navigation]);
 
   return (
     <>
@@ -100,6 +107,7 @@ function ToolList({navigation}: any) {
               style={styles.searchInput}
               color="white"
               onChange={e => setTipoName(e.nativeEvent.text)}
+              value={tipoName}
             />
             <View style={styles.filterView}>
               <Btn
