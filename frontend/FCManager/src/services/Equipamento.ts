@@ -1,5 +1,5 @@
 import {EquipamentoItem, Equipamento as EquipamentoType} from '../types';
-import {apiJson} from './api';
+import {apiFormdata, apiJson} from './api';
 
 interface EquipamentoListReturn {
   values: EquipamentoItem[];
@@ -28,6 +28,16 @@ class Equipamento {
 
   async getById(id: string): Promise<EquipamentoType> {
     const {data} = await apiJson.get(`/equipamentos/${id}`);
+    return data;
+  }
+
+  async active(id: string): Promise<{id: string}> {
+    const {data} = await apiFormdata.put(`/equipamentos/ativar/${id}`);
+    return data;
+  }
+
+  async deactive(id: string): Promise<{id: string}> {
+    const {data} = await apiFormdata.put(`/equipamentos/desativar/${id}`);
     return data;
   }
 }
