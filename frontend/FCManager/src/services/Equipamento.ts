@@ -68,6 +68,29 @@ class Equipamento {
     const {data} = await apiFormdata.post('/equipamentos', formData);
     return data;
   }
+
+  async update(
+    equipamento: EquipamentoForm,
+    id: string,
+  ): Promise<{id: string}> {
+    const formData = new FormData();
+    formData.append('tipo', equipamento.tipo);
+    formData.append('serial', equipamento.serial);
+    formData.append('cidade', equipamento.cidade);
+    formData.append('obs', equipamento.obs);
+
+    equipamento.imgs.forEach((img, index) => {
+      const imgName = `img_${index + 1}.jpg`;
+      formData.append('images', {
+        uri: img,
+        name: imgName,
+        type: 'image/jpeg',
+      });
+    });
+
+    const {data} = await apiFormdata.put(`/equipamentos/${id}`, formData);
+    return data;
+  }
 }
 
 export default new Equipamento();
