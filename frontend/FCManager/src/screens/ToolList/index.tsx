@@ -19,6 +19,7 @@ import Dropdown from '../../components/Dropdown';
 import colors from '../../styles/variables';
 
 import FilterIcon from '../../assets/icons/filterGreen.svg';
+import CitiesJson from '../../assets/data/cities.json';
 
 import Equipamento from '../../services/Equipamento';
 
@@ -35,7 +36,10 @@ function ToolList({navigation}: any) {
   const [lista, setLista] = useState<EquipamentoItem[]>([]);
   const [filterCount, setFilterCount] = useState(0);
 
-  const cities = [{label: 'sjc', value: 'sjc'}];
+  const cities = CitiesJson.cities.map(item => ({
+    value: item,
+    label: item,
+  }));
 
   const openFilter = () => {
     setFilterModal(true);
@@ -158,6 +162,7 @@ function ToolList({navigation}: any) {
               onSelect={value => setCity(value)}
               color="gray"
               placeholder="Cidade"
+              value={city}
             />
           </View>
           <View>
