@@ -8,6 +8,14 @@ interface EquipamentoListReturn {
   };
 }
 
+interface EquipamentoForm {
+  tipo: string;
+  serial: string;
+  cidade: string;
+  obs: string;
+  imgs: string[];
+}
+
 class Equipamento {
   async getAll(
     status: 'ativo' | 'inativo' | 'todos',
@@ -38,6 +46,26 @@ class Equipamento {
 
   async deactive(id: string): Promise<{id: string}> {
     const {data} = await apiFormdata.put(`/equipamentos/desativar/${id}`);
+    return data;
+  }
+
+  async new(equipamento: EquipamentoForm): Promise<{id: string}> {
+    const formData = new FormData();
+    formData.append('tipo', equipamento.tipo);
+    formData.append('serial', equipamento.serial);
+    formData.append('cidade', equipamento.cidade);
+    formData.append('obs', equipamento.obs);
+
+    equipamento.imgs.forEach((img, index) => {
+      const imgName = `img_${index + 1}.jpg`;
+      formData.append('images', {
+        uri: img,
+        name: imgName,
+        type: 'image/jpeg',
+      });
+    });
+
+    const {data} = await apiFormdata.post('/equipamentos', formData);
     return data;
   }
 }
