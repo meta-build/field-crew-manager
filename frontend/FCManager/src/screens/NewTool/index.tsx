@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Text,
   View,
+  LogBox,
 } from 'react-native';
 
 import Header from '../../components/Header/Index';
@@ -26,6 +27,8 @@ import Equipamento from '../../services/Equipamento';
 import Tipo from '../../services/Tipo';
 
 const {width, height} = Dimensions.get('window');
+
+LogBox.ignoreAllLogs();
 
 const Panel = ({children, style}: any) => {
   return <View style={[styles.panel, style]}>{children}</View>;

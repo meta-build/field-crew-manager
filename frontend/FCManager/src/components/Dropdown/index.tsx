@@ -70,7 +70,7 @@ function Dropdown({
         ]}
         onPress={() => setOpen(!open)}>
         <Text style={styles.buttonText}>
-          {items.find(option => option.value == value)?.label || placeholder}
+          {items.find(option => option.value === value)?.label || placeholder}
         </Text>
         {open ? (
           <ArrowUp style={styles.buttonIcon} width={14} height={14} />
