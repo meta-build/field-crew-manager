@@ -41,6 +41,7 @@ interface Props {
   onSelect: (value: string) => void;
   enable?: boolean;
   color?: 'white' | 'gray';
+  value?: string;
 }
 
 function Dropdown({
@@ -49,12 +50,11 @@ function Dropdown({
   onSelect,
   enable = true,
   color = 'white',
+  value,
 }: Props) {
   const [open, setOpen] = useState(false);
-  const [selectedLabel, setSelectedLabel] = useState('');
 
   const onItemSelect = (item: {value: string; label: string}) => {
-    setSelectedLabel(item.label);
     onSelect(item.value);
     setOpen(false);
   };
@@ -69,7 +69,9 @@ function Dropdown({
           !enable ? {backgroundColor: colors.light_gray_2} : {},
         ]}
         onPress={() => setOpen(!open)}>
-        <Text style={styles.buttonText}>{selectedLabel || placeholder}</Text>
+        <Text style={styles.buttonText}>
+          {items.find(option => option.value == value)?.label || placeholder}
+        </Text>
         {open ? (
           <ArrowUp style={styles.buttonIcon} width={14} height={14} />
         ) : (
