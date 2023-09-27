@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import * as dotenv from 'dotenv';
 import equipamentSchema from "../models/equipamentSchema";
 import equipmentTypeSchema from "../models/equipmentTypeSchema";
+import Blob from 'blob';
 
 dotenv.config();
 
