@@ -272,7 +272,7 @@ class EquipamentoController {
         return res.status(409).json({ error: 'Equipamento já está ativo.' });
       }
 
-      const isActive = false;
+      const isActive = true;
       const equipamento = await equipamentSchema.findByIdAndUpdate(id, { isActive });
       return res.status(200).json({ id: equipamento._id });
     } catch (err) {
