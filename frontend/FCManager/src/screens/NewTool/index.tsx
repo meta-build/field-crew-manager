@@ -93,6 +93,7 @@ function NewTool({navigation, route}: any) {
           },
           params.id,
         );
+        navigation.push('ToolList');
         navigation.navigate('ToolProfile', {id: params.id});
       } catch (err) {
         console.log('erro ao criar equip');
@@ -107,6 +108,7 @@ function NewTool({navigation, route}: any) {
         tipo,
       })
         .then(res => {
+          navigation.push('ToolList');
           navigation.navigate('ToolProfile', {id: res.id});
         })
         .catch(err => {
@@ -157,8 +159,24 @@ function NewTool({navigation, route}: any) {
           setSerial(equip.serial);
           setSelectedCity(equip.cidade);
           setObs(equip.obs);
+          setNewTypeCheck(false);
         });
+      } else {
+        setImgs([]);
+        setNewTypeCheck(false);
+        setNewType('');
+        setSelectedTypeValue('');
+        setSerial('');
+        setSelectedCity('');
+        setObs('');
       }
+
+      setConfirmModal(false);
+      setImgAlert(false);
+      setTypeAlert(false);
+      setSerialAlert(false);
+      setCityAlert(false);
+      setObsAlert(false);
     });
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
