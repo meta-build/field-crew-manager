@@ -131,23 +131,25 @@ function ToolList({navigation}: any) {
             styleType="filled"
             title="Adicionar novo equipamento"
           />
-          <FlatList
-            data={lista}
-            renderItem={({item}) => (
-              <View style={styles.item}>
-                <ToolItem
-                  tool={{
-                    img_uri: item.img,
-                    n_serie: item.serial,
-                    status: item.status === 'ativo' ? 'active' : 'deactive',
-                    tipoLabel: item.tipo.value,
-                  }}
-                  onPress={() => openItem(item.id)}
-                />
-              </View>
-            )}
-            keyExtractor={item => item.id}
-          />
+          <View>
+            <FlatList
+              data={lista}
+              renderItem={({item}) => (
+                <View style={styles.item}>
+                  <ToolItem
+                    tool={{
+                      img_uri: item.img,
+                      n_serie: item.serial,
+                      status: item.status === 'ativo' ? 'active' : 'deactive',
+                      tipoLabel: item.tipo.value,
+                    }}
+                    onPress={() => openItem(item.id)}
+                  />
+                </View>
+              )}
+              keyExtractor={item => item.id}
+            />
+          </View>
         </View>
       </SafeAreaView>
       <BottomModal
