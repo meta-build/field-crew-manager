@@ -31,8 +31,11 @@ Versão atual (v3.0) <br> -->
 ![backlog-1-4-readme_page-0001-corte](https://github.com/meta-build/field-crew-manager/assets/111146527/d60bbe25-ba75-4c60-95b7-59b1e5617d96)
 
 <h2 style="font -weight: bold; margin=bottom: margin-bottom: 0px">
-    Link para as Sprints:
+    Sprints:
 </h2>
+
+### Sprint 1
+<a href='https://www.youtube.com/watch?v=jTcLtERkjKo'>Vídeo Sprint Review 1</a>
 
 <!-- <ul>
 <li> <a href="https://github.com/meta-build/Projeto-IONIC-Health/blob/main/Sprint1.md">Sprint 1</a> </li>
