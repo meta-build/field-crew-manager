@@ -28,7 +28,7 @@ https://github.com/ikatyang/emoji-cheat-sheet#smileys--emotion
 <a href='https://user-images.githubusercontent.com/90328897/229401867-6c327c67-188d-41d4-a167-153cb717ef4c.png'>v1.0</a>
 <br><br>
 Versão atual (v3.0) <br> -->
-![backlog-1-4-readme_page-0001-corte](https://github.com/meta-build/field-crew-manager/assets/111146527/d60bbe25-ba75-4c60-95b7-59b1e5617d96)
+![backlog-2-1](https://github.com/meta-build/field-crew-manager/assets/111146527/d95c130d-7190-41f0-a124-391579c459a8)
 
 <h2 style="font -weight: bold; margin=bottom: margin-bottom: 0px">
     Sprints:
