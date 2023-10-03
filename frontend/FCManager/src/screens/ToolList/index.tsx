@@ -24,11 +24,14 @@ import CitiesJson from '../../assets/data/cities.json';
 import Equipamento from '../../services/Equipamento';
 
 import {EquipamentoItem} from '../../types';
+import LoadingToolList from '../../components/LoadingToolList';
 
 const {width, height} = Dimensions.get('window');
 
 function ToolList({navigation}: any) {
   const [filterModal, setFilterModal] = useState(false);
+
+  const [loadingList, setLoadingList] = useState(false);
 
   const [city, setCity] = useState('');
   const [tipoName, setTipoName] = useState('');
@@ -79,15 +82,17 @@ function ToolList({navigation}: any) {
     return regex.test(titulo);
   };
 
-  const getEquipamentos = (
+  const getEquipamentos = async (
     statusFilter: 'todos' | 'ativo' | 'inativo',
     cidade: string,
   ) => {
-    Equipamento.getAll(statusFilter, '', cidade).then(res => {
+    setLoadingList(true);
+    await Equipamento.getAll(statusFilter, '', cidade).then(res => {
       console.log(res);
       const equips = res.values.filter(equip => filtrarNome(equip.tipo.value));
       setLista(equips);
     });
+    setLoadingList(false);
   };
 
   useEffect(() => {
@@ -131,24 +136,28 @@ function ToolList({navigation}: any) {
             styleType="filled"
             title="Adicionar novo equipamento"
           />
-          <FlatList
-            style={styles.equipsList}
-            data={lista}
-            renderItem={({item}) => (
-              <View style={styles.item}>
-                <ToolItem
-                  tool={{
-                    img_uri: item.img,
-                    n_serie: item.serial,
-                    status: item.status === 'ativo' ? 'active' : 'deactive',
-                    tipoLabel: item.tipo.value,
-                  }}
-                  onPress={() => openItem(item.id)}
-                />
-              </View>
-            )}
-            keyExtractor={item => item.id}
-          />
+          {loadingList ? (
+            <LoadingToolList />
+          ) : (
+            <FlatList
+              style={styles.equipsList}
+              data={lista}
+              renderItem={({item}) => (
+                <View style={styles.item}>
+                  <ToolItem
+                    tool={{
+                      img_uri: item.img,
+                      n_serie: item.serial,
+                      status: item.status === 'ativo' ? 'active' : 'deactive',
+                      tipoLabel: item.tipo.value,
+                    }}
+                    onPress={() => openItem(item.id)}
+                  />
+                </View>
+              )}
+              keyExtractor={item => item.id}
+            />
+          )}
         </View>
       </SafeAreaView>
       <BottomModal
