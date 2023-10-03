@@ -131,25 +131,24 @@ function ToolList({navigation}: any) {
             styleType="filled"
             title="Adicionar novo equipamento"
           />
-          <View>
-            <FlatList
-              data={lista}
-              renderItem={({item}) => (
-                <View style={styles.item}>
-                  <ToolItem
-                    tool={{
-                      img_uri: item.img,
-                      n_serie: item.serial,
-                      status: item.status === 'ativo' ? 'active' : 'deactive',
-                      tipoLabel: item.tipo.value,
-                    }}
-                    onPress={() => openItem(item.id)}
-                  />
-                </View>
-              )}
-              keyExtractor={item => item.id}
-            />
-          </View>
+          <FlatList
+            style={styles.equipsList}
+            data={lista}
+            renderItem={({item}) => (
+              <View style={styles.item}>
+                <ToolItem
+                  tool={{
+                    img_uri: item.img,
+                    n_serie: item.serial,
+                    status: item.status === 'ativo' ? 'active' : 'deactive',
+                    tipoLabel: item.tipo.value,
+                  }}
+                  onPress={() => openItem(item.id)}
+                />
+              </View>
+            )}
+            keyExtractor={item => item.id}
+          />
         </View>
       </SafeAreaView>
       <BottomModal
@@ -206,6 +205,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white_3,
     width,
     height,
+    flexDirection: 'column',
   },
   content: {
     flex: 1,
@@ -250,6 +250,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     bottom: -8,
     left: -8,
+  },
+  equipsList: {
+    flex: 1,
   },
 });
 
