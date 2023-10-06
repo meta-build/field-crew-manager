@@ -1,5 +1,11 @@
 import React, {FunctionComponent} from 'react';
-import {Pressable, PressableProps, StyleSheet, Text} from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  PressableProps,
+  StyleSheet,
+  Text,
+} from 'react-native';
 import colors from '../../styles/variables';
 import {SvgProps} from 'react-native-svg';
 
@@ -8,9 +14,17 @@ interface Props extends PressableProps {
   enable?: boolean;
   title?: string;
   icon?: FunctionComponent<SvgProps>;
+  loading?: boolean;
 }
 
-const Btn = ({icon, title, enable = true, styleType, ...props}: Props) => {
+const Btn = ({
+  icon,
+  title,
+  enable = true,
+  styleType,
+  loading = false,
+  ...props
+}: Props) => {
   const styles = StyleSheet.create({
     btn: {
       borderRadius: 10,
@@ -44,6 +58,18 @@ const Btn = ({icon, title, enable = true, styleType, ...props}: Props) => {
   });
 
   const contentMiddleware = () => {
+    if (loading) {
+      return (
+        <ActivityIndicator
+          size={20}
+          color={
+            styleType === 'filled' || styleType === 'alert'
+              ? colors.white
+              : colors.green_1
+          }
+        />
+      );
+    }
     if (!title) {
       if (!icon) {
         return <></>;

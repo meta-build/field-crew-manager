@@ -56,6 +56,8 @@ function NewTool({navigation, route}: any) {
 
   const [confirmModal, setConfirmModal] = useState(false);
 
+  const [loading, setLoading] = useState(false);
+
   const [imgAlert, setImgAlert] = useState(false);
   const [typeAlert, setTypeAlert] = useState(false);
   const [serialAlert, setSerialAlert] = useState(false);
@@ -68,6 +70,8 @@ function NewTool({navigation, route}: any) {
   }));
 
   const create = async () => {
+    setLoading(true);
+
     let tipo = '';
     if (newTypeCheck) {
       try {
@@ -93,9 +97,11 @@ function NewTool({navigation, route}: any) {
           },
           params.id,
         );
+        setLoading(false);
         navigation.push('ToolList');
         navigation.navigate('ToolProfile', {id: params.id});
       } catch (err) {
+        setLoading(false);
         console.log('erro ao criar equip');
         console.log(err);
       }
@@ -108,10 +114,12 @@ function NewTool({navigation, route}: any) {
         tipo,
       })
         .then(res => {
+          setLoading(false);
           navigation.push('ToolList');
           navigation.navigate('ToolProfile', {id: res.id});
         })
         .catch(err => {
+          setLoading(false);
           console.log('erro ao criar equip');
           console.log(err);
         });
@@ -315,7 +323,12 @@ function NewTool({navigation, route}: any) {
           align="center"
         />
         <View style={styles.confirmBtnView}>
-          <Btn styleType="filled" title="Confirmar" onPress={() => create()} />
+          <Btn
+            styleType="filled"
+            title="Confirmar"
+            onPress={() => !loading && create()}
+            loading={loading}
+          />
           <Btn
             styleType="outlined"
             title="Cancelar"
