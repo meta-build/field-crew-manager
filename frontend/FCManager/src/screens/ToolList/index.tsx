@@ -25,6 +25,7 @@ import Equipamento from '../../services/Equipamento';
 
 import {EquipamentoItem} from '../../types';
 import LoadingToolList from '../../components/LoadingToolList';
+import Navbar from '../../components/Navbar';
 
 const {width, height} = Dimensions.get('window');
 
@@ -159,6 +160,7 @@ function ToolList({navigation}: any) {
             />
           )}
         </View>
+        <Navbar selected="Equipamentos" navigation={navigation} />
       </SafeAreaView>
       <BottomModal
         onPressOutside={() => setFilterModal(false)}
@@ -218,7 +220,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingVertical: 16,
+    paddingTop: 12,
     paddingHorizontal: 13,
     gap: 12,
   },
