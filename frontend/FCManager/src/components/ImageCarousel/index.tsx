@@ -7,8 +7,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import colors from '../../styles/variables';
 import LinearGradient from 'react-native-linear-gradient';
+
+import colors from '../../styles/variables';
+
+import ImageIcon from '../../assets/icons/image-white.svg';
 
 interface Props {
   images: string[];
@@ -57,6 +60,19 @@ function ImageCarousel(props: Props) {
         onViewableItemsChanged={onViewRef.current}
       />
 
+      {props.images.length ? (
+        <></>
+      ) : (
+        <TouchableOpacity
+          style={[styles.imageBackground, styles.noImageView]}
+          activeOpacity={1}
+          onPress={() => console.log('clicou')}>
+          <View>
+            <ImageIcon width={84} height={84} />
+          </View>
+        </TouchableOpacity>
+      )}
+
       <LinearGradient
         style={styles.dotContainer}
         colors={['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)']}>
@@ -98,6 +114,7 @@ const styles = StyleSheet.create({
   },
   imageBackground: {
     backgroundColor: 'black',
+    minHeight: 250,
   },
   circleActive: {
     ...circleStyle,
@@ -117,6 +134,11 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 50,
     margin: 0,
+  },
+  noImageView: {
+    backgroundColor: colors.dark_gray,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

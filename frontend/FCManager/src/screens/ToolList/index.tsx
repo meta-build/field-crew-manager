@@ -24,11 +24,14 @@ import CitiesJson from '../../assets/data/cities.json';
 import Equipamento from '../../services/Equipamento';
 
 import {EquipamentoItem} from '../../types';
+import LoadingToolList from '../../components/LoadingToolList';
 
 const {width, height} = Dimensions.get('window');
 
 function ToolList({navigation}: any) {
   const [filterModal, setFilterModal] = useState(false);
+
+  const [loadingList, setLoadingList] = useState(false);
 
   const [city, setCity] = useState('');
   const [tipoName, setTipoName] = useState('');
@@ -79,15 +82,17 @@ function ToolList({navigation}: any) {
     return regex.test(titulo);
   };
 
-  const getEquipamentos = (
+  const getEquipamentos = async (
     statusFilter: 'todos' | 'ativo' | 'inativo',
     cidade: string,
   ) => {
-    Equipamento.getAll(statusFilter, '', cidade).then(res => {
+    setLoadingList(true);
+    await Equipamento.getAll(statusFilter, '', cidade).then(res => {
       console.log(res);
       const equips = res.values.filter(equip => filtrarNome(equip.tipo.value));
       setLista(equips);
     });
+    setLoadingList(false);
   };
 
   useEffect(() => {
@@ -131,8 +136,11 @@ function ToolList({navigation}: any) {
             styleType="filled"
             title="Adicionar novo equipamento"
           />
-          <View>
+          {loadingList ? (
+            <LoadingToolList />
+          ) : (
             <FlatList
+              style={styles.equipsList}
               data={lista}
               renderItem={({item}) => (
                 <View style={styles.item}>
@@ -149,7 +157,7 @@ function ToolList({navigation}: any) {
               )}
               keyExtractor={item => item.id}
             />
-          </View>
+          )}
         </View>
       </SafeAreaView>
       <BottomModal
@@ -206,6 +214,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white_3,
     width,
     height,
+    flexDirection: 'column',
   },
   content: {
     flex: 1,
@@ -250,6 +259,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     bottom: -8,
     left: -8,
+  },
+  equipsList: {
+    flex: 1,
   },
 });
 

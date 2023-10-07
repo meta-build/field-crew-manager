@@ -26,6 +26,8 @@ function ToolProfile({navigation, route}: any) {
 
   const [equipamento, setEquipamento] = useState<EquipamentoType>();
 
+  const [loading, setLoading] = useState(false);
+
   const {id} = route.params;
 
   const edit = () => {
@@ -41,16 +43,20 @@ function ToolProfile({navigation, route}: any) {
   };
 
   const confirmActivate = async () => {
-    Equipamento.active(id).then(res => {
+    setLoading(true);
+    Equipamento.active(id).then(() => {
       getEquipamento();
       setConfirmActive(false);
+      setLoading(false);
     });
   };
 
   const confirmDeactivate = async () => {
-    Equipamento.deactive(id).then(res => {
+    setLoading(true);
+    Equipamento.deactive(id).then(() => {
       getEquipamento();
       setConfirmDeactive(false);
+      setLoading(false);
     });
   };
 
@@ -130,7 +136,8 @@ function ToolProfile({navigation, route}: any) {
             <Btn
               styleType="filled"
               title="Confirmar"
-              onPress={() => confirmActivate()}
+              onPress={() => !loading && confirmActivate()}
+              loading={loading}
             />
             <Btn
               styleType="outlined"
@@ -148,7 +155,8 @@ function ToolProfile({navigation, route}: any) {
             <Btn
               styleType="alert"
               title="Confirmar"
-              onPress={() => confirmDeactivate()}
+              onPress={() => !loading && confirmDeactivate()}
+              loading={loading}
             />
             <Btn
               styleType="outlined"
