@@ -17,7 +17,7 @@ interface NavItemProps extends PressableProps {
 function NavItem({icon, selected, title, ...props}: NavItemProps) {
   return (
     <Pressable
-      onPress={e => !selected && props.onPress && props.onPress(e)}
+      onPress={props.onPress}
       style={[
         navItemStyles.container,
         navItemStyles[selected ? 'containerSelected' : 'containerUnselected'],
