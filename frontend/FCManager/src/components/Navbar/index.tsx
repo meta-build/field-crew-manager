@@ -1,5 +1,5 @@
 import React, {JSXElementConstructor, ReactElement} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {Pressable, PressableProps, StyleSheet, Text, View} from 'react-native';
 
 import ProfileIcon from '../../assets/icons/profile.svg';
 import ToolsIcon from '../../assets/icons/tools.svg';
@@ -8,15 +8,16 @@ import UsersIcon from '../../assets/icons/users.svg';
 
 import colors from '../../styles/variables';
 
-interface NavItemProps {
+interface NavItemProps extends PressableProps {
   icon: ReactElement<any, string | JSXElementConstructor<any>>;
   title: string;
   selected: boolean;
 }
 
-function NavItem({icon, selected, title}: NavItemProps) {
+function NavItem({icon, selected, title, ...props}: NavItemProps) {
   return (
-    <View
+    <Pressable
+      onPress={e => !selected && props.onPress && props.onPress(e)}
       style={[
         navItemStyles.container,
         navItemStyles[selected ? 'containerSelected' : 'containerUnselected'],
@@ -26,7 +27,7 @@ function NavItem({icon, selected, title}: NavItemProps) {
         color: selected ? colors.white : colors.green_2,
       })}
       {!selected ? <Text style={navItemStyles.title}>{title}</Text> : <></>}
-    </View>
+    </Pressable>
   );
 }
 
@@ -51,27 +52,48 @@ const navItemStyles = StyleSheet.create({
 
 interface NavbarProps {
   selected: 'Usuários' | 'Equipamentos' | 'Manobras' | 'Perfil';
+  navigation: any;
 }
 
-function Navbar({selected}: NavbarProps) {
+function Navbar({selected, navigation}: NavbarProps) {
+  const goToUsuarios = () => {
+    console.log('usuarios');
+  };
+
+  const goToTools = () => {
+    navigation.navigate('ToolList');
+  };
+
+  const goToManobras = () => {
+    console.log('manobras');
+  };
+
+  const goToPerfil = () => {
+    console.log('perfil');
+  };
+
   return (
     <View style={navBarStyles.container}>
       <NavItem
+        onPress={() => goToUsuarios()}
         title="Usuários"
         selected={selected === 'Usuários'}
         icon={<UsersIcon />}
       />
       <NavItem
+        onPress={() => goToTools()}
         title="Equipamentos"
         selected={selected === 'Equipamentos'}
         icon={<ToolsIcon />}
       />
       <NavItem
+        onPress={() => goToManobras()}
         title="Manobras"
         selected={selected === 'Manobras'}
         icon={<ManeuversIcon />}
       />
       <NavItem
+        onPress={() => goToPerfil()}
         title="Perfil"
         selected={selected === 'Perfil'}
         icon={<ProfileIcon />}
@@ -84,6 +106,8 @@ const navBarStyles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     height: 72,
+    borderTopColor: colors.green_1,
+    borderTopWidth: 2,
   },
 });
 
