@@ -7,6 +7,7 @@ import {
   Text,
   View,
 } from 'react-native';
+
 import colors from '../../styles/variables';
 import Btn from '../../components/Button';
 import Title from '../../components/Title';
@@ -50,6 +51,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 18,
+    backgroundColor: colors.white,
   },
   logo: {
     height: 22,
