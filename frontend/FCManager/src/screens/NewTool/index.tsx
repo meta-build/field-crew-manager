@@ -8,6 +8,7 @@ import {
   Text,
   View,
   LogBox,
+  Platform,
 } from 'react-native';
 
 import Header from '../../components/Header/Index';
@@ -187,13 +188,14 @@ function NewTool({navigation, route}: any) {
       setObsAlert(false);
     });
 
-    // Return the function to unsubscribe from the event so it gets removed on unmount
     return onFocus;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation]);
 
   return (
     <>
-      <KeyboardAvoidingView>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <SafeAreaView style={styles.container}>
           <Header
             text={params?.id ? 'Editar Equipamento' : 'Novo Equipamento'}
