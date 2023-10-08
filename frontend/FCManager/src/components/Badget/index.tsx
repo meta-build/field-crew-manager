@@ -1,29 +1,48 @@
 import React from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text} from 'react-native';
 import colors from '../../styles/variables';
 
 interface Props {
   status: 'active' | 'deactive';
   size?: 'tiny' | 'small';
+  customText?: string;
 }
 
-function Badget({status, size = 'tiny'}: Props) {
+function Badget({status, size = 'tiny', customText}: Props) {
   return (
-    <View style={[styles.container, styles[size], styles[status]]}>
+    <>
       {status === 'active' ? (
-        <Text style={[styles.text, styles[`text_${size}`]]}>Ativo</Text>
+        <Text
+          style={[
+            styles.container,
+            styles[size],
+            styles[status],
+            styles.text,
+            styles[`text_${size}`],
+          ]}>
+          {customText ? customText : 'Ativo'}
+        </Text>
       ) : (
-        <Text style={[styles.text, styles[`text_${size}`]]}>Inativo</Text>
+        <Text
+          style={[
+            styles.container,
+            styles[size],
+            styles[status],
+            styles.text,
+            styles[`text_${size}`],
+          ]}>
+          {customText ? customText : 'Inativo'}
+        </Text>
       )}
-    </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    textAlign: 'center',
     borderRadius: 12,
+    width: 'auto',
   },
   tiny: {
     padding: 6,
