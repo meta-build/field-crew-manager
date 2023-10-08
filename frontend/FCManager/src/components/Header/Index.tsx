@@ -4,12 +4,20 @@ import colors from '../../styles/variables';
 
 interface Props {
   text: string;
+  runningManeuve?: boolean;
 }
 
-const Header = ({text}: Props) => {
+const Header = ({text, runningManeuve}: Props) => {
   return (
-    <View style={styles.header}>
-      <Text style={styles.h1}>{text}</Text>
+    <View>
+      <View style={styles.header}>
+        <Text style={styles.h1}>{text}</Text>
+      </View>
+      {runningManeuve ? (
+        <Text style={styles.warning}>Você possui uma manobra em andamento</Text>
+      ) : (
+        <></>
+      )}
     </View>
   );
 };
@@ -17,14 +25,21 @@ const Header = ({text}: Props) => {
 const styles = StyleSheet.create({
   header: {
     backgroundColor: colors.white,
-    padding: 15,
+    padding: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
   h1: {
     fontWeight: 'bold',
     color: colors.green_1,
-    fontSize: 24,
+    fontSize: 20,
+  },
+  warning: {
+    backgroundColor: colors.green_1,
+    color: colors.white,
+    fontWeight: 'bold',
+    padding: 6,
+    textAlign: 'center',
   },
 });
 
