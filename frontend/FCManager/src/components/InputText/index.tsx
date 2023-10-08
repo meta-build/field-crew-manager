@@ -6,12 +6,14 @@ import {
   TextInputProps,
   TextStyle,
 } from 'react-native';
+
 import colors from '../../styles/variables';
 
 interface Props extends TextInputProps {
   color: 'gray' | 'white';
   enable?: boolean;
   style?: StyleProp<TextStyle>;
+  error?: boolean;
 }
 
 const InputText = ({enable = true, color, ...props}: Props) => {
@@ -19,6 +21,7 @@ const InputText = ({enable = true, color, ...props}: Props) => {
     borderRadius: 10,
     padding: 6,
     color: colors.dark_gray,
+    ...(props.error ? {borderColor: colors.alert_1, borderWidth: 1} : {}),
   };
 
   const styles = StyleSheet.create({
