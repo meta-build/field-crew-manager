@@ -1,194 +1,83 @@
 import { Request, Response } from "express";
-import { Document, Types } from "mongoose";
-
-import equipamentSchema from "../models/equipamentSchema";
-
-import Validations from "../utils/validations";
-import { uploadImg } from "../utils/imageUploader";
 import usuarioSchema from "../models/usuarioSchema";
+import * as dotenv from 'dotenv';
 
-interface RequestFiles extends Request {
-  files: any[] | any;
-}
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+dotenv.config();
 
 class UsuarioController {
-  public async getEquipamentos(req: RequestFiles, res: Response) {
-    const { status, tipo } = req.query;
-    const cidade = decodeURIComponent(req.query.cidade as string);
-
-    const invalidStatusAlert = Validations.equipments.statusValidation(status as string, res);
-    if (invalidStatusAlert) return invalidStatusAlert;
-
-    if (tipo) {
-      const invalidTypeId = await Validations.equipmentTypes.idValidation(tipo as string, res);
-      if (invalidTypeId['errorResponse']) return invalidTypeId['errorResponse'];
-    }
-
-    try {
-      const equipamentos = await equipamentSchema.find();
-      const itens = equipamentos
-        .filter(equip => {
-          const cidadeFilter = cidade !== 'undefined' ? cidade == equip.cidade : true;
-          const statusFilter = Boolean(status) ? (status == 'ativo' ? equip.isActive : !equip.isActive) : true;
-          const tipoFilter = Boolean(tipo) ? tipo == equip.tipo.id : true;
-
-          return cidadeFilter && statusFilter && tipoFilter;
-        })
-        .map(equip => ({
-          id: equip._id,
-          tipo: equip.tipo,
-          serial: equip.serial,
-          status: equip.isActive ? 'ativo' : 'inativo',
-          img: equip.imgs[0],
-        }));
-      res.status(200).json({
-        values: itens,
-        metadata: {
-          itens: itens.length,
-        }
-      });
-    } catch (error) {
-      res.status(500).json({ error });
-    }
-  }
-
-  public async getEquipamentosById(req: Request, res: Response) {
-    const { id } = req.params;
-
-    try {
-      const equipamento = await equipamentSchema.findById(id);
-      return res.status(200).json({
-        id: equipamento._id,
-        tipo: equipamento.tipo,
-        serial: equipamento.serial,
-        cidade: equipamento.cidade,
-        obs: equipamento.obs,
-        status: equipamento.isActive ? 'ativo' : 'inativo',
-        imgs: equipamento.imgs,
-      });
-    } catch (error) {
-      if (error.name == "CastError") {
-        return res.status(404).json({ error: 'Equipamento não encontrado.' });
-      }
-      return res.status(500).json({ error });
-    }
-  }
-
   public async new(req: Request, res: Response) {
     // informações básicas do usuário
-    const { nome, sobrenome, email, telefone, matricula, cpf, isAdmin } = req.body;
+    const { nome, sobrenome, email, telefone, matricula, cpf, senha, isAdmin } = req.body;
 
-    // validação das informações recebidas
-    const invalidFieldsAlert = Validations.verifyFields({ nome, sobrenome, email, telefone, matricula, cpf }, res);
-    if (invalidFieldsAlert) return invalidFieldsAlert;
+    if (!nome) {
+      return res.status(400).json({ error: 'campo "Nome" não informado.' });
+    }
+
+    if (!sobrenome) {
+      return res.status(400).json({ error: 'campo "Sobrenome" não informado.' });
+    }
+
+    if (!email) {
+      return res.status(400).json({ error: 'campo "email" não informado.' });
+    }
+
+    if (!telefone) {
+      return res.status(400).json({ error: 'campo "telefone" não informado.' });
+    }
+
+    if (!matricula) {
+      return res.status(400).json({ error: 'campo "matricula" não informado.' });
+    }
+
+    if (!cpf) {
+      return res.status(400).json({ error: 'campo "CPF" não informado.' });
+    }
+
+    if (!senha) {
+      return res.status(400).json({ error: 'campo "senha" não informado.' });
+    }
+
+    if (!isAdmin) {
+      return res.status(401).json({ error: 'Não autorizado' });
+    }
+
+    const userExists = await usuarioSchema.findOne({ email: email });
+
+    //checar se existe usuario
+    if (userExists) {
+      return res.status(400).json({ error: 'email já está em uso, utilize outro' });
+    }
 
     try {
+      const salt = await bcrypt.genSalt(12);
+      const passwordHash = await bcrypt.hash(senha, salt);
       const usuario = await usuarioSchema.create({
-        nome, sobrenome, email, telefone, matricula, cpf, isAdmin, senha: cpf
+        nome, sobrenome, email, telefone, matricula, cpf, isAdmin, senha: cpf && passwordHash
       });
 
-      const id = usuario._id;
-      return res.status(200).json({ id });
+      const id = usuario._id
+
+      try {
+
+        const secret = process.env.SECRET
+        const token = jwt.sign({
+          id: usuario._id
+        },
+          secret
+        );
+
+        return res.status(200).json({ id, token })
+      } catch (error) {
+        res.status(500).json({ msg: "não foi possivel criar token" })
+      }
     } catch (error) {
       console.log(error)
       res.status(500).json({
         error
       });
     }
-  }
-
-  public async update(req: RequestFiles, res: Response) {
-    const { id } = req.params;
-
-    try {
-      const { tipo, serial, cidade, obs } = req.body;
-
-      // validação das informações recebidas
-      const invalidFieldsAlert = Validations.verifyFields({ tipo, serial, cidade, obs, id }, res);
-      if (invalidFieldsAlert) return invalidFieldsAlert;
-
-      // validação se existe tipo (se não existir o tipo, deve retornar true para retornar o erro)
-      const tipoValidation = await Validations.equipmentTypes.idValidation(tipo as string, res);
-      if (tipoValidation['errorResponse']) return tipoValidation['errorResponse'];
-
-      const tipoObj = tipoValidation as Document<unknown, {}, {
-        value?: string;
-      }> & {
-        value?: string;
-      } & {
-        _id: Types.ObjectId;
-      }
-
-      // armazenamento das fotos do equipamento na api IMGUR
-      const imgsValidation = Validations.equipments.imageArrayValidation(req.files, res);
-      if (imgsValidation['errorResponse']) return imgsValidation['errorResonse'];
-
-      const imagens = imgsValidation as any[];
-      const imgs = [];
-
-      for (const img of imagens) {
-        try {
-          const url = await uploadImg(img);
-          imgs.push(url);
-        } catch (err) {
-          return res.status(500).json({ error: err });
-        }
-      }
-
-      const equipamento = await equipamentSchema.findByIdAndUpdate(id, {
-        tipo: {
-          id: tipo,
-          value: tipoObj.value,
-        },
-        serial,
-        cidade,
-        obs,
-        imgs
-      });
-      return res.status(200).json({ id: equipamento._id });
-
-    } catch (error) {
-      if (error.name == "CastError") {
-        return res.status(404).json({ error: 'ID do equipamento não encontrado.' });
-      }
-      return res.status(500).json({ error });
-    }
-  }
-
-  public async active(req: Request, res: Response) {
-    const { id } = req.params;
-
-    const equipValidation = await Validations.equipments.idValidation(id, res);
-    if (equipValidation['errorResponse']) return equipValidation['errorResponse'];
-
-    const equip = equipValidation as any;
-
-    // se equipamento já estiver ativo, condição do if abaixo deve ser true
-    if (equip.isActive) {
-      return res.status(409).json({ error: 'Equipamento já está ativo.' });
-    }
-
-    const isActive = true;
-    const equipamento = await equipamentSchema.findByIdAndUpdate(id, { isActive });
-    return res.status(200).json({ id: equipamento._id });
-  }
-
-  public async desactive(req: Request, res: Response) {
-    const { id } = req.params;
-
-    const equipValidation = await Validations.equipments.idValidation(id, res);
-    if (equipValidation['errorResponse']) return equipValidation['errorResponse'];
-
-    const equip = equipValidation as any;
-
-    // se equipamento já estiver ativo, condição do if abaixo deve ser true
-    if (!equip.isActive) {
-      return res.status(409).json({ error: 'Equipamento já está inativo.' });
-    }
-
-    const isActive = false;
-    const equipamento = await equipamentSchema.findByIdAndUpdate(id, { isActive });
-    return res.status(200).json({ id: equipamento._id });
   }
 }
 

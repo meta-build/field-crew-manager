@@ -36,6 +36,7 @@ const usuarioSchema = new mongoose.Schema({
     isAdmin: {
         type: Boolean
     },
+
 });
 
 export default mongoose.model("usuarios", usuarioSchema);
