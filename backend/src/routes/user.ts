@@ -8,7 +8,7 @@ const formDataMiddleware = parse();
 
 routes.get('/usuarios', UsuarioController.getUsuarios);
 
-routes.get('/usuarios/:id', UsuarioController.getEquipamentosById);
+routes.get('/usuarios/:id', UsuarioController.getUsuarioById);
 
 routes.post('/usuarios', UsuarioController.new);
 

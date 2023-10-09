@@ -33,23 +33,24 @@ class UsuarioController {
     }
   }
 
-  public async getEquipamentosById(req: Request, res: Response) {
+  public async getUsuarioById(req: Request, res: Response) {
     const { id } = req.params;
 
     try {
-      const equipamento = await equipamentSchema.findById(id);
+      const usuario = await usuarioSchema.findById(id);
       return res.status(200).json({
-        id: equipamento._id,
-        tipo: equipamento.tipo,
-        serial: equipamento.serial,
-        cidade: equipamento.cidade,
-        obs: equipamento.obs,
-        status: equipamento.isActive ? 'ativo' : 'inativo',
-        imgs: equipamento.imgs,
+        id: usuario?._id,
+        nome: usuario?.nome,
+        sobrenome: usuario?.sobrenome,
+        email: usuario?.email,
+        telefone: usuario?.telefone,
+        matricula: usuario?.matricula,
+        cpf: usuario?.cpf,
+        foto: usuario?.foto || ''
       });
     } catch (error) {
       if (error.name == "CastError") {
-        return res.status(404).json({ error: 'Equipamento não encontrado.' });
+        return res.status(404).json({ error: 'Usuário não encontrado.' });
       }
       return res.status(500).json({ error });
     }
