@@ -12,35 +12,16 @@ interface RequestFiles extends Request {
 }
 
 class UsuarioController {
-  public async getEquipamentos(req: RequestFiles, res: Response) {
-    const { status, tipo } = req.query;
-    const cidade = decodeURIComponent(req.query.cidade as string);
-
-    const invalidStatusAlert = Validations.equipments.statusValidation(status as string, res);
-    if (invalidStatusAlert) return invalidStatusAlert;
-
-    if (tipo) {
-      const invalidTypeId = await Validations.equipmentTypes.idValidation(tipo as string, res);
-      if (invalidTypeId['errorResponse']) return invalidTypeId['errorResponse'];
-    }
-
+  public async getUsuarios(req: RequestFiles, res: Response) {
     try {
-      const equipamentos = await equipamentSchema.find();
-      const itens = equipamentos
-        .filter(equip => {
-          const cidadeFilter = cidade !== 'undefined' ? cidade == equip.cidade : true;
-          const statusFilter = Boolean(status) ? (status == 'ativo' ? equip.isActive : !equip.isActive) : true;
-          const tipoFilter = Boolean(tipo) ? tipo == equip.tipo.id : true;
-
-          return cidadeFilter && statusFilter && tipoFilter;
-        })
-        .map(equip => ({
-          id: equip._id,
-          tipo: equip.tipo,
-          serial: equip.serial,
-          status: equip.isActive ? 'ativo' : 'inativo',
-          img: equip.imgs[0],
-        }));
+      const usuarios = await usuarioSchema.find();
+      const itens = usuarios
+      .map(user => ({
+          id: user?._id,
+          nome: user?.sobrenome,
+          sobrenome: user?.sobrenome,
+          foto: user?.foto ? user?.foto : '',
+      }));
       res.status(200).json({
         values: itens,
         metadata: {

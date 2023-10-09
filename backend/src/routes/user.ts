@@ -1,5 +1,4 @@
-import { Router, Request, Response } from 'express';
-import EquipamentoController from '../controllers/EquipamentoController';
+import { Router } from 'express';
 import { parse } from 'express-form-data';
 import UsuarioController from '../controllers/UsuarioController';
 
@@ -7,7 +6,7 @@ const routes = Router();
 
 const formDataMiddleware = parse();
 
-routes.get('/usuarios', UsuarioController.getEquipamentos);
+routes.get('/usuarios', UsuarioController.getUsuarios);
 
 routes.get('/usuarios/:id', UsuarioController.getEquipamentosById);
 
