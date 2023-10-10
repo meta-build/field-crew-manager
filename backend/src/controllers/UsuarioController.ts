@@ -1,10 +1,20 @@
 import { Request, Response } from "express";
-import usuarioSchema from "../models/usuarioSchema";
+import { Document, Types } from "mongoose";
 import * as dotenv from 'dotenv';
+
+import usuarioSchema from "../models/usuarioSchema";
+
+import Validations from "../utils/validations";
+import { uploadImg } from "../utils/imageUploader";
+import { hash } from "bcrypt";
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 dotenv.config();
+
+interface RequestFiles extends Request {
+  files: any[] | any;
+}
 
 class UsuarioController {
   public async new(req: Request, res: Response) {
@@ -77,6 +87,55 @@ class UsuarioController {
       res.status(500).json({
         error
       });
+    }
+  }
+
+  public async editarUsuario(req: RequestFiles, res: Response) {
+    const { id } = req.params;
+
+    try {
+      const { nome, sobrenome, email, telefone, matricula, cpf, isAdmin } = req.body;
+
+      const adminValidation = await Validations.user.adminValidation(isAdmin as string, res);
+      if(adminValidation) return adminValidation;
+
+      const invalidFieldsAlert = Validations.verifyFields({ nome, sobrenome, email, telefone, matricula, cpf, id }, res);
+      if (invalidFieldsAlert) return invalidFieldsAlert;
+
+      const imgsValidation = Validations.user.imageArrayValidation(req.files, res);
+      if (imgsValidation['errorResponse']) return imgsValidation['errorResponse'];
+
+      const imagens = imgsValidation as any[];
+      const imgs = [];
+
+      for (const img of imagens) {
+        try {
+          const url = await uploadImg(img);
+          imgs.push(url);
+        } catch (err) {
+          return res.status(500).json({ error: err });
+        }
+      }
+
+      const users = await usuarioSchema.findByIdAndUpdate(id, {
+        nome,
+        sobrenome,
+        email,
+        telefone,
+        matricula,
+        cpf,
+        isAdmin,
+        imgs
+      });
+      return res.status(200).json({ id: users._id });
+
+    } catch (error) {
+      if (error.name == "CastError") {
+        return res.status(404).json({ error: 'ID do usuario não encontrado.' });
+      }
+      console.log(error)
+      return res.status(500).json({ error: error })
+
     }
   }
 }

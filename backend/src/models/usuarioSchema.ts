@@ -25,8 +25,8 @@ const usuarioSchema = new mongoose.Schema({
         type: String
     },
 
-    foto: {
-        type: String
+    imgs: {
+        type: [String]
     },
 
     senha: {
@@ -35,7 +35,7 @@ const usuarioSchema = new mongoose.Schema({
 
     isAdmin: {
         type: Boolean
-    },
+    }
 
 });
 

@@ -26,7 +26,7 @@ class Validations {
     },
     idValidation: async (id: string, res: Response): Promise<any | { errorResponse: Response<any, Record<string, any>> }> => {
       if (!id) {
-        return { errorResponse: res.status(400).json({ error: 'ID não informado.' })};
+        return { errorResponse: res.status(400).json({ error: 'ID não informado.' }) };
       }
       try {
         const equip = await equipamentSchema.findById(id);
@@ -67,6 +67,30 @@ class Validations {
     }
     return undefined;
   }
+
+  public user = {
+    imageArrayValidation: (files: any, res: Response): any[] | { errorResponse: Response<any, Record<string, any>> } => {
+      if (!files) {
+        return { errorResponse: res.status(400).json({ error: 'Equipamento precisa ter no mínimo 1 foto.' }) };
+      }
+      const { images } = files;
+      const imagens = Array.isArray(images) ? images : images ? [images] : [];
+
+      if (!imagens.length) {
+        return { errorResponse: res.status(400).json({ error: 'Equipamento precisa ter no mínimo 1 foto.' }) };
+      }
+
+      return imagens;
+    },
+
+    adminValidation: (isAdmin: string, res: Response) => {
+      if (isAdmin  !== 'true') {
+        return res.status(401).json({ error: 'não autorizado' });
+      }
+      return undefined;
+    },
+  }
+
 }
 
 export default new Validations();
