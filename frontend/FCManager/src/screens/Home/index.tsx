@@ -26,6 +26,7 @@ const Home = ({ navigation }: any) => {
 
   const openLoginModal = () => {
     setloginModal(true);
+    setloginPasswordModal(false);
   };
 
   const closeLoginModal = () => {
@@ -34,6 +35,7 @@ const Home = ({ navigation }: any) => {
 
   const openLoginPasswordModal = () => {
      setloginPasswordModal(true);
+     setloginModal(false);
   };
 
   const closeLoginPasswordModal = () => {
@@ -84,7 +86,10 @@ const Home = ({ navigation }: any) => {
         <InputText color={'gray'} placeholder='exemplo@dominio.com' style={styles.inputText}></InputText>
 
         <View style={styles.btnContainer}> 
-         <Btn onPress={() => openLoginPasswordModal()} styleType="outlined" title='Continuar' />
+         <Btn 
+          onPress={() => openLoginPasswordModal()}
+          styleType="outlined"
+          title='Continuar' />
         </View>
 
       </BottomModal>
@@ -93,6 +98,27 @@ const Home = ({ navigation }: any) => {
              visible={loginPasswordModal}
              onPressOutside={() =>
               closeLoginPasswordModal()}>
+
+          <Title
+           text='Seja bem vindo(a)'
+           color={'green'}
+           align={'left'}
+           />
+
+          <Text style={styles.modalText}>
+            Senha:
+          </Text>
+
+          <InputText color={'gray'} isPassword style={styles.inputText}></InputText>
+
+        <View style={styles.btnContainer}> 
+         <Btn 
+          onPress={() => closeLoginPasswordModal()}
+          styleType="outlined"
+          title='Entrar' />
+        </View>
+
+
 
       </BottomModal>
 
