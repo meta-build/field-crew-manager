@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dimensions,
   Image,
+  KeyboardAvoidingView,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -10,36 +11,90 @@ import {
 import colors from '../../styles/variables';
 import Btn from '../../components/Button';
 import Title from '../../components/Title';
+import BottomModal from '../../components/BottomModal';
+import InputText from '../../components/InputText';
 
 const logo = require('../../assets/images/logo-1.png');
 const image = require('../../assets/images/home-image.png');
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
-const Home = ({navigation}: any) => {
-  const goToList = () => {
-    navigation.navigate('ToolList');
+const Home = ({ navigation }: any) => {
+  const [loginModalL, setloginModal] = useState(false);
+  const [loginPasswordModal, setloginPasswordModal] = useState(false);
+
+  const openLoginModal = () => {
+    setloginModal(true);
   };
 
+  const closeLoginModal = () => {
+    setloginModal(false);
+  };
+
+  const openLoginPasswordModal = () => {
+     setloginPasswordModal(true);
+  };
+
+  const closeLoginPasswordModal = () => {
+    setloginPasswordModal(false);
+  }
+
+
+
+  function goToList(): void {
+    throw new Error('Function not implemented.');
+  }
+
   return (
-    <SafeAreaView style={styles.container}>
-      <Image style={styles.logo} source={logo} />
-      <View style={styles.content}>
-        <Image style={styles.image} source={image} />
+    <>
+      <SafeAreaView style={styles.container}>
+        <Image style={styles.logo} source={logo} />
+        <View style={styles.content}>
+          <Image style={styles.image} source={image} />
+          <Title
+            align="center"
+            color="green"
+            text="Gerencie seus equipamentos em campo."
+          />
+          <Text style={styles.text}>
+            O segredo para o sucesso em campo: simplifique o gerenciamento de seus
+            equipamentos de forma fácil, intuitiva e eficiente.
+          </Text>
+        </View>
+        <View style={styles.btnContainer}>
+          <Btn onPress={() => openLoginModal()} styleType="filled" title="Iniciar" />
+        </View>
+      </SafeAreaView>
+      <BottomModal
+        visible={loginModalL}
+        onPressOutside={() =>
+          closeLoginModal()}>
+            
         <Title
-          align="center"
-          color="green"
-          text="Gerencie seus equipamentos em campo."
+         text='Seja bem vindo(a)'
+         color={'green'}
+         align={'left'}
         />
-        <Text style={styles.text}>
-          O segredo para o sucesso em campo: simplifique o gerenciamento de seus
-          equipamentos de forma fácil, intuitiva e eficiente.
+        
+        <Text style={styles.modalText}>
+          E-mail:
         </Text>
-      </View>
-      <View style={styles.btnContainer}>
-        <Btn onPress={() => goToList()} styleType="filled" title="Iniciar" />
-      </View>
-    </SafeAreaView>
+
+        <InputText color={'gray'} placeholder='exemplo@dominio.com' style={styles.inputText}></InputText>
+
+        <View style={styles.btnContainer}> 
+         <Btn onPress={() => openLoginPasswordModal()} styleType="outlined" title='Continuar' />
+        </View>
+
+      </BottomModal>
+      <BottomModal
+             visible={loginPasswordModal}
+             onPressOutside={() =>
+              closeLoginPasswordModal()}>
+
+            </BottomModal>
+
+    </>
   );
 };
 
@@ -74,6 +129,14 @@ const styles = StyleSheet.create({
   btnContainer: {
     width: '100%',
   },
+  modalText: {
+    marginBottom: 8,
+    marginTop: 35,
+  },
+  inputText: {
+    marginBottom: 24,
+  },
+  
 });
 
 export default Home;
