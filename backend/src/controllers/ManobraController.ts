@@ -58,10 +58,10 @@ class ManobraController {
       }
 
       // Defina a data e hora de término com base no que foi fornecido ou no momento atual
-      const dataHoraFim = datetimeFim ? new Date(datetimeFim) : new Date();
+      const datetimeFimFinal = datetimeFim ? new Date(datetimeFim) : new Date();
 
       // Atualize a manobra com a data e hora de término
-      await manobraSchema.findByIdAndUpdate(id, { datetimeFim: dataHoraFim });
+      await manobraSchema.findByIdAndUpdate(id, { datetimeFim: datetimeFimFinal });
 
       return res.status(200).json({});
     } catch (error) {
@@ -72,10 +72,10 @@ class ManobraController {
   public async editarManobra(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { titulo, descricao, equipamentos, dataHoraInicio, dataHoraFim, funcionario } = req.body;
+      const { titulo, descricao, equipamentos, datetimeInicio, datetimeFim, funcionario } = req.body;
 
       // Verificar se todos os campos obrigatórios estão presentes
-      if (!titulo || !descricao || !equipamentos || !dataHoraInicio || !funcionario) {
+      if (!titulo || !descricao || !equipamentos || !datetimeInicio || !funcionario) {
         return res.status(400).json({ error: 'Campos obrigatórios faltando.' });
       }
 
@@ -108,12 +108,43 @@ class ManobraController {
         titulo,
         descricao,
         equipamentos,
-        dataHoraInicio: new Date(dataHoraInicio),
-        dataHoraFim: dataHoraFim ? new Date(dataHoraFim) : undefined,
+        datetimeInicio,
+        datetimeFim: datetimeFim ? new Date(datetimeFim) : undefined,
         funcionario,
       });
 
       return res.status(200).json({ id });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error });
+    }
+  }
+  public async getManobras(req: Request, res: Response) {
+    try {
+      const titulo: string | undefined = req.query.titulo as string | undefined;
+      let manobras;
+  
+      if (titulo) {
+        // Se um título foi fornecido na consulta, filtre as manobras com base nele
+        manobras = await manobraSchema.find({ titulo: { $regex: new RegExp(titulo, "i") } });
+      } else {
+        // Se nenhum título foi fornecido, retorne todas as manobras
+        manobras = await manobraSchema.find();
+      }
+  
+      const manobrasValues = manobras.map((manobra) => ({
+        id: manobra._id,
+        titulo: manobra.titulo,
+        dataHoraInicio: manobra.datetimeInicio.toISOString(),
+        dataHoraFim: manobra.datetimeFim ? manobra.datetimeFim.toISOString() : undefined,
+      }));
+  
+      return res.status(200).json({
+        values: manobrasValues,
+        metadata: {
+          itens: manobras.length,
+        },
+      });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error });
