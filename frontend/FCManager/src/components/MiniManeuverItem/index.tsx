@@ -8,26 +8,27 @@ import {
   View,
 } from 'react-native';
 
-import Badget from '../Badget';
-
 import ArrowRight from '../../assets/icons/arrowRightGreen.svg';
 import CheckboxIcon from '../../assets/icons/box.svg';
 import CheckedboxIcon from '../../assets/icons/filledBoxChecked.svg';
 
 import colors from '../../styles/variables';
+import Badget from '../Badget';
 
 interface Props extends PressableProps {
-  tool: {
-    tipoLabel: string;
-    img_uri: string;
-    n_serie: string;
-    status: 'active' | 'deactive';
+  manobra: {
+    titulo: string;
+    usuario: {
+      nome: string;
+      sobrenome: string;
+    };
+    emAndamento: boolean;
   };
   checkbox?: boolean;
   checked?: boolean;
 }
 
-function ToolItem({tool, ...props}: Props) {
+function MiniManeuverItem({manobra, ...props}: Props) {
   return (
     <Pressable
       style={styles.container}
@@ -35,28 +36,30 @@ function ToolItem({tool, ...props}: Props) {
       onPressIn={props.onPressIn}
       onPressOut={props.onPressOut}
       onLongPress={props.onLongPress}>
-      <Image
-        style={styles.img}
-        source={{
-          uri: tool.img_uri,
-        }}
-      />
       <View style={styles.info}>
-        <Text style={styles.title}>{tool.tipoLabel}</Text>
-        <View style={styles.value_label}>
-          <Text style={[styles.desc, styles.label]}>N° Série:</Text>
-          <Text style={styles.desc}>{tool.n_serie}</Text>
+        <View style={styles.titleView}>
+          <Text style={styles.title}>{manobra.titulo}</Text>
+          {manobra.emAndamento ? (
+            <Badget status="active" customText="Em andamento" />
+          ) : (
+            <></>
+          )}
         </View>
-        <View style={styles.badge}>
-          <Badget status={tool.status} size="tiny" />
+        <View style={styles.value_label}>
+          <Text style={styles.desc}>por:</Text>
+          <Text
+            style={[
+              styles.desc,
+              styles.label,
+            ]}>{`${manobra.usuario.nome} ${manobra.usuario.sobrenome}`}</Text>
         </View>
       </View>
       {!props.checkbox ? (
-        <ArrowRight style={styles.arrow} width={10} height={15} />
+        <ArrowRight width={10} height={15} />
       ) : !props.checked ? (
-        <CheckboxIcon style={styles.arrow} width={16} height={16} />
+        <CheckboxIcon width={16} height={16} />
       ) : (
-        <CheckedboxIcon style={styles.arrow} width={16} height={16} />
+        <CheckedboxIcon width={16} height={16} />
       )}
     </Pressable>
   );
@@ -65,27 +68,23 @@ function ToolItem({tool, ...props}: Props) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.white,
-    minHeight: 90,
     flexDirection: 'row',
-    paddingVertical: 4,
+    paddingVertical: 6,
     gap: 12,
     alignItems: 'center',
-    borderRadius: 12,
     overflow: 'hidden',
   },
   info: {
     flex: 1,
-    gap: 6,
     paddingVertical: 4,
   },
   value_label: {
     flexDirection: 'row',
     gap: 4,
   },
-  img: {
-    width: 84,
-    height: '100%',
-    resizeMode: 'cover',
+  titleView: {
+    flexDirection: 'row',
+    gap: 8,
   },
   title: {
     color: colors.dark_gray,
@@ -99,12 +98,6 @@ const styles = StyleSheet.create({
   label: {
     fontWeight: 'bold',
   },
-  badge: {
-    width: 48,
-  },
-  arrow: {
-    marginRight: 12,
-  },
 });
 
-export default ToolItem;
+export default MiniManeuverItem;

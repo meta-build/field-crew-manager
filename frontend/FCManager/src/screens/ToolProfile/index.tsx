@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import colors from '../../styles/variables';
+
 import Header from '../../components/Header/Index';
 import ImageCarousel from '../../components/ImageCarousel';
 import Title from '../../components/Title';
@@ -15,7 +16,10 @@ import Badget from '../../components/Badget';
 import Info from '../../components/Info';
 import Btn from '../../components/Button';
 import BottomModal from '../../components/BottomModal';
+import Navbar from '../../components/Navbar';
+
 import Equipamento from '../../services/Equipamento';
+
 import {Equipamento as EquipamentoType} from '../../types';
 
 const {width, height} = Dimensions.get('window');
@@ -25,6 +29,8 @@ function ToolProfile({navigation, route}: any) {
   const [confirmDeactive, setConfirmDeactive] = useState(false);
 
   const [equipamento, setEquipamento] = useState<EquipamentoType>();
+
+  const [loading, setLoading] = useState(false);
 
   const {id} = route.params;
 
@@ -41,16 +47,20 @@ function ToolProfile({navigation, route}: any) {
   };
 
   const confirmActivate = async () => {
-    Equipamento.active(id).then(res => {
+    setLoading(true);
+    Equipamento.active(id).then(() => {
       getEquipamento();
       setConfirmActive(false);
+      setLoading(false);
     });
   };
 
   const confirmDeactivate = async () => {
-    Equipamento.deactive(id).then(res => {
+    setLoading(true);
+    Equipamento.deactive(id).then(() => {
       getEquipamento();
       setConfirmDeactive(false);
+      setLoading(false);
     });
   };
 
@@ -95,31 +105,28 @@ function ToolProfile({navigation, route}: any) {
                 <Text style={styles.value}>{equipamento?.obs as string}</Text>
               </View>
             </View>
-            <View style={styles.btnView}>
-              <View style={styles.btn}>
-                <Btn
-                  onPress={() => edit()}
-                  styleType="outlined"
-                  title="Editar"
-                />
-              </View>
-              <View style={styles.btn}>
-                {equipamento?.status === 'ativo' ? (
-                  <Btn
-                    onPress={() => deactivate()}
-                    styleType="alert"
-                    title="Desativar"
-                  />
-                ) : (
-                  <Btn
-                    onPress={() => activate()}
-                    styleType="filled"
-                    title="Ativar"
-                  />
-                )}
-              </View>
-            </View>
           </ScrollView>
+          <View style={styles.btnView}>
+            <View style={styles.btn}>
+              <Btn onPress={() => edit()} styleType="outlined" title="Editar" />
+            </View>
+            <View style={styles.btn}>
+              {equipamento?.status === 'ativo' ? (
+                <Btn
+                  onPress={() => deactivate()}
+                  styleType="alert"
+                  title="Desativar"
+                />
+              ) : (
+                <Btn
+                  onPress={() => activate()}
+                  styleType="filled"
+                  title="Ativar"
+                />
+              )}
+            </View>
+          </View>
+          <Navbar selected="Equipamentos" navigation={navigation} />
         </SafeAreaView>
 
         <BottomModal
@@ -130,7 +137,8 @@ function ToolProfile({navigation, route}: any) {
             <Btn
               styleType="filled"
               title="Confirmar"
-              onPress={() => confirmActivate()}
+              onPress={() => !loading && confirmActivate()}
+              loading={loading}
             />
             <Btn
               styleType="outlined"
@@ -148,7 +156,8 @@ function ToolProfile({navigation, route}: any) {
             <Btn
               styleType="alert"
               title="Confirmar"
-              onPress={() => confirmDeactivate()}
+              onPress={() => !loading && confirmDeactivate()}
+              loading={loading}
             />
             <Btn
               styleType="outlined"
@@ -166,11 +175,11 @@ const styles = StyleSheet.create({
   container: {
     width,
     height,
-    backgroundColor: colors.white_3,
+    backgroundColor: colors.white,
   },
   content: {
-    backgroundColor: colors.white,
     padding: 16,
+    flex: 1,
   },
   info: {
     marginTop: 18,
@@ -194,7 +203,7 @@ const styles = StyleSheet.create({
     marginVertical: 12,
     flexDirection: 'row',
     width: '100%',
-    paddingBottom: 14,
+    paddingHorizontal: 12,
     gap: 12,
   },
   btn: {
@@ -204,6 +213,9 @@ const styles = StyleSheet.create({
   confirmBtnView: {
     gap: 12,
     marginTop: 36,
+  },
+  spacing: {
+    flex: 1,
   },
 });
 

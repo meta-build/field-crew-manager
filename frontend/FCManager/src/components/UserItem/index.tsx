@@ -8,8 +8,6 @@ import {
   View,
 } from 'react-native';
 
-import Badget from '../Badget';
-
 import ArrowRight from '../../assets/icons/arrowRightGreen.svg';
 import CheckboxIcon from '../../assets/icons/box.svg';
 import CheckedboxIcon from '../../assets/icons/filledBoxChecked.svg';
@@ -17,17 +15,17 @@ import CheckedboxIcon from '../../assets/icons/filledBoxChecked.svg';
 import colors from '../../styles/variables';
 
 interface Props extends PressableProps {
-  tool: {
-    tipoLabel: string;
-    img_uri: string;
-    n_serie: string;
-    status: 'active' | 'deactive';
+  user: {
+    foto: string;
+    nome: string;
+    sobrenome: string;
+    inscricao: string;
   };
   checkbox?: boolean;
   checked?: boolean;
 }
 
-function ToolItem({tool, ...props}: Props) {
+function UserItem({user, ...props}: Props) {
   return (
     <Pressable
       style={styles.container}
@@ -35,28 +33,29 @@ function ToolItem({tool, ...props}: Props) {
       onPressIn={props.onPressIn}
       onPressOut={props.onPressOut}
       onLongPress={props.onLongPress}>
-      <Image
-        style={styles.img}
-        source={{
-          uri: tool.img_uri,
-        }}
-      />
+      <View style={styles.imgView}>
+        <Image
+          style={styles.img}
+          source={{
+            uri: user.foto,
+          }}
+        />
+      </View>
       <View style={styles.info}>
-        <Text style={styles.title}>{tool.tipoLabel}</Text>
+        <Text style={styles.title}>
+          {user.nome} {user.sobrenome}
+        </Text>
         <View style={styles.value_label}>
-          <Text style={[styles.desc, styles.label]}>N° Série:</Text>
-          <Text style={styles.desc}>{tool.n_serie}</Text>
-        </View>
-        <View style={styles.badge}>
-          <Badget status={tool.status} size="tiny" />
+          <Text style={[styles.desc, styles.label]}>N° Inscrição:</Text>
+          <Text style={styles.desc}>{user.inscricao}</Text>
         </View>
       </View>
       {!props.checkbox ? (
-        <ArrowRight style={styles.arrow} width={10} height={15} />
+        <ArrowRight width={10} height={15} />
       ) : !props.checked ? (
-        <CheckboxIcon style={styles.arrow} width={16} height={16} />
+        <CheckboxIcon width={16} height={16} />
       ) : (
-        <CheckedboxIcon style={styles.arrow} width={16} height={16} />
+        <CheckedboxIcon width={16} height={16} />
       )}
     </Pressable>
   );
@@ -65,26 +64,35 @@ function ToolItem({tool, ...props}: Props) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.white,
-    minHeight: 90,
     flexDirection: 'row',
-    paddingVertical: 4,
+    padding: 8,
     gap: 12,
-    alignItems: 'center',
     borderRadius: 12,
+    alignItems: 'center',
     overflow: 'hidden',
   },
   info: {
     flex: 1,
-    gap: 6,
     paddingVertical: 4,
   },
   value_label: {
     flexDirection: 'row',
     gap: 4,
   },
+  imgView: {
+    width: 48,
+    height: 48,
+    borderRadius: 48,
+    overflow: 'hidden',
+    elevation: 2,
+    shadowColor: 'black',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.5,
+    shadowRadius: 2,
+  },
   img: {
-    width: 84,
-    height: '100%',
+    width: 48,
+    height: 48,
     resizeMode: 'cover',
   },
   title: {
@@ -99,12 +107,6 @@ const styles = StyleSheet.create({
   label: {
     fontWeight: 'bold',
   },
-  badge: {
-    width: 48,
-  },
-  arrow: {
-    marginRight: 12,
-  },
 });
 
-export default ToolItem;
+export default UserItem;
