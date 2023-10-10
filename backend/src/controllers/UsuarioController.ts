@@ -8,6 +8,50 @@ const jwt = require('jsonwebtoken');
 dotenv.config();
 
 class UsuarioController {
+  public async getUsuarios(req: Request, res: Response) {
+    try {
+      const usuarios = await usuarioSchema.find();
+      const itens = usuarios
+      .map(user => ({
+          id: user?._id,
+          nome: user?.sobrenome,
+          sobrenome: user?.sobrenome,
+          foto: user?.foto ? user?.foto : '',
+      }));
+      res.status(200).json({
+        values: itens,
+        metadata: {
+          itens: itens.length,
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ error });
+    }
+  }
+
+  public async getUsuarioById(req: Request, res: Response) {
+    const { id } = req.params;
+
+    try {
+      const usuario = await usuarioSchema.findById(id);
+      return res.status(200).json({
+        id: usuario?._id,
+        nome: usuario?.nome,
+        sobrenome: usuario?.sobrenome,
+        email: usuario?.email,
+        telefone: usuario?.telefone,
+        matricula: usuario?.matricula,
+        cpf: usuario?.cpf,
+        foto: usuario?.foto || ''
+      });
+    } catch (error) {
+      if (error.name == "CastError") {
+        return res.status(404).json({ error: 'Usuário não encontrado.' });
+      }
+      return res.status(500).json({ error });
+    }
+  }
+
   public async new(req: Request, res: Response) {
     // informações básicas do usuário
     const { nome, sobrenome, email, telefone, matricula, cpf, isAdmin } = req.body;
