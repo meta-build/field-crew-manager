@@ -100,7 +100,25 @@ class Validations {
         return undefined;
       };
       return res.status(400).json({ error: "campo isAdmin não é um booleano" });
-    }
+    },
+    idValidation: async (id: string, res: Response): Promise<any | { errorResponse: Response<any, Record<string, any>> }> => {
+      if (!id) {
+        return res.status(400).json({ error: "ID não informado." });
+      };
+      try {
+        const user = await usuarioSchema.findById(id);
+        if (!user) {
+          return { errorResponse: res.status(404).json({ error: 'Usuário não encontrado.' }) };
+        }
+        return user;
+      } catch (err) {
+        // validar se ID existe
+        if (err.name == "CastError") {
+          return { errorResponse: res.status(404).json({ error: 'Usuário não encontrado.' }) };
+        }
+        return { errorResponse: res.status(500).json({ err }) };
+      }
+    },
   }
 
   public verifyFields(fields: object, res: Response) {

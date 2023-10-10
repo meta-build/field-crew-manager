@@ -7,6 +7,8 @@ routes.get('/usuarios', UsuarioController.getUsuarios);
 
 routes.get('/usuarios/:id', UsuarioController.getUsuarioById);
 
+routes.delete('/usuarios/:id', UsuarioController.delete);
+
 routes.post('/usuarios', UsuarioController.new);
 
 export default routes;

@@ -12,12 +12,12 @@ class UsuarioController {
     try {
       const usuarios = await usuarioSchema.find();
       const itens = usuarios
-      .map(user => ({
+        .map(user => ({
           id: user?._id,
           nome: user?.sobrenome,
           sobrenome: user?.sobrenome,
           foto: user?.foto ? user?.foto : '',
-      }));
+        }));
       res.status(200).json({
         values: itens,
         metadata: {
@@ -56,16 +56,16 @@ class UsuarioController {
     // informações básicas do usuário
     const { nome, sobrenome, email, telefone, matricula, cpf, isAdmin } = req.body;
 
-    const invalidFieldsAlert = Validations.verifyFields({ 
-      nome, 
-      sobrenome, 
-      email, 
-      telefone, 
-      matricula, 
-      cpf 
+    const invalidFieldsAlert = Validations.verifyFields({
+      nome,
+      sobrenome,
+      email,
+      telefone,
+      matricula,
+      cpf
     }, res);
     if (invalidFieldsAlert) return invalidFieldsAlert;
-    
+
     const emailAlert = await Validations.users.emailValidation(email, res);
     if (emailAlert) return emailAlert;
 
@@ -74,7 +74,7 @@ class UsuarioController {
 
     const isAdminValidation = Validations.users.isAdminValidation(isAdmin, res);
     if (isAdminValidation) return isAdminValidation;
-    
+
     try {
       const salt = await bcrypt.genSalt(12);
       const passwordHash = await bcrypt.hash(cpf, salt);
@@ -98,6 +98,21 @@ class UsuarioController {
       res.status(500).json({
         error
       });
+    }
+  }
+
+  public async delete(req: Request, res: Response) {
+    const { id } = req.params;
+
+    const userValidation = await Validations.users.idValidation(id, res);
+    if (userValidation['errorResponse']) return userValidation['errorResponse'];
+
+    try {
+      await usuarioSchema.deleteOne({ _id: id });
+      return res.sendStatus(200);
+    } catch (e) {
+      console.log(e);
+      return res.send(500).json({ error: e });
     }
   }
 }
