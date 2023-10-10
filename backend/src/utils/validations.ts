@@ -2,6 +2,7 @@ import { Response } from "express";
 import equipmentTypeSchema from "../models/equipmentTypeSchema";
 import { Document, Types } from "mongoose";
 import equipamentSchema from "../models/equipamentSchema";
+import usuarioSchema from "../models/usuarioSchema";
 
 class Validations {
   public equipments = {
@@ -26,7 +27,7 @@ class Validations {
     },
     idValidation: async (id: string, res: Response): Promise<any | { errorResponse: Response<any, Record<string, any>> }> => {
       if (!id) {
-        return { errorResponse: res.status(400).json({ error: 'ID não informado.' })};
+        return { errorResponse: res.status(400).json({ error: 'ID não informado.' }) };
       }
       try {
         const equip = await equipamentSchema.findById(id);
@@ -58,6 +59,47 @@ class Validations {
         }
         return { errorResponse: res.status(500).json({ error }) };
       }
+    }
+  }
+
+  public users = {
+    emailValidation: async (email: string, res: Response) => {
+      try {
+        const userExists = await usuarioSchema.findOne({ email });
+        
+        //checar se existe usuario
+        if (userExists) {
+          return res.status(400).json({ error: 'Email já está em uso.' });
+        };
+        return undefined;
+      } catch (e) {
+        console.log(e);
+        return undefined;
+      }
+    },
+    cpfValidation: async (cpf: string, res: Response) => {
+      if (cpf.length > 12) {
+        return res.status(400).json({ error: 'CPF inválido.' });
+      }
+
+      try {
+        const userExists = await usuarioSchema.findOne({ cpf });
+        
+        //checar se existe usuario
+        if (userExists) {
+          return res.status(400).json({ error: 'CPF já está em uso.' });
+        };
+        return undefined;
+      } catch (e) {
+        console.log(e);
+        return undefined;
+      }
+    },
+    isAdminValidation: (isAdmin: any, res: Response) => {
+      if (typeof isAdmin === 'boolean') {
+        return undefined;
+      };
+      return res.status(400).json({ error: "campo isAdmin não é um booleano" });
     }
   }
 
