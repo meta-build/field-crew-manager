@@ -87,12 +87,13 @@ const Home = ({ navigation }: any) => {
         </View>
 
       </BottomModal>
+      
       <BottomModal
              visible={loginPasswordModal}
              onPressOutside={() =>
               closeLoginPasswordModal()}>
 
-            </BottomModal>
+      </BottomModal>
 
     </>
   );
