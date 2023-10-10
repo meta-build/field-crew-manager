@@ -23,12 +23,14 @@ const { width, height } = Dimensions.get('window');
 const Home = ({ navigation }: any) => {
   const [loginModalL, setloginModal] = useState(false);
   const [loginPasswordModal, setloginPasswordModal] = useState(false);
+  const [failEmail, setFailEmail] = useState(false);
+  const [failPassword, setFailPassword] = useState(false);
 
   const openLoginModal = () => {
     setloginModal(true);
     setloginPasswordModal(false);
   };
-
+  
   const closeLoginModal = () => {
     setloginModal(false);
   };
@@ -42,7 +44,13 @@ const Home = ({ navigation }: any) => {
     setloginPasswordModal(false);
   }
 
+  const submitEmail = () => {
+     setFailEmail(true);
+  }
 
+  const submitPassword = () => {
+    setFailPassword(true);
+  }
 
   function goToList(): void {
     throw new Error('Function not implemented.');
@@ -79,11 +87,19 @@ const Home = ({ navigation }: any) => {
          align={'left'}
         />
         
+
+        {failEmail ? <Text> email invalido</Text> : <></>}
         <Text style={styles.modalText}>
           E-mail:
         </Text>
 
-        <InputText color={'gray'} placeholder='exemplo@dominio.com' style={styles.inputText}></InputText>
+        <InputText
+         color={'gray'}
+         placeholder='exemplo@dominio.com'
+         style={styles.inputText}
+         error={failEmail}     
+         />
+          
 
         <View style={styles.btnContainer}> 
          <Btn 
@@ -105,11 +121,17 @@ const Home = ({ navigation }: any) => {
            align={'left'}
            />
 
+          {failPassword ? <Text> senha invalida</Text> : <></>}
           <Text style={styles.modalText}>
             Senha:
           </Text>
 
-          <InputText color={'gray'} isPassword style={styles.inputText}></InputText>
+          <InputText
+           color={'gray'}
+           isPassword style={styles.inputText}
+           error={failPassword}
+           > 
+           </InputText>
 
         <View style={styles.btnContainer}> 
          <Btn 
@@ -169,3 +191,11 @@ const styles = StyleSheet.create({
 });
 
 export default Home;
+function setEmailError(arg0: boolean) {
+  throw new Error('Function not implemented.');
+}
+
+function setPasswordError(arg0: boolean) {
+  throw new Error('Function not implemented.');
+}
+
