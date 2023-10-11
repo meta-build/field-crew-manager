@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import manobraSchema from "../models/manobraSchema";
 import equipamentSchema from "../models/equipamentSchema";
-import funcionarioSchema from "../models/funcionarioSchema";
 
 class ManobraController {
   public async createManobra(req: Request, res: Response) {
@@ -28,18 +27,14 @@ class ManobraController {
       }
 
       // Obtenha o funcionário a partir do modelo de funcionário
-      const funcionarioObj = await funcionarioSchema.findById(funcionario);
-
-      if (!funcionarioObj) {
-        return res.status(404).json({ error: 'Funcionário não encontrado.' });
-      }
+      
 
       // Crie a manobra
       const manobra = await manobraSchema.create({
         titulo,
         descricao,
         equipamentos,
-        funcionario: funcionarioObj, // Salvando um objeto do funcionário
+        funcionario: funcionario, // Salvando um objeto do funcionário
         datetimeInicio,
         datetimeFim,
       });
