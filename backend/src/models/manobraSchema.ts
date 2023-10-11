@@ -15,6 +15,7 @@ const manobraSchema = new mongoose.Schema({
   },
   funcionario: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: "funcionario", // Referência ao modelo de funcionário
     required: true,
   },
   datetimeInicio: {
