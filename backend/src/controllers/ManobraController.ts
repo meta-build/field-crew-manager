@@ -165,6 +165,26 @@ class ManobraController {
       return res.status(500).json({ error });
     }
   }
+  public async eraseManobra(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      // Verificar se o ID da manobra existe
+      const manobra = await manobraSchema.findById(id);
+
+      if (!manobra) {
+        return res.status(404).json({ error: 'Manobra não encontrada.' });
+      }
+
+      // Excluindo a manobra
+      await manobraSchema.findByIdAndRemove(id);
+
+      return res.status(200).json({});
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error });
+    }
+  }
 }
 
 export default new ManobraController();
