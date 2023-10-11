@@ -1,12 +1,10 @@
 import { Request, Response } from "express";
-import { Document, Types } from "mongoose";
 import * as dotenv from 'dotenv';
 
 import usuarioSchema from "../models/usuarioSchema";
 
 import Validations from "../utils/validations";
 import { uploadImg } from "../utils/imageUploader";
-import { hash } from "bcrypt";
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -128,32 +126,39 @@ class UsuarioController {
   public async editarUsuario(req: RequestFiles, res: Response) {
     const { id } = req.params;
 
+    const { nome, sobrenome, email, telefone, matricula } = req.body;
+
+    const invalidFieldsAlert = Validations.verifyFields({ nome, sobrenome, email, telefone, matricula, id }, res);
+    if (invalidFieldsAlert) return invalidFieldsAlert;
+
+    if (req.body.isAdmin !== 'true' && req.body.isAdmin !== 'false') {
+      return res.status(400).json({ error: "Campo isAdmin não é um booleano"});
+    };
+    const isAdmin = req.body.isAdmin === 'true'; 
+
+    let foto = '';
+    if (req.files && req.files.foto) {
+      const url = await uploadImg(req.files.foto);
+      foto = url;
+    };
+
     try {
-      const { nome, sobrenome, email, telefone, matricula, cpf, isAdmin } = req.body;
-
-      const adminValidation = await Validations.users.adminValidation(isAdmin, res);
-      if (adminValidation) return adminValidation;
-
-      const invalidFieldsAlert = Validations.verifyFields({ nome, sobrenome, email, telefone, matricula, cpf, id }, res);
-      if (invalidFieldsAlert) return invalidFieldsAlert;
-
-      const users = await usuarioSchema.findByIdAndUpdate(id, {
+      const user = await usuarioSchema.findByIdAndUpdate(id, {
         nome,
         sobrenome,
         email,
         telefone,
         matricula,
-        cpf,
-        isAdmin
+        isAdmin,
+        foto
       });
-      return res.status(200).json({ id: users._id });
-
+      return res.status(200).json({ id: user._id });
     } catch (error) {
       if (error.name == "CastError") {
         return res.status(404).json({ error: 'ID do usuario não encontrado.' });
       }
-      console.log(error)
-      return res.status(500).json({ error: error })
+      console.log(error);
+      return res.status(500).json({ error: error });
     }
   }
 }
