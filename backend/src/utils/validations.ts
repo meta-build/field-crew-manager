@@ -2,6 +2,7 @@ import { Response } from "express";
 import equipmentTypeSchema from "../models/equipmentTypeSchema";
 import { Document, Types } from "mongoose";
 import equipamentSchema from "../models/equipamentSchema";
+import usuarioSchema from "../models/usuarioSchema";
 
 class Validations {
   public equipments = {
@@ -61,36 +62,77 @@ class Validations {
     }
   }
 
-  public verifyFields(fields: object, res: Response) {
-    for (const key of Object.keys(fields)) {
-      if (!fields[key]) return res.status(400).json({ error: `Campo ${key} não informado.` });
-    }
-    return undefined;
-  }
-
-  public user = {
-    imageArrayValidation: (files: any, res: Response): any[] | { errorResponse: Response<any, Record<string, any>> } => {
-      if (!files) {
-        return { errorResponse: res.status(400).json({ error: 'Equipamento precisa ter no mínimo 1 foto.' }) };
+  public users = {
+    emailValidation: async (email: string, res: Response) => {
+      try {
+        const userExists = await usuarioSchema.findOne({ email });
+        
+        //checar se existe usuario
+        if (userExists) {
+          return res.status(400).json({ error: 'Email já está em uso.' });
+        };
+        return undefined;
+      } catch (e) {
+        console.log(e);
+        return undefined;
       }
-      const { images } = files;
-      const imagens = Array.isArray(images) ? images : images ? [images] : [];
-
-      if (!imagens.length) {
-        return { errorResponse: res.status(400).json({ error: 'Equipamento precisa ter no mínimo 1 foto.' }) };
-      }
-
-      return imagens;
     },
+    cpfValidation: async (cpf: string, res: Response) => {
+      if (cpf.length > 12) {
+        return res.status(400).json({ error: 'CPF inválido.' });
+      }
 
-    adminValidation: (isAdmin: string, res: Response) => {
-      if (isAdmin  !== 'true') {
+      try {
+        const userExists = await usuarioSchema.findOne({ cpf });
+        
+        //checar se existe usuario
+        if (userExists) {
+          return res.status(400).json({ error: 'CPF já está em uso.' });
+        };
+        return undefined;
+      } catch (e) {
+        console.log(e);
+        return undefined;
+      }
+    },
+    isAdminValidation: (isAdmin: any, res: Response) => {
+      if (typeof isAdmin === 'boolean') {
+        return undefined;
+      };
+      return res.status(400).json({ error: "campo isAdmin não é um booleano" });
+    },
+    idValidation: async (id: string, res: Response): Promise<any | { errorResponse: Response<any, Record<string, any>> }> => {
+      if (!id) {
+        return res.status(400).json({ error: "ID não informado." });
+      };
+      try {
+        const user = await usuarioSchema.findById(id);
+        if (!user) {
+          return { errorResponse: res.status(404).json({ error: 'Usuário não encontrado.' }) };
+        }
+        return user;
+      } catch (err) {
+        // validar se ID existe
+        if (err.name == "CastError") {
+          return { errorResponse: res.status(404).json({ error: 'Usuário não encontrado.' }) };
+        }
+        return { errorResponse: res.status(500).json({ err }) };
+      }
+    },
+    adminValidation: (isAdmin: boolean, res: Response) => {
+      if (!isAdmin) {
         return res.status(401).json({ error: 'não autorizado' });
       }
       return undefined;
     },
   }
 
+  public verifyFields(fields: object, res: Response) {
+    for (const key of Object.keys(fields)) {
+      if (!fields[key]) return res.status(400).json({ error: `Campo ${key} não informado.` });
+    }
+    return undefined;
+  }
 }
 
 export default new Validations();

@@ -17,76 +17,111 @@ interface RequestFiles extends Request {
 }
 
 class UsuarioController {
+  public async getUsuarios(req: Request, res: Response) {
+    try {
+      const usuarios = await usuarioSchema.find();
+      const itens = usuarios
+        .map(user => ({
+          id: user?._id,
+          nome: user?.sobrenome,
+          sobrenome: user?.sobrenome,
+          foto: user?.foto ? user?.foto : '',
+        }));
+      res.status(200).json({
+        values: itens,
+        metadata: {
+          itens: itens.length,
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ error });
+    }
+  }
+
+  public async getUsuarioById(req: Request, res: Response) {
+    const { id } = req.params;
+
+    try {
+      const usuario = await usuarioSchema.findById(id);
+      return res.status(200).json({
+        id: usuario?._id,
+        nome: usuario?.nome,
+        sobrenome: usuario?.sobrenome,
+        email: usuario?.email,
+        telefone: usuario?.telefone,
+        matricula: usuario?.matricula,
+        cpf: usuario?.cpf,
+        foto: usuario?.foto || ''
+      });
+    } catch (error) {
+      if (error.name == "CastError") {
+        return res.status(404).json({ error: 'Usuário não encontrado.' });
+      }
+      return res.status(500).json({ error });
+    }
+  }
+
   public async new(req: Request, res: Response) {
     // informações básicas do usuário
-    const { nome, sobrenome, email, telefone, matricula, cpf, senha, isAdmin } = req.body;
+    const { nome, sobrenome, email, telefone, matricula, cpf, isAdmin } = req.body;
 
-    if (!nome) {
-      return res.status(400).json({ error: 'campo "Nome" não informado.' });
-    }
+    const invalidFieldsAlert = Validations.verifyFields({
+      nome,
+      sobrenome,
+      email,
+      telefone,
+      matricula,
+      cpf
+    }, res);
+    if (invalidFieldsAlert) return invalidFieldsAlert;
 
-    if (!sobrenome) {
-      return res.status(400).json({ error: 'campo "Sobrenome" não informado.' });
-    }
+    const emailAlert = await Validations.users.emailValidation(email, res);
+    if (emailAlert) return emailAlert;
 
-    if (!email) {
-      return res.status(400).json({ error: 'campo "email" não informado.' });
-    }
+    const cpfAlert = await Validations.users.cpfValidation(cpf, res);
+    if (cpfAlert) return cpfAlert;
 
-    if (!telefone) {
-      return res.status(400).json({ error: 'campo "telefone" não informado.' });
-    }
-
-    if (!matricula) {
-      return res.status(400).json({ error: 'campo "matricula" não informado.' });
-    }
-
-    if (!cpf) {
-      return res.status(400).json({ error: 'campo "CPF" não informado.' });
-    }
-
-    if (!senha) {
-      return res.status(400).json({ error: 'campo "senha" não informado.' });
-    }
-
-    if (!isAdmin) {
-      return res.status(401).json({ error: 'Não autorizado' });
-    }
-
-    const userExists = await usuarioSchema.findOne({ email: email });
-
-    //checar se existe usuario
-    if (userExists) {
-      return res.status(400).json({ error: 'email já está em uso, utilize outro' });
-    }
+    const isAdminValidation = Validations.users.isAdminValidation(isAdmin, res);
+    if (isAdminValidation) return isAdminValidation;
 
     try {
       const salt = await bcrypt.genSalt(12);
-      const passwordHash = await bcrypt.hash(senha, salt);
+      const passwordHash = await bcrypt.hash(cpf, salt);
+
       const usuario = await usuarioSchema.create({
-        nome, sobrenome, email, telefone, matricula, cpf, isAdmin, senha: cpf && passwordHash
+        nome,
+        sobrenome,
+        email,
+        telefone,
+        matricula,
+        cpf,
+        isAdmin,
+        senha: passwordHash
       });
 
-      const id = usuario._id
+      const id = usuario._id;
 
-      try {
-
-        const secret = process.env.SECRET
-        const token = jwt.sign({
-          id: usuario._id
-        },
-          secret
-        );
-
-        return res.status(200).json({ id, token })
-      } catch (error) {
-        res.status(500).json({ msg: "não foi possivel criar token" })
-      }
+      return res.status(200).json({ id })
     } catch (error) {
-      console.log(error)
+      console.log(error);
       res.status(500).json({
         error
       });
+    }
+  }
+
+  public async delete(req: Request, res: Response) {
+    const { id } = req.params;
+
+    const userValidation = await Validations.users.idValidation(id, res);
+    if (userValidation['errorResponse']) return userValidation['errorResponse'];
+
+    try {
+      await usuarioSchema.deleteOne({ _id: id });
+      return res.sendStatus(200);
+    } catch (e) {
+      console.log(e);
+      return res.send(500).json({ error: e });
     }
   }
 
@@ -96,26 +131,11 @@ class UsuarioController {
     try {
       const { nome, sobrenome, email, telefone, matricula, cpf, isAdmin } = req.body;
 
-      const adminValidation = await Validations.user.adminValidation(isAdmin as string, res);
-      if(adminValidation) return adminValidation;
+      const adminValidation = await Validations.users.adminValidation(isAdmin, res);
+      if (adminValidation) return adminValidation;
 
       const invalidFieldsAlert = Validations.verifyFields({ nome, sobrenome, email, telefone, matricula, cpf, id }, res);
       if (invalidFieldsAlert) return invalidFieldsAlert;
-
-      const imgsValidation = Validations.user.imageArrayValidation(req.files, res);
-      if (imgsValidation['errorResponse']) return imgsValidation['errorResponse'];
-
-      const imagens = imgsValidation as any[];
-      const imgs = [];
-
-      for (const img of imagens) {
-        try {
-          const url = await uploadImg(img);
-          imgs.push(url);
-        } catch (err) {
-          return res.status(500).json({ error: err });
-        }
-      }
 
       const users = await usuarioSchema.findByIdAndUpdate(id, {
         nome,
@@ -124,8 +144,7 @@ class UsuarioController {
         telefone,
         matricula,
         cpf,
-        isAdmin,
-        imgs
+        isAdmin
       });
       return res.status(200).json({ id: users._id });
 
@@ -135,7 +154,6 @@ class UsuarioController {
       }
       console.log(error)
       return res.status(500).json({ error: error })
-
     }
   }
 }

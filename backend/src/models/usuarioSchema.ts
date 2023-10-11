@@ -1,41 +1,41 @@
 import mongoose from "mongoose";
 
 const usuarioSchema = new mongoose.Schema({
-    nome: {
-        type: String
-    },
+  nome: {
+    type: String
+  },
 
-    sobrenome: {
-        type: String
-    },
+  sobrenome: {
+    type: String
+  },
 
-    email: {
-        type: String
-    },
+  email: {
+    type: String
+  },
 
-    telefone: {
-        type: String
-    },
+  telefone: {
+    type: String
+  },
 
-    matricula: {
-        type: String
-    },
+  matricula: {
+    type: String
+  },
 
-    cpf: {
-        type: String
-    },
+  cpf: {
+    type: String
+  },
 
-    imgs: {
-        type: [String]
-    },
+  foto: {
+    type: String
+  },
 
-    senha: {
-        type: String
-    },
+  senha: {
+    type: String
+  },
 
-    isAdmin: {
-        type: Boolean
-    }
+  isAdmin: {
+    type: Boolean
+  }
 
 });
 
