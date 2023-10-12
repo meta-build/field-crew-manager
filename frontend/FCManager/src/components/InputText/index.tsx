@@ -91,6 +91,7 @@ const InputText = ({enable = true, color, ...props}: Props) => {
         multiline={props.multiline}
         textAlignVertical={props.textAlignVertical}
         secureTextEntry={props.isPassword ? hideText : false}
+        keyboardType={props.keyboardType}
       />
       {props.isPassword ? (
         <EyeComponent open={!hideText} onPress={() => setHideText(!hideText)} />
