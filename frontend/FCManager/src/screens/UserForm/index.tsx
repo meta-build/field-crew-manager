@@ -118,7 +118,6 @@ function UserForm({navigation, route}: any) {
 
     // validar se email, cpf, e matrícula já existem
 
-
     if (
       !(
         !nomeAlert ||
@@ -265,70 +264,74 @@ function UserForm({navigation, route}: any) {
                   <></>
                 )}
               </Panel>
-              <Panel>
-                <Text style={styles.panel_label}>Identificação</Text>
-                <View>
-                  <Text style={styles.label}>Matrícula</Text>
-                  <InputMaskText
-                    value={matricula}
-                    mask="999999"
-                    color="gray"
-                    onChangeText={(txt, masktxt) => {
-                      setMatricula(masktxt);
-                    }}
-                    placeholder="000000"
-                    keyboardType="number-pad"
-                    error={matriculaAlert || invalidMatricula}
-                  />
-                </View>
-                {matriculaAlert ? (
-                  <AlertMsg>Usuário deve possuir N° de matrícula.</AlertMsg>
-                ) : (
-                  <></>
-                )}
-                {alreadyMatricula ? (
-                  <AlertMsg>
-                    N° de matrícula já cadastrado anteriormente.
-                  </AlertMsg>
-                ) : (
-                  <></>
-                )}
-                {!matriculaAlert && invalidMatricula ? (
-                  <AlertMsg>N° de Matrícula inválido.</AlertMsg>
-                ) : (
-                  <></>
-                )}
-                <View>
-                  <Text style={styles.label}>CPF</Text>
-                  <InputMaskText
-                    mask="999.999.999-99"
-                    value={cpfMask}
-                    onChangeText={(txt, mask) => {
-                      setCpf(txt);
-                      setCpfMask(mask);
-                    }}
-                    color="gray"
-                    error={cpfAlert || invalidCpf}
-                    placeholder="xxx.xxx.xxx-xx"
-                    keyboardType="decimal-pad"
-                  />
-                </View>
-                {cpfAlert ? (
-                  <AlertMsg>Usuário deve possuir CPF.</AlertMsg>
-                ) : (
-                  <></>
-                )}
-                {alreadyCpf ? (
-                  <AlertMsg>CPF já cadastrado anteriormente.</AlertMsg>
-                ) : (
-                  <></>
-                )}
-                {!cpfAlert && invalidCpf ? (
-                  <AlertMsg>N° de CPF inválido.</AlertMsg>
-                ) : (
-                  <></>
-                )}
-              </Panel>
+              {!params?.id ? (
+                <Panel>
+                  <Text style={styles.panel_label}>Identificação</Text>
+                  <View>
+                    <Text style={styles.label}>Matrícula</Text>
+                    <InputMaskText
+                      value={matricula}
+                      mask="999999"
+                      color="gray"
+                      onChangeText={(txt, masktxt) => {
+                        setMatricula(masktxt);
+                      }}
+                      placeholder="000000"
+                      keyboardType="number-pad"
+                      error={matriculaAlert || invalidMatricula}
+                    />
+                  </View>
+                  {matriculaAlert ? (
+                    <AlertMsg>Usuário deve possuir N° de matrícula.</AlertMsg>
+                  ) : (
+                    <></>
+                  )}
+                  {alreadyMatricula ? (
+                    <AlertMsg>
+                      N° de matrícula já cadastrado anteriormente.
+                    </AlertMsg>
+                  ) : (
+                    <></>
+                  )}
+                  {!matriculaAlert && invalidMatricula ? (
+                    <AlertMsg>N° de Matrícula inválido.</AlertMsg>
+                  ) : (
+                    <></>
+                  )}
+                  <View>
+                    <Text style={styles.label}>CPF</Text>
+                    <InputMaskText
+                      mask="999.999.999-99"
+                      value={cpfMask}
+                      onChangeText={(txt, mask) => {
+                        setCpf(txt);
+                        setCpfMask(mask);
+                      }}
+                      color="gray"
+                      error={cpfAlert || invalidCpf}
+                      placeholder="xxx.xxx.xxx-xx"
+                      keyboardType="decimal-pad"
+                    />
+                  </View>
+                  {cpfAlert ? (
+                    <AlertMsg>Usuário deve possuir CPF.</AlertMsg>
+                  ) : (
+                    <></>
+                  )}
+                  {alreadyCpf ? (
+                    <AlertMsg>CPF já cadastrado anteriormente.</AlertMsg>
+                  ) : (
+                    <></>
+                  )}
+                  {!cpfAlert && invalidCpf ? (
+                    <AlertMsg>N° de CPF inválido.</AlertMsg>
+                  ) : (
+                    <></>
+                  )}
+                </Panel>
+              ) : (
+                <></>
+              )}
               <Panel>
                 <Text style={styles.panel_label}>Permissão</Text>
                 <Checkbox
@@ -341,14 +344,19 @@ function UserForm({navigation, route}: any) {
                   lista de usuários e poderá criar e editar outros usuários.
                 </Text>
               </Panel>
-              <Panel>
-                <Text style={styles.panel_label}>Senha</Text>
-                <Text style={styles.desc}>
-                  Por padrão, a senha do usuário recém-criado será o cpf
-                  inserido até o momento em que o próprio usuário alterar a
-                  senha.
-                </Text>
-              </Panel>
+              {!params?.id ? (
+                <Panel>
+                  <Text style={styles.panel_label}>Senha</Text>
+                  <Text style={styles.desc}>
+                    Por padrão, a senha do usuário recém-criado será o cpf
+                    inserido até o momento em que o próprio usuário alterar a
+                    senha.
+                  </Text>
+                </Panel>
+              ) : (
+                <></>
+              )}
+              <View style={styles.spacing} />
               <View style={styles.btnView}>
                 <Btn
                   onPress={() => confirm()}
@@ -439,6 +447,9 @@ const styles = StyleSheet.create({
   desc: {
     color: colors.dark_gray,
     fontSize: 12,
+  },
+  spacing: {
+    flex: 1,
   },
 });
 
