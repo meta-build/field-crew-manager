@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {Image, StyleSheet, View} from 'react-native';
 import colors from '../../styles/variables';
 
@@ -10,6 +10,8 @@ interface Props {
 const defaultImg = require('../../assets/images/default-profile-img.png');
 
 function ProfileImage({url, size = 180}: Props) {
+  const [error, setError] = useState(false);
+
   const styles = StyleSheet.create({
     container: {
       width: size,
@@ -29,8 +31,10 @@ function ProfileImage({url, size = 180}: Props) {
     <View style={styles.container}>
       <Image
         defaultSource={defaultImg}
-        source={url ? {uri: url} : defaultImg}
+        source={url && !error ? {uri: url} : defaultImg}
         style={styles.img}
+        onError={() => setError(true)}
+        onLoad={() => setError(false)}
       />
     </View>
   );
