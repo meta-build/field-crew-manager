@@ -1,8 +1,11 @@
 import { Response } from "express";
-import equipmentTypeSchema from "../models/equipmentTypeSchema";
 import { Document, Types } from "mongoose";
+
+import equipmentTypeSchema from "../models/equipmentTypeSchema";
 import equipamentSchema from "../models/equipamentSchema";
 import usuarioSchema from "../models/usuarioSchema";
+
+import * as bcrypt from 'bcrypt';
 
 class Validations {
   public equipments = {
@@ -66,7 +69,7 @@ class Validations {
     emailValidation: async (email: string, res: Response) => {
       try {
         const userExists = await usuarioSchema.findOne({ email });
-        
+
         //checar se existe usuario
         if (userExists) {
           return res.status(400).json({ error: 'Email já está em uso.' });
@@ -84,7 +87,7 @@ class Validations {
 
       try {
         const userExists = await usuarioSchema.findOne({ cpf });
-        
+
         //checar se existe usuario
         if (userExists) {
           return res.status(400).json({ error: 'CPF já está em uso.' });
@@ -125,6 +128,26 @@ class Validations {
       }
       return undefined;
     },
+    passwordValidation: async (userId: string, passwordInserted: string, res: Response): Promise<undefined | { errorResponse: any}> => {
+      console.log('validando id...')
+      const userValidation = await this.users.idValidation(userId, res);
+      if (userValidation['errorResponse']) return userValidation;
+
+      const { senha } = userValidation;
+
+      console.log('validando senha validation...')
+      try {
+        const isMatch = await bcrypt.compare(passwordInserted, senha);
+        console.log(isMatch);
+        if (!isMatch) {
+          return { errorResponse: res.sendStatus(401) };
+        }
+        return undefined;
+      } catch (e) {
+        console.log(e);
+        return { errorResponse: res.status(500).json({ error: e }) };
+      }
+    }
   }
 
   public verifyFields(fields: object, res: Response) {
