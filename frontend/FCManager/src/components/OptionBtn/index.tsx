@@ -27,15 +27,14 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.white,
     flexDirection: 'row',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
+    padding: 12,
     gap: 12,
     alignItems: 'center',
     overflow: 'hidden',
   },
   label: {
     color: colors.dark_gray,
-    fontSize: 14,
+    fontSize: 16,
     flex: 1,
   },
 });
