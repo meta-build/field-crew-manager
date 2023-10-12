@@ -28,8 +28,8 @@ function UserList({navigation}: any) {
   const [name, setName] = useState('');
   const [lista, setLista] = useState<EquipamentoItem[]>([]);
 
-  const openNewTool = () => {
-    navigation.navigate('NewTool');
+  const openUserForm = () => {
+    navigation.navigate('UserForm');
   };
 
   const openItem = (serie: string) => {
@@ -81,7 +81,7 @@ function UserList({navigation}: any) {
             />
           </View>
           <Btn
-            onPress={() => openNewTool()}
+            onPress={() => openUserForm()}
             styleType="filled"
             title="Adicionar novo usuário"
           />
