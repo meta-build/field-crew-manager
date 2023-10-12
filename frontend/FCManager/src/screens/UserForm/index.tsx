@@ -118,23 +118,20 @@ function UserForm({navigation, route}: any) {
 
     // validar se email, cpf, e matrícula já existem
 
-    if (
-      !(
-        !nomeAlert ||
-        !sobrenomeAlert ||
-        !emailAlert ||
-        !invalidEmail ||
-        !alreadyEmail ||
-        !telefoneAlert ||
-        !invalidTelefone ||
-        !matriculaAlert ||
-        !invalidMatricula ||
-        !alreadyMatricula ||
-        !cpfAlert ||
-        !invalidCpf ||
-        !alreadyCpf
-      )
-    ) {
+    const validation =
+      nome &&
+      sobrenome &&
+      email &&
+      telefone &&
+      matricula &&
+      cpf &&
+      isEmailValid() &&
+      isPhoneNumberValid() &&
+      cpf.length === 11 &&
+      matricula.length === 6;
+
+    if (validation) {
+      console.log('caindo');
       setConfirmModal(true);
     }
 
@@ -242,7 +239,7 @@ function UserForm({navigation, route}: any) {
                   <Text style={styles.label}>Telefone</Text>
                   <InputMaskText
                     value={telefoneMask}
-                    onChangeText={(txt, txtMask) => {
+                    onChangeText={(txtMask, txt) => {
                       setTelefone(txt);
                       setTelefoneMask(txtMask);
                     }}
@@ -303,9 +300,10 @@ function UserForm({navigation, route}: any) {
                     <InputMaskText
                       mask="999.999.999-99"
                       value={cpfMask}
-                      onChangeText={(txt, mask) => {
+                      onChangeText={(mask, txt) => {
                         setCpf(txt);
                         setCpfMask(mask);
+                        console.log(txt, mask);
                       }}
                       color="gray"
                       error={cpfAlert || invalidCpf}
