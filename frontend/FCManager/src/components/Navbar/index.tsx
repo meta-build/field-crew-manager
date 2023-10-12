@@ -57,7 +57,7 @@ interface NavbarProps {
 
 function Navbar({selected, navigation}: NavbarProps) {
   const goToUsuarios = () => {
-    console.log('usuarios');
+    navigation.navigate('UserList');
   };
 
   const goToTools = () => {
