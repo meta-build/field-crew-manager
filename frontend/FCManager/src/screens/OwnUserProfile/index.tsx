@@ -35,9 +35,9 @@ function OwnUserProfile({navigation, route}: any) {
   const openUpdateUser = () => {
     navigation.navigate('UpdateUserData', {id: usuario.id});
   };
-
+  
   const openChangePassword = () => {
-    console.log('trocar senha');
+    navigation.navigate('ChangePassword', {id: usuario.id});
   };
 
   const openExitModal = () => {
