@@ -45,6 +45,7 @@ class ManobraController {
       return res.status(500).json({ error });
     }
   }
+
   public async finalizarManobra(req: Request, res: Response) {
     try {
       const { id } = req.params;
@@ -69,6 +70,7 @@ class ManobraController {
       return res.status(500).json({ error });
     }
   }
+
   public async editarManobra(req: Request, res: Response) {
     try {
       const { id } = req.params;
@@ -119,6 +121,42 @@ class ManobraController {
       return res.status(500).json({ error });
     }
   }
+
+  public async getManobras (req: Request, res: Response) {
+    try {
+      const titulo: string | undefined = req.query.titulo as string | undefined;
+      let manobras;
+
+      if (titulo) {
+        // Se um título foi fornecido na consulta, filtre as manobras com base nele
+        manobras = await manobraSchema.find({ titulo: { $regex: new RegExp(titulo, "i") } });
+      } else {
+        // Se nenhum título foi fornecido, retorne todas as manobras
+        manobras = await manobraSchema.find();
+      }
+
+      const manobrasValues = manobras.map((manobra) => ({
+        id: manobra._id,
+        titulo: manobra.titulo,
+        datetimeFim: manobra.datetimeFim ? manobra.datetimeFim.toISOString() : null,
+        usuario: {
+          nome: 'fulano',
+          sobrenome: 'ciclano',
+        },
+      }));
+
+      return res.status(200).json({
+        values: manobrasValues,
+        metadata: {
+          itens: manobras.length,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error });
+    }
+  }
+
   public async getManobraById(req: Request, res: Response) {
     try {
       const { id } = req.params;
@@ -160,6 +198,7 @@ class ManobraController {
       return res.status(500).json({ error });
     }
   }
+
   public async eraseManobra(req: Request, res: Response) {
     try {
       const { id } = req.params;
