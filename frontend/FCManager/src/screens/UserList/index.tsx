@@ -33,7 +33,7 @@ function UserList({navigation}: any) {
   };
 
   const openItem = (serie: string) => {
-    navigation.navigate('ToolProfile', {id: serie});
+    navigation.navigate('UserProfile', {id: serie});
   };
 
   const cancelFilter = () => {
