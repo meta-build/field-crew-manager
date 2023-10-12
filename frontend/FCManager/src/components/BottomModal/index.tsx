@@ -1,8 +1,6 @@
 import React from 'react';
-import {Dimensions, Pressable, StyleSheet, View, ViewProps} from 'react-native';
+import {Modal, Pressable, StyleSheet, View, ViewProps} from 'react-native';
 import colors from '../../styles/variables';
-
-const {width, height} = Dimensions.get('window');
 
 interface Props extends ViewProps {
   visible: boolean;
@@ -12,33 +10,44 @@ interface Props extends ViewProps {
 function BottomModal({onPressOutside, children, visible}: Props) {
   return (
     <>
-      {visible ? (
+      <Modal
+        visible={visible}
+        onRequestClose={() => onPressOutside()}
+        transparent
+        animationType="fade">
+        <View style={styles.background} />
+      </Modal>
+      <Modal
+        visible={visible}
+        onRequestClose={() => onPressOutside()}
+        transparent
+        animationType="slide">
         <Pressable onPress={() => onPressOutside()} style={styles.container}>
-          <View style={styles.modal}>{children}</View>
+          <Pressable style={styles.modal}>{children}</Pressable>
         </Pressable>
-      ) : (
-        <></>
-      )}
+      </Modal>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    width,
-    height,
+  background: {
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    position: 'absolute',
+    flex: 1,
+  },
+  container: {
+    flex: 1,
     flexDirection: 'column-reverse',
-    zIndex: 2,
+  },
+  modalContainer: {
+    flex: 1,
   },
   modal: {
     width: '100%',
     backgroundColor: colors.white,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    padding: 18,
-    paddingTop: 24,
+    padding: 24,
   },
 });
 
