@@ -15,6 +15,7 @@ import NewTool from './screens/NewTool';
 import UserList from './screens/UserList';
 import UserProfile from './screens/UserProfile';
 import UserForm from './screens/UserForm';
+import OwnUserProfile from './screens/OwnUserProfile';
 
 const Stack = createNativeStackNavigator();
 
@@ -37,6 +38,7 @@ const App = () => {
             <Stack.Screen name="UserList" component={UserList} />
             <Stack.Screen name="UserProfile" component={UserProfile} />
             <Stack.Screen name="UserForm" component={UserForm} />
+            <Stack.Screen name="OwnUserProfile" component={OwnUserProfile} />
           </Stack.Navigator>
         </SafeAreaView>
       </NavigationContainer>

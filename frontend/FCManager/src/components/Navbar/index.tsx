@@ -63,13 +63,13 @@ function Navbar({selected, navigation}: NavbarProps) {
   const goToTools = () => {
     navigation.navigate('ToolList');
   };
-
+  
   const goToManobras = () => {
     console.log('manobras');
   };
 
   const goToPerfil = () => {
-    console.log('perfil');
+    navigation.navigate('OwnUserProfile');
   };
 
   return (
