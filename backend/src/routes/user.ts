@@ -16,4 +16,6 @@ routes.post('/usuarios', UsuarioController.new);
 
 routes.put('/usuarios/:id', formDataMiddleware, UsuarioController.editarUsuario);
 
+routes.put('/usuarios/senha/:id', UsuarioController.editarSenha);
+
 export default routes;

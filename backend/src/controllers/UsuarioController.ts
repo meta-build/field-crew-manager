@@ -5,6 +5,7 @@ import usuarioSchema from "../models/usuarioSchema";
 
 import Validations from "../utils/validations";
 import { uploadImg } from "../utils/imageUploader";
+import encryptPassword from "../utils/encryptPassword";
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -83,8 +84,7 @@ class UsuarioController {
     if (isAdminValidation) return isAdminValidation;
 
     try {
-      const salt = await bcrypt.genSalt(12);
-      const passwordHash = await bcrypt.hash(cpf, salt);
+      const passwordHash = await encryptPassword(cpf);
 
       const usuario = await usuarioSchema.create({
         nome,
@@ -132,9 +132,9 @@ class UsuarioController {
     if (invalidFieldsAlert) return invalidFieldsAlert;
 
     if (req.body.isAdmin !== 'true' && req.body.isAdmin !== 'false') {
-      return res.status(400).json({ error: "Campo isAdmin não é um booleano"});
+      return res.status(400).json({ error: "Campo isAdmin não é um booleano" });
     };
-    const isAdmin = req.body.isAdmin === 'true'; 
+    const isAdmin = req.body.isAdmin === 'true';
 
     let foto = '';
     if (req.files && req.files.foto) {
@@ -160,6 +160,23 @@ class UsuarioController {
       console.log(error);
       return res.status(500).json({ error: error });
     }
+  }
+
+  public async editarSenha(req: Request, res: Response) {
+    const { id } = req.params;
+
+    const { senhaAntiga, novaSenha } = req.body;
+
+    const invalidFields = Validations.verifyFields({ senhaAntiga, novaSenha }, res);
+    if (invalidFields) return invalidFields;
+
+    const validation = await Validations.users.passwordValidation(id, senhaAntiga, res);
+    if (validation && validation['errorResponse']) return validation['errorResponse'];
+
+    const criptoPassword = await encryptPassword(novaSenha);
+
+    await usuarioSchema.findByIdAndUpdate(id, { senha: criptoPassword });
+    return res.sendStatus(200);
   }
 }
 
