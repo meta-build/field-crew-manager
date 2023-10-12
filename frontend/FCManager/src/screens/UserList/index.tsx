@@ -10,15 +10,15 @@ import {
 import Header from '../../components/Header/Index';
 import InputText from '../../components/InputText';
 import Btn from '../../components/Button';
+import Navbar from '../../components/Navbar';
+import UserItem from '../../components/UserItem';
+import LoadingUserList from '../../components/LoadingUserList';
 
 import colors from '../../styles/variables';
 
 import Equipamento from '../../services/Equipamento';
 
 import {EquipamentoItem} from '../../types';
-import LoadingToolList from '../../components/LoadingToolList';
-import Navbar from '../../components/Navbar';
-import UserItem from '../../components/UserItem';
 
 const {width, height} = Dimensions.get('window');
 
@@ -86,7 +86,7 @@ function UserList({navigation}: any) {
             title="Adicionar novo usuário"
           />
           {loadingList ? (
-            <LoadingToolList />
+            <LoadingUserList />
           ) : (
             <FlatList
               style={styles.equipsList}
