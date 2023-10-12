@@ -21,4 +21,16 @@ interface Equipamento {
   imgs: string[];
 }
 
-export type {Tipo, Equipamento, EquipamentoItem};
+interface Usuario {
+  id: string;
+  nome: string;
+  sobrenome: string;
+  email: string;
+  telefone: string;
+  matricula: string;
+  cpf: string;
+  foto: string;
+  isAdmin: boolean
+}
+
+export type {Tipo, Equipamento, EquipamentoItem, Usuario};
