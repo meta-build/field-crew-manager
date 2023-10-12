@@ -1,8 +1,7 @@
 import React, {useState} from 'react';
 import {Dimensions, StyleSheet, Text, View} from 'react-native';
-import {Usuario} from '../../types';
-import colors from '../../styles/variables';
 import {SafeAreaView} from 'react-native-safe-area-context';
+
 import Header from '../../components/Header/Index';
 import ProfileImage from '../../components/ProfileImage';
 import Navbar from '../../components/Navbar';
@@ -11,6 +10,10 @@ import ExitBtn from '../../components/ExitBtn';
 import OptionBtn from '../../components/OptionBtn';
 import BottomModal from '../../components/BottomModal';
 import Btn from '../../components/Button';
+
+import {Usuario} from '../../types';
+
+import colors from '../../styles/variables';
 
 const {width, height} = Dimensions.get('window');
 
@@ -30,7 +33,7 @@ function OwnUserProfile({navigation, route}: any) {
   const [exitModal, setExitModal] = useState(false);
 
   const openUpdateUser = () => {
-    console.log('trocar dados');
+    navigation.navigate('UpdateUserData', {id: usuario.id});
   };
 
   const openChangePassword = () => {
@@ -42,7 +45,8 @@ function OwnUserProfile({navigation, route}: any) {
   };
 
   const exit = () => {
-    console.log('sair');
+    setExitModal(false);
+    navigation.navigate('Home');
   };
 
   return (
