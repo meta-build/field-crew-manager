@@ -1,16 +1,12 @@
 import { Request, Response } from "express";
-import * as dotenv from 'dotenv';
 
 import usuarioSchema from "../models/usuarioSchema";
 
 import Validations from "../utils/validations";
 import { uploadImg } from "../utils/imageUploader";
 import encryptPassword from "../utils/encryptPassword";
-import generateToken from "../middlewares/generateToken";
 
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-dotenv.config();
+import generateToken from "../middlewares/generateToken";
 
 interface RequestFiles extends Request {
   files: any[] | any;
