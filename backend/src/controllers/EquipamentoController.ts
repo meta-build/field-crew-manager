@@ -5,6 +5,7 @@ import equipamentSchema from "../models/equipamentSchema";
 
 import Validations from "../utils/validations";
 import { uploadImg } from "../utils/imageUploader";
+import manobraSchema from "../models/manobraSchema";
 
 interface RequestFiles extends Request {
   files: any[] | any;
@@ -55,6 +56,14 @@ class EquipamentoController {
     const { id } = req.params;
 
     try {
+      const manobrasBD = await manobraSchema.find({ equipamentos: id })
+      const manobras = manobrasBD.map(manobra => ({
+        id: manobra.id,
+        titulo: manobra.titulo,
+        datetimeFim: manobra.datetimeFim,
+        usuario: manobra.funcionario,
+      }));
+
       const equipamento = await equipamentSchema.findById(id);
       return res.status(200).json({
         id: equipamento._id,
@@ -64,6 +73,7 @@ class EquipamentoController {
         obs: equipamento.obs,
         status: equipamento.isActive ? 'ativo' : 'inativo',
         imgs: equipamento.imgs,
+        manobras: manobras,
       });
     } catch (error) {
       if (error.name == "CastError") {
