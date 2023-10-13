@@ -1,6 +1,6 @@
 import { Router} from 'express';
-import UsuarioController from '../controllers/UsuarioController';
 import { parse } from 'express-form-data';
+import UsuarioController from '../controllers/UsuarioController';
 import tokenValidation from '../middlewares/tokenValidation';
 
 const formDataMiddleware = parse();
