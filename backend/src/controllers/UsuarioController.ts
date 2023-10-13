@@ -167,17 +167,17 @@ class UsuarioController {
   }
 
   public async editarSenha(req: Request, res: Response) {
-    const { id } = req.params;
+    const id = req.user.id;
 
-    const { senhaAntiga, novaSenha } = req.body;
+    const { senhaAntiga, senhaNova } = req.body;
 
-    const invalidFields = Validations.verifyFields({ senhaAntiga, novaSenha }, res);
+    const invalidFields = Validations.verifyFields({ senhaAntiga, senhaNova }, res);
     if (invalidFields) return invalidFields;
 
     const validation = await Validations.users.passwordValidation(id, senhaAntiga, res);
     if (validation && validation['errorResponse']) return validation['errorResponse'];
 
-    const criptoPassword = await encryptPassword(novaSenha);
+    const criptoPassword = await encryptPassword(senhaNova);
 
     await usuarioSchema.findByIdAndUpdate(id, { senha: criptoPassword });
     return res.sendStatus(200);

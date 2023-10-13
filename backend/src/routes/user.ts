@@ -17,7 +17,7 @@ routes.post('/usuarios', tokenValidation.adminUserVerification, UsuarioControlle
 
 routes.put('/usuarios/:id', formDataMiddleware, tokenValidation.anyUserVerification, UsuarioController.editarUsuario);
 
-routes.put('/usuarios/senha/:id', tokenValidation.anyUserVerification, UsuarioController.editarSenha);
+routes.put('/usuarios/login/senha', tokenValidation.anyUserVerification, UsuarioController.editarSenha);
 
 routes.post('/usuarios/login/email', UsuarioController.validateUserEmail);
 
