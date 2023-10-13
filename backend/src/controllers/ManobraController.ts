@@ -145,10 +145,7 @@ class ManobraController {
         id: manobra._id,
         titulo: manobra.titulo,
         datetimeFim: manobra.datetimeFim ? manobra.datetimeFim.toISOString() : null,
-        usuario: {
-          nome: 'fulano',
-          sobrenome: 'ciclano',
-        },
+        usuario: manobra.funcionario,
       }));
 
       return res.status(200).json({
@@ -183,13 +180,9 @@ class ManobraController {
             id: equipamento._id,
             tipo: equipamento.tipo.value,
             img: equipamento.imgs[0], // A primeira imagem
-            status: equipamento.isActive ? 'ativo' : 'inativo',
           };
         })
       );
-
-      // Acessar diretamente os campos do funcionário
-      const funcionario = manobra.funcionario;
 
       return res.status(200).json({
         titulo: manobra.titulo,
@@ -197,7 +190,7 @@ class ManobraController {
         equipamentos: equipamentosInfo,
         datetimeInicio: manobra.datetimeInicio.toISOString(),
         datetimeFim: manobra.datetimeFim ? manobra.datetimeFim.toISOString() : null,
-        funcionario,
+        usuario: manobra.funcionario,
       });
     } catch (error) {
       console.error(error);
