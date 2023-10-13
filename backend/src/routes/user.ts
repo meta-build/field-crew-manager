@@ -18,4 +18,6 @@ routes.put('/usuarios/:id', formDataMiddleware, UsuarioController.editarUsuario)
 
 routes.put('/usuarios/senha/:id', UsuarioController.editarSenha);
 
+routes.post('/usuarios/login/email', UsuarioController.validateUserEmail);
+
 export default routes;

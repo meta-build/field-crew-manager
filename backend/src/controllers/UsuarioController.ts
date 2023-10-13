@@ -102,7 +102,7 @@ class UsuarioController {
       return res.status(200).json({ id })
     } catch (error) {
       console.log(error);
-      res.status(500).json({
+      return res.status(500).json({
         error
       });
     }
@@ -177,6 +177,31 @@ class UsuarioController {
 
     await usuarioSchema.findByIdAndUpdate(id, { senha: criptoPassword });
     return res.sendStatus(200);
+  }
+
+  public async validateUserEmail(req: Request, res: Response) {
+    const { email } = req.body;
+
+    const invalidFieldsAlert = Validations.verifyFields({ email }, res);
+    if (invalidFieldsAlert) return invalidFieldsAlert;
+
+    try {
+      const usuario = await usuarioSchema.findOne({ email });
+      if (!usuario) {
+        return res.status(404).json({ error: "Usuário não encontrado." });
+      }
+
+      const { id, nome, sobrenome } = usuario;
+      return res.status(200).json({ id, nome, sobrenome });
+    } catch (err) {
+      if (err.name == "CastError") {
+        return { errorResponse: res.status(404).json({ error: 'Usuário não encontrado.' }) };
+      }
+      console.log(err);
+      return res.status(500).json({
+        error: err
+      });
+    }
   }
 }
 
