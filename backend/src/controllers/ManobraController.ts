@@ -45,6 +45,10 @@ class ManobraController {
         datetimeInicio,
       });
 
+      equipamentos.forEach(async (equipId) => {
+        await equipamentSchema.findByIdAndUpdate(equipId, { isActive: false });
+      });
+
       return res.status(201).json({ id: manobra._id });
     } catch (error) {
       console.error(error);
@@ -69,6 +73,10 @@ class ManobraController {
 
       // Atualize a manobra com a data e hora de término
       await manobraSchema.findByIdAndUpdate(id, { datetimeFim: datetimeFimFinal });
+
+      manobra.equipamentos.forEach(async (equipId) => {
+        await equipamentSchema.findByIdAndUpdate(equipId, { isActive: true });
+      });
 
       return res.status(200).json({});
     } catch (error) {
