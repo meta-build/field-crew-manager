@@ -17,6 +17,6 @@ routes.get('/manobras', tokenValidation.anyUserVerification, ManobraController.g
 routes.delete('/manobras/:id', tokenValidation.adminUserVerification, ManobraController.eraseManobra);
 
 // Rota não encontrada
-routes.use((req, res) => res.status(404).json({ error: 'Requisição desconhecida.' }));
+// routes.use((req, res) => res.status(404).json({ error: 'Requisição desconhecida.' }));
 
 export default routes;
