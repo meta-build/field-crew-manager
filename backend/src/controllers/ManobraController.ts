@@ -1,15 +1,18 @@
 import { Request, Response } from "express";
 import manobraSchema from "../models/manobraSchema";
 import equipamentSchema from "../models/equipamentSchema";
+import usuarioSchema from "../models/usuarioSchema";
+import Validations from "../utils/validations";
 
 class ManobraController {
   public async createManobra(req: Request, res: Response) {
-    try {
-      const { titulo, descricao, equipamentos, funcionario, datetimeInicio, datetimeFim } = req.body;
+    const idUser = req.user?.id;
 
-      if (!titulo || !descricao || !equipamentos || !funcionario || !datetimeInicio) {
-        return res.status(400).json({ error: 'Campos obrigatórios faltando.' });
-      }
+    try {
+      const { titulo, descricao, equipamentos, datetimeInicio } = req.body;
+
+      const invalidFieldsAlert = Validations.verifyFields({ titulo, descricao, equipamentos, datetimeInicio }, res);
+      if (invalidFieldsAlert) return invalidFieldsAlert;
 
       if (equipamentos.length === 0) {
         return res.status(400).json({ error: 'Pelo menos um equipamento deve ser informado.' });
@@ -27,16 +30,19 @@ class ManobraController {
       }
 
       // Obtenha o funcionário a partir do modelo de funcionário
-      
+      const usuario = await usuarioSchema.findById(idUser);
 
       // Crie a manobra
       const manobra = await manobraSchema.create({
         titulo,
         descricao,
         equipamentos,
-        funcionario: funcionario, // Salvando um objeto do funcionário
+        funcionario: {
+          id: idUser,
+          nome: usuario.nome,
+          sobrenome: usuario.sobrenome,
+        },
         datetimeInicio,
-        datetimeFim,
       });
 
       return res.status(201).json({ id: manobra._id });
