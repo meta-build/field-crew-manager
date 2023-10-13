@@ -126,6 +126,12 @@ class UsuarioController {
   public async editarUsuario(req: RequestFiles, res: Response) {
     const { id } = req.params;
 
+    const user = req.user;
+
+    if (id !== user.id && !user.isAdmin) {
+      return res.status(401).json({ error: "Usuário não possui permissão." });
+    }
+
     const { nome, sobrenome, email, telefone, matricula } = req.body;
 
     const invalidFieldsAlert = Validations.verifyFields({ nome, sobrenome, email, telefone, matricula, id }, res);

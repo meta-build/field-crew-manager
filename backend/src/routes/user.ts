@@ -15,7 +15,7 @@ routes.delete('/usuarios/:id', tokenValidation.adminUserVerification, UsuarioCon
 
 routes.post('/usuarios', tokenValidation.adminUserVerification, UsuarioController.new);
 
-routes.put('/usuarios/:id', formDataMiddleware, tokenValidation.adminUserVerification, UsuarioController.editarUsuario);
+routes.put('/usuarios/:id', formDataMiddleware, tokenValidation.anyUserVerification, UsuarioController.editarUsuario);
 
 routes.put('/usuarios/senha/:id', tokenValidation.anyUserVerification, UsuarioController.editarSenha);
 
