@@ -134,10 +134,7 @@ class UsuarioController {
 
     const { nome, sobrenome, email, telefone, matricula } = req.body;
 
-    const invalidFieldsAlert = Validations.verifyFields({ nome, sobrenome, email, telefone, matricula, id }, res);
-    if (invalidFieldsAlert) return invalidFieldsAlert;
-
-    if (req.body.isAdmin !== 'true' && req.body.isAdmin !== 'false') {
+    if (req.body.isAdmin && req.body.isAdmin !== 'true' && req.body.isAdmin !== 'false') {
       return res.status(400).json({ error: "Campo isAdmin não é um booleano" });
     };
     const isAdmin = req.body.isAdmin === 'true';
@@ -148,16 +145,17 @@ class UsuarioController {
       foto = url;
     };
 
+    const updateFields: any = {};
+    if (nome) updateFields.nome = nome;
+    if (sobrenome) updateFields.sobrenome = sobrenome;
+    if (email) updateFields.email = email;
+    if (telefone) updateFields.telefone = telefone;
+    if (matricula) updateFields.matricula = matricula;
+    updateFields.isAdmin = isAdmin;
+    if (foto) updateFields.foto = foto;
+
     try {
-      const user = await usuarioSchema.findByIdAndUpdate(id, {
-        nome,
-        sobrenome,
-        email,
-        telefone,
-        matricula,
-        isAdmin,
-        foto
-      });
+      const user = await usuarioSchema.findByIdAndUpdate(id, updateFields);
       return res.status(200).json({ id: user._id });
     } catch (error) {
       if (error.name == "CastError") {
@@ -225,7 +223,7 @@ class UsuarioController {
       const validation = await Validations.users.passwordValidation(usuario.id, senha, res);
       if (validation && validation['errorResponse']) return validation['errorResponse'];
 
-      const token = generateToken({id: usuario.id, isAdmin: usuario.isAdmin});
+      const token = generateToken({ id: usuario.id, isAdmin: usuario.isAdmin });
 
       return res.status(200).json({
         user: {
