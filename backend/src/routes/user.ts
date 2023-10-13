@@ -1,22 +1,23 @@
 import { Router} from 'express';
 import UsuarioController from '../controllers/UsuarioController';
 import { parse } from 'express-form-data';
+import tokenValidation from '../middlewares/tokenValidation';
 
 const formDataMiddleware = parse();
 
 const routes = Router();
 
-routes.get('/usuarios', UsuarioController.getUsuarios);
+routes.get('/usuarios', tokenValidation.adminUserVerification, UsuarioController.getUsuarios);
 
-routes.get('/usuarios/:id', UsuarioController.getUsuarioById);
+routes.get('/usuarios/:id', tokenValidation.anyUserVerification, UsuarioController.getUsuarioById);
 
-routes.delete('/usuarios/:id', UsuarioController.delete);
+routes.delete('/usuarios/:id', tokenValidation.adminUserVerification, UsuarioController.delete);
 
-routes.post('/usuarios', UsuarioController.new);
+routes.post('/usuarios', tokenValidation.adminUserVerification, UsuarioController.new);
 
-routes.put('/usuarios/:id', formDataMiddleware, UsuarioController.editarUsuario);
+routes.put('/usuarios/:id', formDataMiddleware, tokenValidation.adminUserVerification, UsuarioController.editarUsuario);
 
-routes.put('/usuarios/senha/:id', UsuarioController.editarSenha);
+routes.put('/usuarios/senha/:id', tokenValidation.anyUserVerification, UsuarioController.editarSenha);
 
 routes.post('/usuarios/login/email', UsuarioController.validateUserEmail);
 
