@@ -6,6 +6,7 @@ import usuarioSchema from "../models/usuarioSchema";
 import Validations from "../utils/validations";
 import { uploadImg } from "../utils/imageUploader";
 import encryptPassword from "../utils/encryptPassword";
+import generateToken from "../middlewares/generateToken";
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -193,6 +194,48 @@ class UsuarioController {
 
       const { id, nome, sobrenome } = usuario;
       return res.status(200).json({ id, nome, sobrenome });
+    } catch (err) {
+      if (err.name == "CastError") {
+        return { errorResponse: res.status(404).json({ error: 'Usuário não encontrado.' }) };
+      }
+      console.log(err);
+      return res.status(500).json({
+        error: err
+      });
+    }
+  }
+
+  public async login(req: Request, res: Response) {
+    const { email, senha } = req.body;
+
+    const invalidFieldsAlert = Validations.verifyFields({ email, senha }, res);
+    if (invalidFieldsAlert) return invalidFieldsAlert;
+
+    try {
+      const usuario = await usuarioSchema.findOne({ email });
+      if (!usuario) {
+        return res.status(404).json({ error: "Usuário não encontrado." });
+      }
+
+      const validation = await Validations.users.passwordValidation(usuario.id, senha, res);
+      if (validation && validation['errorResponse']) return validation['errorResponse'];
+
+      const token = generateToken({id: usuario.id, isAdmin: usuario.isAdmin});
+
+      return res.status(200).json({
+        user: {
+          id: usuario.id,
+          nome: usuario.nome,
+          sobrenome: usuario.sobrenome,
+          email: usuario.email,
+          telefone: usuario.telefone,
+          matricula: usuario.matricula,
+          cpf: usuario.cpf,
+          foto: usuario.foto,
+          isAdmin: usuario.isAdmin,
+        },
+        token
+      });
     } catch (err) {
       if (err.name == "CastError") {
         return { errorResponse: res.status(404).json({ error: 'Usuário não encontrado.' }) };

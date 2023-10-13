@@ -20,4 +20,6 @@ routes.put('/usuarios/senha/:id', UsuarioController.editarSenha);
 
 routes.post('/usuarios/login/email', UsuarioController.validateUserEmail);
 
+routes.post('/usuarios/login', UsuarioController.login);
+
 export default routes;
