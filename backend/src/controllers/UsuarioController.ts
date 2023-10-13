@@ -14,9 +14,12 @@ interface RequestFiles extends Request {
 
 class UsuarioController {
   public async getUsuarios(req: Request, res: Response) {
+    const idUser = req.user.id;
+
     try {
       const usuarios = await usuarioSchema.find();
       const itens = usuarios
+        .filter(user => user?.id !== idUser)
         .map(user => ({
           id: user?._id,
           nome: user?.sobrenome,
