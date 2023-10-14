@@ -56,7 +56,7 @@ function ManeuverList({navigation}: any) {
   };
 
   const openItem = (serie: string) => {
-    navigation.navigate('ToolProfile', {id: serie});
+    navigation.navigate('ManeuverProfile', {id: serie});
   };
 
   const confirmFilter = () => {
