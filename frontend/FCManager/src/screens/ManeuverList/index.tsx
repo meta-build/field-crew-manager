@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Dimensions,
   FlatList,
@@ -20,31 +20,34 @@ import colors from '../../styles/variables';
 import FilterIcon from '../../assets/icons/filterGreen.svg';
 import Equipamento from '../../services/Equipamento';
 
-import { EquipamentoItem } from '../../types';
+import {EquipamentoItem} from '../../types';
+
 import LoadingToolList from '../../components/LoadingToolList';
 import Navbar from '../../components/Navbar';
 import ManeuverItem from '../../components/ManeuverItem';
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
-function ManeuverList({ navigation }: any) {
+type StatusType = 'todos' | 'concluido' | 'emAndamento';
+
+function ManeuverList({navigation}: any) {
   const [filterModal, setFilterModal] = useState(false);
 
   const [loadingList, setLoadingList] = useState(false);
 
   const [city, setCity] = useState('');
-  const [tipoName, setTipoName] = useState('');
-  const [status, setStatus] = useState<'todos' | 'ativo' | 'inativo'>('todos');
+  const [titulo, setTitulo] = useState('');
+  const [status, setStatus] = useState<StatusType>('todos');
   const [lista, setLista] = useState<EquipamentoItem[]>([]);
   const [filterCount, setFilterCount] = useState(0);
-  const [isRunning, setIsRunning] = useState(true);
+  const [isRunning, setIsRunning] = useState(false);
   const [alertModal, setAlertModal] = useState(false);
 
   const openFilter = () => {
     setFilterModal(true);
   };
 
-  const openNewTool = () => {
+  const openManeuverForm = () => {
     if (isRunning) {
       setAlertModal(true);
     } else {
@@ -53,7 +56,7 @@ function ManeuverList({ navigation }: any) {
   };
 
   const openItem = (serie: string) => {
-    navigation.navigate('ToolProfile', { id: serie });
+    navigation.navigate('ToolProfile', {id: serie});
   };
 
   const confirmFilter = () => {
@@ -64,31 +67,27 @@ function ManeuverList({ navigation }: any) {
     } else {
       setFilterCount(0);
     }
-    getEquipamentos(status, city);
+    getManobras();
     setFilterModal(false);
   };
 
   const cancelFilter = () => {
     setCity('');
     setStatus('todos');
-    setTipoName('');
+    setTitulo('');
     setFilterCount(0);
-    getEquipamentos('todos', '');
+    getManobras();
     setFilterModal(false);
   };
 
-  const filtrarNome = (titulo: string) => {
-    const regex = new RegExp(tipoName, 'i');
-    return regex.test(titulo);
+  const filtrarNome = (title: string) => {
+    const regex = new RegExp(titulo, 'i');
+    return regex.test(title);
   };
 
-  const getEquipamentos = async (
-    statusFilter: 'todos' | 'ativo' | 'inativo',
-    cidade: string,
-  ) => {
+  const getManobras = async () => {
     setLoadingList(true);
-    await Equipamento.getAll(statusFilter, '', cidade).then(res => {
-      console.log(res);
+    await Equipamento.getAll('todos', '', '').then(res => {
       const equips = res.values.filter(equip => filtrarNome(equip.tipo.value));
       setLista(equips);
     });
@@ -98,12 +97,13 @@ function ManeuverList({ navigation }: any) {
   useEffect(() => {
     const onFocus = navigation.addListener('focus', () => {
       cancelFilter();
-    });
 
-    getEquipamentos(status, city);
-    // Return the function to unsubscribe from the event so it gets removed on unmount
+      // ver se usuário possui manobra em andamento
+    });
+    getManobras();
     return onFocus;
-  }, [tipoName, navigation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [titulo, navigation]);
 
   return (
     <>
@@ -115,8 +115,8 @@ function ManeuverList({ navigation }: any) {
               placeholder="Pesquisar por título"
               style={styles.searchInput}
               color="white"
-              onChange={e => setTipoName(e.nativeEvent.text)}
-              value={tipoName}
+              onChange={e => setTitulo(e.nativeEvent.text)}
+              value={titulo}
             />
             <View style={styles.filterView}>
               <Btn
@@ -132,7 +132,7 @@ function ManeuverList({ navigation }: any) {
             </View>
           </View>
           <Btn
-            onPress={() => openNewTool()}
+            onPress={() => openManeuverForm()}
             styleType="filled"
             title="Criar nova manobra"
           />
@@ -142,7 +142,7 @@ function ManeuverList({ navigation }: any) {
             <FlatList
               style={styles.equipsList}
               data={lista}
-              renderItem={({ item }) => (
+              renderItem={({item}) => (
                 <View style={styles.item}>
                   <ManeuverItem
                     highlight={isRunning}
@@ -162,6 +162,7 @@ function ManeuverList({ navigation }: any) {
         </View>
         <Navbar selected="Manobras" navigation={navigation} />
       </SafeAreaView>
+
       <BottomModal
         onPressOutside={() => setFilterModal(false)}
         visible={filterModal}>
@@ -171,12 +172,12 @@ function ManeuverList({ navigation }: any) {
             <Text style={styles.label}>Status</Text>
             <Dropdown
               items={[
-                { label: 'Todos', value: 'todos' },
-                { label: 'Ativo', value: 'ativo' },
-                { label: 'Inativo', value: 'inativo' },
+                {label: 'Todos', value: 'todos'},
+                {label: 'Em Andamento', value: 'emAndamento'},
+                {label: 'Concluído', value: 'concluido'},
               ]}
               onSelect={value => {
-                setStatus(value as 'ativo' | 'inativo' | 'todos');
+                setStatus(value as 'emAndamento' | 'concluido' | 'todos');
               }}
               color="gray"
               placeholder="Todos"
@@ -197,6 +198,7 @@ function ManeuverList({ navigation }: any) {
           />
         </View>
       </BottomModal>
+
       <BottomModal
         onPressOutside={() => setAlertModal(false)}
         visible={alertModal}>
@@ -276,6 +278,7 @@ const styles = StyleSheet.create({
   },
   alertTxt: {
     textAlign: 'center',
+    color: colors.dark_gray,
   },
 });
 
