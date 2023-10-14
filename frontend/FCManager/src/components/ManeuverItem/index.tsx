@@ -24,7 +24,7 @@ interface Props extends PressableProps {
 function ManeuverItem({maneuver, ...props}: Props) {
   const convertBadgeText = () => {
     if (maneuver.status === 'active') {
-      return 'Ativo';
+      return 'Em andamento';
     } else {
       const text = `Finalizado em ${new Date(
         maneuver.date as string,

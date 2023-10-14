@@ -12,6 +12,7 @@ import ToolProfile from './screens/ToolProfile';
 import NewTool from './screens/NewTool';
 
 import colors from './styles/variables';
+import ManeuverList from './screens/ManeuverList';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +32,7 @@ const App = () => {
             <Stack.Screen name="ToolList" component={ToolList} />
             <Stack.Screen name="ToolProfile" component={ToolProfile} />
             <Stack.Screen name="NewTool" component={NewTool} />
+            <Stack.Screen name="ManeuverList" component={ManeuverList} />
           </Stack.Navigator>
         </SafeAreaView>
       </NavigationContainer>

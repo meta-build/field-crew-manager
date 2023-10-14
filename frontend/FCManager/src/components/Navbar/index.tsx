@@ -65,7 +65,7 @@ function Navbar({selected, navigation}: NavbarProps) {
   };
 
   const goToManobras = () => {
-    console.log('manobras');
+    navigation.navigate('ManeuverList');
   };
 
   const goToPerfil = () => {
