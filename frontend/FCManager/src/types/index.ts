@@ -21,4 +21,17 @@ interface Equipamento {
   imgs: string[];
 }
 
-export type {Tipo, Equipamento, EquipamentoItem};
+interface Manobra {
+  titulo: string;
+  descricao: string;
+  datetimeInicio: Date;
+  datetimeFim?: Date;
+  equipamentos: EquipamentoItem[];
+  usuario: {
+    id: string;
+    nome: string;
+    sobrenome: string;
+  }
+}
+
+export type {Tipo, Equipamento, EquipamentoItem, Manobra};
