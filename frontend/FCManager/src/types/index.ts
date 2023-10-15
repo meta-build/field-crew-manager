@@ -44,9 +44,14 @@ interface UsuarioItem {
 interface Manobra {
   titulo: string;
   descricao: string;
-  datetimeInicio: Date;
-  datetimeFim?: Date;
-  equipamentos: EquipamentoItem[];
+  datetimeInicio: string;
+  datetimeFim?: string;
+  equipamentos: {
+    id: string;
+    tipo: string;
+    img: string;
+    serial: string;
+  }[];
   usuario: {
     id: string;
     nome: string;

@@ -1,5 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {FlatList, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import Navbar from '../../components/Navbar';
@@ -14,6 +21,8 @@ import BottomModal from '../../components/BottomModal';
 import colors from '../../styles/variables';
 
 import {Manobra as ManobraType} from '../../types';
+
+import Manobra from '../../services/Manobra';
 
 const Panel = ({children}: any) => {
   return <View style={styles.panel}>{children}</View>;
@@ -39,81 +48,10 @@ function ManeuverProfile({navigation, route}: any) {
   };
 
   useEffect(() => {
-    const onFocus = navigation.addListener('focus', () => {
+    const onFocus = navigation.addListener('focus', async () => {
       // pegar manobra e armazenar no state manobra
-      setManobra({
-        datetimeFim: new Date(),
-        datetimeInicio: new Date(),
-        descricao: 'asdas',
-        equipamentos: [
-          {
-            id: '123',
-            img: 'https://plus.unsplash.com/premium_photo-1694467832488-9bc48ff8d112?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1480&q=80',
-            serial: '123123',
-            status: 'ativo',
-            tipo: {
-              id: '31123',
-              value: 'tipo equip',
-            },
-          },
-          {
-            id: '123',
-            img: 'https://plus.unsplash.com/premium_photo-1694467832488-9bc48ff8d112?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1480&q=80',
-            serial: '123123',
-            status: 'ativo',
-            tipo: {
-              id: '31123',
-              value: 'tipo equip',
-            },
-          },
-          {
-            id: '123',
-            img: 'https://plus.unsplash.com/premium_photo-1694467832488-9bc48ff8d112?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1480&q=80',
-            serial: '123123',
-            status: 'ativo',
-            tipo: {
-              id: '31123',
-              value: 'tipo equip',
-            },
-          },
-          {
-            id: '123',
-            img: 'https://plus.unsplash.com/premium_photo-1694467832488-9bc48ff8d112?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1480&q=80',
-            serial: '123123',
-            status: 'ativo',
-            tipo: {
-              id: '31123',
-              value: 'tipo equip',
-            },
-          },
-          {
-            id: '123',
-            img: 'https://plus.unsplash.com/premium_photo-1694467832488-9bc48ff8d112?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1480&q=80',
-            serial: '123123',
-            status: 'ativo',
-            tipo: {
-              id: '31123',
-              value: 'tipo equip',
-            },
-          },
-          {
-            id: '123',
-            img: 'https://plus.unsplash.com/premium_photo-1694467832488-9bc48ff8d112?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1480&q=80',
-            serial: '123123',
-            status: 'ativo',
-            tipo: {
-              id: '31123',
-              value: 'tipo equip',
-            },
-          },
-        ],
-        titulo: 'titulo manobra',
-        usuario: {
-          id: 'q34234',
-          nome: 'fulano',
-          sobrenome: 'ciclano',
-        },
-      });
+      const maneuver = await Manobra.getById(id);
+      setManobra(maneuver);
     });
 
     return onFocus;
@@ -149,22 +87,34 @@ function ManeuverProfile({navigation, route}: any) {
                 <View>
                   <Text style={styles.title}>Data e hora de início</Text>
                   <Text style={styles.info}>
-                    {manobra.datetimeInicio.toLocaleDateString('pt-BR')} às{' '}
-                    {manobra.datetimeInicio.toLocaleTimeString('pt-BR', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                    {new Date(manobra.datetimeInicio).toLocaleDateString(
+                      'pt-BR',
+                    )}{' '}
+                    às{' '}
+                    {new Date(manobra.datetimeInicio).toLocaleTimeString(
+                      'pt-BR',
+                      {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      },
+                    )}
                   </Text>
                 </View>
                 {manobra.datetimeFim ? (
                   <View>
                     <Text style={styles.title}>Data e hora de conclusão</Text>
                     <Text style={styles.info}>
-                      {manobra.datetimeFim.toLocaleDateString('pt-BR')} às{' '}
-                      {manobra.datetimeFim.toLocaleTimeString('pt-BR', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
+                      {new Date(manobra.datetimeFim).toLocaleDateString(
+                        'pt-BR',
+                      )}{' '}
+                      às{' '}
+                      {new Date(manobra.datetimeFim).toLocaleTimeString(
+                        'pt-BR',
+                        {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        },
+                      )}
                     </Text>
                   </View>
                 ) : (
@@ -180,8 +130,7 @@ function ManeuverProfile({navigation, route}: any) {
                       tool={{
                         img_uri: item.img,
                         n_serie: item.serial,
-                        status: item.status === 'ativo' ? 'active' : 'deactive',
-                        tipoLabel: item.tipo.value,
+                        tipoLabel: item.tipo,
                       }}
                       onPress={() => openToolItem(item.id)}
                     />
@@ -202,7 +151,9 @@ function ManeuverProfile({navigation, route}: any) {
             </View>
           </ScrollView>
         ) : (
-          <></>
+          <View style={styles.loadingView}>
+            <ActivityIndicator size={52} color={colors.green_1} />
+          </View>
         )}
         <Navbar navigation={navigation} selected="Manobras" />
       </SafeAreaView>
@@ -265,13 +216,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   modal: {
-    // paddingHorizontal: 16,
     gap: 18,
   },
   modalDesc: {
     color: colors.dark_gray,
     textAlign: 'center',
     marginVertical: 18,
+  },
+  loadingView: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

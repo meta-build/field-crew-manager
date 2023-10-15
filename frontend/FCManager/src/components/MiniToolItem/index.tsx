@@ -19,7 +19,6 @@ interface Props extends PressableProps {
     tipoLabel: string;
     img_uri: string;
     n_serie: string;
-    status: 'active' | 'deactive';
   };
   checkbox?: boolean;
   checked?: boolean;
