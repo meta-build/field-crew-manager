@@ -34,4 +34,16 @@ interface Manobra {
   }
 }
 
-export type {Tipo, Equipamento, EquipamentoItem, Manobra};
+interface ManobraItem {
+  id: string;
+  titulo: string;
+  datetimeInicio: Date;
+  datetimeFim?: Date;
+  usuario: {
+    id: string;
+    nome: string;
+    sobrenome: string;
+  };
+}
+
+export type {Tipo, Equipamento, EquipamentoItem, Manobra, ManobraItem};
