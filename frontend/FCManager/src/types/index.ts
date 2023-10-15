@@ -38,7 +38,7 @@ interface UsuarioItem {
   nome: string;
   sobrenome: string;
   foto: string;
-  inscricao: string;
+  matricula: string;
 }
 
 interface Manobra {

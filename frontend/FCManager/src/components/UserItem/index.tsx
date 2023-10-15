@@ -50,7 +50,7 @@ function UserItem({user, ...props}: Props) {
           {user.nome} {user.sobrenome}
         </Text>
         <View style={styles.value_label}>
-          <Text style={[styles.desc, styles.label]}>N° Inscrição:</Text>
+          <Text style={[styles.desc, styles.label]}>Matrícula:</Text>
           <Text style={styles.desc}>{user.inscricao}</Text>
         </View>
       </View>

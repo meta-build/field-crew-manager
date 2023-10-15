@@ -98,7 +98,7 @@ function UserList({navigation}: any) {
                   <UserItem
                     user={{
                       foto: item.foto,
-                      inscricao: item.inscricao,
+                      inscricao: item.matricula,
                       nome: item.nome,
                       sobrenome: item.sobrenome,
                     }}
