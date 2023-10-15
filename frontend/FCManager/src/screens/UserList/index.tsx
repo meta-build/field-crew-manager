@@ -16,9 +16,9 @@ import LoadingUserList from '../../components/LoadingUserList';
 
 import colors from '../../styles/variables';
 
-import Equipamento from '../../services/Equipamento';
+import {UsuarioItem} from '../../types';
 
-import {EquipamentoItem} from '../../types';
+import Usuario from '../../services/Usuario';
 
 const {width, height} = Dimensions.get('window');
 
@@ -26,7 +26,7 @@ function UserList({navigation}: any) {
   const [loadingList, setLoadingList] = useState(false);
 
   const [name, setName] = useState('');
-  const [lista, setLista] = useState<EquipamentoItem[]>([]);
+  const [lista, setLista] = useState<UsuarioItem[]>([]);
 
   const openUserForm = () => {
     navigation.navigate('UserForm');
@@ -38,7 +38,7 @@ function UserList({navigation}: any) {
 
   const cancelFilter = () => {
     setName('');
-    getUsuarios('todos');
+    getUsuarios();
   };
 
   const filtrarNome = (titulo: string) => {
@@ -46,11 +46,13 @@ function UserList({navigation}: any) {
     return regex.test(titulo);
   };
 
-  const getUsuarios = async (statusFilter: 'todos' | 'ativo' | 'inativo') => {
+  const getUsuarios = async () => {
     setLoadingList(true);
-    await Equipamento.getAll(statusFilter, '', '').then(res => {
-      const equips = res.values.filter(equip => filtrarNome(equip.tipo.value));
-      setLista(equips);
+    await Usuario.getAll().then(res => {
+      const users = res.values.filter(user =>
+        filtrarNome(`${user.nome} ${user.sobrenome}`),
+      );
+      setLista(users);
     });
     setLoadingList(false);
   };
@@ -60,7 +62,7 @@ function UserList({navigation}: any) {
       cancelFilter();
     });
 
-    getUsuarios('todos');
+    getUsuarios();
     return onFocus;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -95,10 +97,10 @@ function UserList({navigation}: any) {
                 <View style={styles.item}>
                   <UserItem
                     user={{
-                      foto: item.img,
-                      inscricao: item.serial,
-                      nome: 'nome',
-                      sobrenome: 'sobrenome',
+                      foto: item.foto,
+                      inscricao: item.inscricao,
+                      nome: item.nome,
+                      sobrenome: item.sobrenome,
                     }}
                     onPress={() => openItem(item.id)}
                   />

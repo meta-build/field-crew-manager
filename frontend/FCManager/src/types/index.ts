@@ -38,6 +38,7 @@ interface UsuarioItem {
   nome: string;
   sobrenome: string;
   foto: string;
+  inscricao: string;
 }
 
 interface Manobra {
