@@ -33,4 +33,29 @@ interface Usuario {
   isAdmin: boolean
 }
 
-export type {Tipo, Equipamento, EquipamentoItem, Usuario};
+interface Manobra {
+  titulo: string;
+  descricao: string;
+  datetimeInicio: Date;
+  datetimeFim?: Date;
+  equipamentos: EquipamentoItem[];
+  usuario: {
+    id: string;
+    nome: string;
+    sobrenome: string;
+  }
+}
+
+interface ManobraItem {
+  id: string;
+  titulo: string;
+  datetimeInicio: Date;
+  datetimeFim?: Date;
+  usuario: {
+    id: string;
+    nome: string;
+    sobrenome: string;
+  };
+}
+
+export type {Tipo, Equipamento, EquipamentoItem, Usuario, Manobra, ManobraItem};

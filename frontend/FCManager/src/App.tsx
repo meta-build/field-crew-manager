@@ -18,6 +18,9 @@ import UserForm from './screens/UserForm';
 import OwnUserProfile from './screens/OwnUserProfile';
 import UpdateUserData from './screens/UpdateUserData';
 import ChangePassword from './screens/ChangePassword';
+import ManeuverList from './screens/ManeuverList';
+import ManeuverProfile from './screens/ManeuverProfile';
+import ManeuverForm from './screens/ManeuverForm';
 
 const Stack = createNativeStackNavigator();
 
@@ -43,6 +46,9 @@ const App = () => {
             <Stack.Screen name="OwnUserProfile" component={OwnUserProfile} />
             <Stack.Screen name="UpdateUserData" component={UpdateUserData} />
             <Stack.Screen name="ChangePassword" component={ChangePassword} />
+            <Stack.Screen name="ManeuverList" component={ManeuverList} />
+            <Stack.Screen name="ManeuverProfile" component={ManeuverProfile} />
+            <Stack.Screen name="ManeuverForm" component={ManeuverForm} />
           </Stack.Navigator>
         </SafeAreaView>
       </NavigationContainer>
