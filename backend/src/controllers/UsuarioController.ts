@@ -22,8 +22,9 @@ class UsuarioController {
         .filter(user => user?.id !== idUser)
         .map(user => ({
           id: user?._id,
-          nome: user?.sobrenome,
+          nome: user?.nome,
           sobrenome: user?.sobrenome,
+          matricula: user?.matricula,
           foto: user?.foto ? user?.foto : '',
         }));
       res.status(200).json({
@@ -50,7 +51,8 @@ class UsuarioController {
         telefone: usuario?.telefone,
         matricula: usuario?.matricula,
         cpf: usuario?.cpf,
-        foto: usuario?.foto || ''
+        foto: usuario?.foto || '',
+        isAdmin: usuario?.isAdmin,
       });
     } catch (error) {
       if (error.name == "CastError") {
@@ -138,6 +140,9 @@ class UsuarioController {
       return res.status(400).json({ error: "Campo isAdmin não é um booleano" });
     };
     const isAdmin = req.body.isAdmin === 'true';
+
+    const emailAlert = await Validations.users.emailValidation(email, res);
+    if (emailAlert) return emailAlert;
 
     let foto = '';
     if (req.files && req.files.foto) {
