@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
+  ActivityIndicator,
   Dimensions,
   FlatList,
   SafeAreaView,
@@ -23,7 +24,6 @@ import MiniManeuverItem from '../../components/MiniManeuverItem';
 import Equipamento from '../../services/Equipamento';
 
 import {Equipamento as EquipamentoType} from '../../types';
-import {ManobraItem as ManobraItemType} from '../../types';
 
 const {width, height} = Dimensions.get('window');
 
@@ -32,7 +32,6 @@ function ToolProfile({navigation, route}: any) {
   const [confirmDeactive, setConfirmDeactive] = useState(false);
 
   const [equipamento, setEquipamento] = useState<EquipamentoType>();
-  const [manobras, setManobras] = useState<ManobraItemType[]>([]);
 
   const [loading, setLoading] = useState(false);
 
@@ -81,140 +80,142 @@ function ToolProfile({navigation, route}: any) {
   useEffect(() => {
     const onFocus = navigation.addListener('focus', () => {
       getEquipamento();
-
-      setManobras([
-        {
-          datetimeInicio: new Date(),
-          id: '123',
-          titulo: 'teste',
-          usuario: {id: '123', nome: 'fulano', sobrenome: 'ciclano'},
-        },
-        {
-          datetimeInicio: new Date(),
-          datetimeFim: new Date(),
-          id: '1234',
-          titulo: 'teste',
-          usuario: {id: '123', nome: 'fulano', sobrenome: 'ciclano'},
-        },
-      ]);
     });
 
     return onFocus;
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigation]);
 
-  if (equipamento) {
-    return (
-      <>
-        <SafeAreaView style={styles.container}>
-          <Header text="Equipamentos" />
-          <ImageCarousel images={equipamento?.imgs as string[]} />
-          <ScrollView >
-            <View style={styles.content}>
-              <Title color="gray" text={equipamento?.tipo.value as string} />
-              <View style={styles.info}>
-                <View style={styles.status}>
-                  <Text style={styles.label}>Status:</Text>
+  return (
+    <>
+      <SafeAreaView style={styles.container}>
+        <Header text="Equipamentos" />
+        {equipamento ? (
+          <>
+            <ImageCarousel images={equipamento?.imgs as string[]} />
+            <ScrollView contentContainerStyle={styles.scrollView}>
+              <View style={styles.content}>
+                <Title color="gray" text={equipamento?.tipo.value as string} />
+                <View style={styles.info}>
+                  <View style={styles.status}>
+                    <Text style={styles.label}>Status:</Text>
+                    <View>
+                      <Badget
+                        status={
+                          equipamento?.status === 'ativo'
+                            ? 'active'
+                            : 'deactive'
+                        }
+                        size="small"
+                      />
+                    </View>
+                  </View>
+                  <Info
+                    label="N° Serial"
+                    value={equipamento?.serial as string}
+                  />
+                  <Info label="ID" value={id} />
                   <View>
-                    <Badget
-                      status={
-                        equipamento?.status === 'ativo' ? 'active' : 'deactive'
-                      }
-                      size="small"
+                    <Text style={styles.label}>Observações:</Text>
+                    <Text style={styles.value}>
+                      {equipamento?.obs as string}
+                    </Text>
+                  </View>
+                  <View style={styles.info}>
+                    <Text style={styles.label}>Histórico de Manobras:</Text>
+                    <FlatList
+                      data={equipamento?.manobras}
+                      renderItem={({item}) => (
+                        <MiniManeuverItem
+                          manobra={{
+                            emAndamento: !item.datetimeFim,
+                            titulo: item.titulo,
+                            usuario: {
+                              nome: item.usuario.nome,
+                              sobrenome: item.usuario.sobrenome,
+                            },
+                          }}
+                          onPress={() => openManobra(item.id)}
+                        />
+                      )}
+                      keyExtractor={item => item.id}
                     />
                   </View>
                 </View>
-                <Info label="N° Serial" value={equipamento?.serial as string} />
-                <Info label="ID" value={id} />
-                <View>
-                  <Text style={styles.label}>Observações:</Text>
-                  <Text style={styles.value}>{equipamento?.obs as string}</Text>
-                </View>
-                <View style={styles.info}>
-                  <Text style={styles.label}>Histórico de Manobras:</Text>
-                  <FlatList
-                    data={manobras}
-                    renderItem={({item}) => (
-                      <MiniManeuverItem
-                        manobra={{
-                          emAndamento: !item.datetimeFim,
-                          titulo: item.titulo,
-                          usuario: {
-                            nome: item.usuario.nome,
-                            sobrenome: item.usuario.sobrenome,
-                          },
-                        }}
-                        onPress={() => openManobra(item.id)}
-                      />
-                    )}
-                    keyExtractor={item => item.id}
+              </View>
+              <View style={styles.btnView}>
+                <View style={styles.btn}>
+                  <Btn
+                    onPress={() => edit()}
+                    styleType="outlined"
+                    title="Editar"
                   />
                 </View>
+                <View style={styles.btn}>
+                  {equipamento?.status === 'ativo' ? (
+                    <Btn
+                      onPress={() => deactivate()}
+                      styleType="alert"
+                      title="Desativar"
+                    />
+                  ) : (
+                    <Btn
+                      onPress={() => activate()}
+                      styleType="filled"
+                      title="Ativar"
+                    />
+                  )}
+                </View>
               </View>
-            </View>
-          </ScrollView>
-          <View style={styles.btnView}>
-            <View style={styles.btn}>
-              <Btn onPress={() => edit()} styleType="outlined" title="Editar" />
-            </View>
-            <View style={styles.btn}>
-              {equipamento?.status === 'ativo' ? (
-                <Btn
-                  onPress={() => deactivate()}
-                  styleType="alert"
-                  title="Desativar"
-                />
-              ) : (
-                <Btn
-                  onPress={() => activate()}
-                  styleType="filled"
-                  title="Ativar"
-                />
-              )}
-            </View>
+            </ScrollView>
+          </>
+        ) : (
+          <View style={styles.loadingView}>
+            <ActivityIndicator size={52} color={colors.green_1} />
           </View>
-          <Navbar selected="Equipamentos" navigation={navigation} />
-        </SafeAreaView>
+        )}
+        <Navbar selected="Equipamentos" navigation={navigation} />
+      </SafeAreaView>
 
-        <BottomModal
-          visible={confirmActive}
-          onPressOutside={() => setConfirmActive(false)}>
-          <Title color="green" text="Ativar equipamento?" align="center" />
-          <View style={styles.confirmBtnView}>
-            <Btn
-              styleType="filled"
-              title="Confirmar"
-              onPress={() => !loading && confirmActivate()}
-              loading={loading}
-            />
-            <Btn
-              styleType="outlined"
-              title="Cancelar"
-              onPress={() => setConfirmActive(false)}
-            />
-          </View>
-        </BottomModal>
+      <BottomModal
+        visible={confirmActive}
+        onPressOutside={() => setConfirmActive(false)}>
+        <Title color="green" text="Ativar equipamento?" align="center" />
+        <View style={styles.confirmBtnView}>
+          <Btn
+            styleType="filled"
+            title="Confirmar"
+            onPress={() => !loading && confirmActivate()}
+            loading={loading}
+          />
+          <Btn
+            styleType="outlined"
+            title="Cancelar"
+            onPress={() => setConfirmActive(false)}
+          />
+        </View>
+      </BottomModal>
 
-        <BottomModal
-          visible={confirmDeactive}
-          onPressOutside={() => setConfirmDeactive(false)}>
-          <Title color="green" text="Desativar equipamento?" align="center" />
-          <View style={styles.confirmBtnView}>
-            <Btn
-              styleType="alert"
-              title="Confirmar"
-              onPress={() => !loading && confirmDeactivate()}
-              loading={loading}
-            />
-            <Btn
-              styleType="outlined"
-              title="Cancelar"
-              onPress={() => setConfirmDeactive(false)}
-            />
-          </View>
-        </BottomModal>
-      </>
-    );
-  }
+      <BottomModal
+        visible={confirmDeactive}
+        onPressOutside={() => setConfirmDeactive(false)}>
+        <Title color="green" text="Desativar equipamento?" align="center" />
+        <View style={styles.confirmBtnView}>
+          <Btn
+            styleType="alert"
+            title="Confirmar"
+            onPress={() => !loading && confirmDeactivate()}
+            loading={loading}
+          />
+          <Btn
+            styleType="outlined"
+            title="Cancelar"
+            onPress={() => setConfirmDeactive(false)}
+          />
+        </View>
+      </BottomModal>
+    </>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -222,6 +223,9 @@ const styles = StyleSheet.create({
     width,
     height,
     backgroundColor: colors.white,
+  },
+  scrollView: {
+    flexGrow: 1,
   },
   content: {
     padding: 16,
@@ -262,6 +266,11 @@ const styles = StyleSheet.create({
   },
   spacing: {
     flex: 1,
+  },
+  loadingView: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

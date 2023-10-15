@@ -19,6 +19,7 @@ interface Equipamento {
   obs: string;
   status: 'ativo' | 'inativo';
   imgs: string[];
+  manobras: ManobraItem[];
 }
 
 interface Usuario {
@@ -62,7 +63,6 @@ interface Manobra {
 interface ManobraItem {
   id: string;
   titulo: string;
-  datetimeInicio: string;
   datetimeFim?: string;
   usuario: {
     id: string;
