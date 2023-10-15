@@ -13,6 +13,7 @@ import Btn from '../../components/Button';
 import Title from '../../components/Title';
 import BottomModal from '../../components/BottomModal';
 import InputText from '../../components/InputText';
+import Usuario from '../../services/Usuario';
 
 const logo = require('../../assets/images/logo-1.png');
 const image = require('../../assets/images/home-image.png');
@@ -46,17 +47,29 @@ const Home = ({navigation}: any) => {
     setFailEmail(false);
   };
 
-  const submitEmail = () => {
+  const submitEmail = async () => {
     if (email) {
       // antes da requisição
       setLoading(true);
 
-      // se encontrar email
-      setName('flano');
-      openLoginPasswordModal();
-
-      // se não encontrar email
-      // setFailEmail(true);
+      const retorno = await Usuario.loginEmail(email);
+      if ('nome' in retorno) {
+        // se encontrar email
+        setName(retorno.nome);
+        openLoginPasswordModal();
+      } else if ('errorNum' in retorno) {
+        if (retorno.errorNum === 404) {
+          // se não encontrar email
+          setFailEmail(true);
+        } else {
+          // um erro diferente aconteceu
+          console.log(retorno);
+        }
+      } else {
+        // Algo inesperado aconteceu
+        console.error('Resposta inesperada da API');
+        console.log(retorno);
+      }
 
       // depois da requisição
       setLoading(false);
@@ -68,16 +81,28 @@ const Home = ({navigation}: any) => {
     setLoginMailModal(false);
   };
 
-  const submitPassword = () => {
+  const submitPassword = async () => {
     if (password) {
       // antes da requisição
       setLoading(true);
 
-      // se senha correta
-      goToList();
-
-      //  se senha incorreta
-      setFailPassword(true);
+      const retorno = await Usuario.login(email, password);
+      if ('nome' in retorno) {
+        // se senha correta
+        goToList();
+      } else if ('errorNum' in retorno) {
+        if (retorno.errorNum === 401) {
+          //  se senha incorreta
+          setFailPassword(true);
+        } else {
+          // um erro diferente aconteceu
+          console.log(retorno);
+        }
+      } else {
+        // Algo inesperado aconteceu
+        console.error('Resposta inesperada da API');
+        console.log(retorno);
+      }
 
       // depois da requisição
       setLoading(false);
@@ -133,6 +158,7 @@ const Home = ({navigation}: any) => {
             error={failEmail}
             value={email}
             onChange={e => setEmail(e.nativeEvent.text)}
+            keyboardType="email-address"
           />
         </View>
 
