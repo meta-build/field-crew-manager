@@ -30,6 +30,15 @@ class Manobra {
     const {data} = await api.apiJson.post('/manobras', manobra);
     return data;
   }
+
+  async finalize(id: string): Promise<any> {
+    try {
+      const retorno = await api.apiJson.put(`/manobras/finalizar/${id}`);
+      return retorno;
+    } catch (err) {
+      throw err;
+    }
+  }
 }
 
 export default new Manobra();

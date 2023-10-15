@@ -71,6 +71,11 @@ interface ManobraItem {
   };
 }
 
+interface ErrorType {
+  errorNum: number;
+  errorMsg: string;
+}
+
 export type {
   Tipo,
   Equipamento,
@@ -79,4 +84,5 @@ export type {
   UsuarioItem,
   Manobra,
   ManobraItem,
+  ErrorType,
 };

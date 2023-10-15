@@ -1,4 +1,4 @@
-import {Usuario as UsuarioType, UsuarioItem} from '../types';
+import {Usuario as UsuarioType, UsuarioItem, ErrorType} from '../types';
 import api from './api';
 
 interface UsuarioListReturn {
@@ -25,11 +25,6 @@ interface UpdateUsuarioForm {
   telefone?: string;
   foto?: string;
   isAdmin?: boolean;
-}
-
-interface ErrorType {
-  errorNum: number;
-  errorMsg: string;
 }
 
 class Usuario {
