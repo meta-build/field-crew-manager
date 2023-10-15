@@ -80,6 +80,20 @@ class Validations {
         return undefined;
       }
     },
+    MatriculaValidation: async (matricula: string, res: Response) => {
+      try {
+        const userExists = await usuarioSchema.findOne({ matricula });
+
+        //checar se existe usuario
+        if (userExists) {
+          return res.status(400).json({ error: 'N° de Matrícula já está em uso.' });
+        };
+        return undefined;
+      } catch (e) {
+        console.log(e);
+        return undefined;
+      }
+    },
     cpfValidation: async (cpf: string, res: Response) => {
       if (cpf.length > 12) {
         return res.status(400).json({ error: 'CPF inválido.' });

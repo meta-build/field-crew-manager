@@ -79,6 +79,9 @@ class UsuarioController {
     const emailAlert = await Validations.users.emailValidation(email, res);
     if (emailAlert) return emailAlert;
 
+    const matriculaAlert = await Validations.users.MatriculaValidation(matricula, res);
+    if (matriculaAlert) return matriculaAlert;
+
     const cpfAlert = await Validations.users.cpfValidation(cpf, res);
     if (cpfAlert) return cpfAlert;
 
@@ -141,8 +144,20 @@ class UsuarioController {
     };
     const isAdmin = req.body.isAdmin === 'true';
 
-    const emailAlert = await Validations.users.emailValidation(email, res);
-    if (emailAlert) return emailAlert;
+    const usuario = await usuarioSchema.findById(id);
+    if (!usuario) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+    
+    if (email && email !== usuario.email) {
+      const emailAlert = await Validations.users.emailValidation(email, res);
+      if (emailAlert) return emailAlert;
+    }
+
+    if (matricula && matricula !== usuario.matricula) {
+      const matriculaAlert = await Validations.users.MatriculaValidation(matricula, res);
+      if (matriculaAlert) return matriculaAlert;
+    }
 
     let foto = '';
     if (req.files && req.files.foto) {
