@@ -30,7 +30,14 @@ interface Usuario {
   matricula: string;
   cpf: string;
   foto: string;
-  isAdmin: boolean
+  isAdmin: boolean;
+}
+
+interface UsuarioItem {
+  id: string;
+  nome: string;
+  sobrenome: string;
+  foto: string;
 }
 
 interface Manobra {
@@ -43,7 +50,7 @@ interface Manobra {
     id: string;
     nome: string;
     sobrenome: string;
-  }
+  };
 }
 
 interface ManobraItem {
@@ -58,4 +65,12 @@ interface ManobraItem {
   };
 }
 
-export type {Tipo, Equipamento, EquipamentoItem, Usuario, Manobra, ManobraItem};
+export type {
+  Tipo,
+  Equipamento,
+  EquipamentoItem,
+  Usuario,
+  UsuarioItem,
+  Manobra,
+  ManobraItem,
+};
