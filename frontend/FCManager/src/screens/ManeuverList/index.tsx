@@ -35,15 +35,16 @@ function ManeuverList({navigation}: any) {
   const {usuario} = useContexto();
 
   const [filterModal, setFilterModal] = useState(false);
+  const [alertModal, setAlertModal] = useState(false);
 
   const [loadingList, setLoadingList] = useState(false);
 
-  const [city, setCity] = useState('');
   const [titulo, setTitulo] = useState('');
   const [status, setStatus] = useState<StatusType>('todos');
+
   const [lista, setLista] = useState<ManobraItem[]>([]);
+
   const [filterCount, setFilterCount] = useState(0);
-  const [alertModal, setAlertModal] = useState(false);
 
   const openFilter = () => {
     setFilterModal(true);
@@ -62,9 +63,7 @@ function ManeuverList({navigation}: any) {
   };
 
   const confirmFilter = () => {
-    if (city && status !== 'todos') {
-      setFilterCount(2);
-    } else if (city || status !== 'todos') {
+    if (status !== 'todos') {
       setFilterCount(1);
     } else {
       setFilterCount(0);
@@ -74,7 +73,6 @@ function ManeuverList({navigation}: any) {
   };
 
   const cancelFilter = () => {
-    setCity('');
     setStatus('todos');
     setTitulo('');
     setFilterCount(0);
@@ -159,7 +157,9 @@ function ManeuverList({navigation}: any) {
               renderItem={({item}) => (
                 <View style={styles.item}>
                   <ManeuverItem
-                    highlight={usuario?.manobraAtiva}
+                    highlight={
+                      !item.datetimeFim && item.usuario.id === usuario?.id
+                    }
                     maneuver={{
                       user: `${item.usuario.nome} ${item.usuario.sobrenome}`,
                       status: !item.datetimeFim ? 'active' : 'deactive',

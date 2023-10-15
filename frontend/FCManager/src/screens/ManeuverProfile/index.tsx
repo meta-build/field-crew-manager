@@ -23,17 +23,23 @@ import colors from '../../styles/variables';
 import {Manobra as ManobraType} from '../../types';
 
 import Manobra from '../../services/Manobra';
+import useContexto from '../../hooks/useContexto';
+import {UsuarioContext} from '../../contexts/Contexto';
 
 const Panel = ({children}: any) => {
   return <View style={styles.panel}>{children}</View>;
 };
 
 function ManeuverProfile({navigation, route}: any) {
+  const {usuario, setUsuario} = useContexto();
+
   const {id} = route.params;
 
-  const [manobra, setManobra] = useState<ManobraType>();
+  const [manobra, setManobra] = useState<ManobraType | undefined>();
 
   const [confirmModal, setConfirmModal] = useState(false);
+
+  const [loading, setLoading] = useState(false);
 
   const openToolItem = (toolId: string) => {
     navigation.navigate('ToolProfile', {id: toolId});
@@ -43,15 +49,36 @@ function ManeuverProfile({navigation, route}: any) {
     setConfirmModal(true);
   };
 
-  const finalizeManeuver = () => {
+  const finalizeManeuver = async () => {
+    setLoading(true);
+
     // requisição para concluir manobra selecionada
+    await Manobra.finalize(id)
+      .then(async () => {
+        await getManobra();
+        const tempUser = {
+          ...usuario,
+          manobraAtiva: false,
+        } as UsuarioContext;
+        setUsuario(tempUser);
+      })
+      .catch(err => console.log(err));
+
+    setLoading(false);
+    setConfirmModal(false);
+  };
+
+  const getManobra = async () => {
+    const maneuver = await Manobra.getById(id);
+    setManobra(maneuver);
   };
 
   useEffect(() => {
-    const onFocus = navigation.addListener('focus', async () => {
+    const onFocus = navigation.addListener('focus', () => {
+      setManobra(undefined);
+
       // pegar manobra e armazenar no state manobra
-      const maneuver = await Manobra.getById(id);
-      setManobra(maneuver);
+      getManobra();
     });
 
     return onFocus;
@@ -63,7 +90,7 @@ function ManeuverProfile({navigation, route}: any) {
       <SafeAreaView style={styles.container}>
         <Header text="Manobras" />
         {manobra ? (
-          <ScrollView>
+          <ScrollView contentContainerStyle={styles.scrollView}>
             <View style={styles.content}>
               <Panel>
                 <Title color="gray" text={manobra?.titulo as string} />
@@ -139,7 +166,7 @@ function ManeuverProfile({navigation, route}: any) {
                 />
               </Panel>
               <View style={styles.spacing} />
-              {!manobra.datetimeFim ? (
+              {!manobra.datetimeFim && manobra.usuario.id === usuario?.id ? (
                 <Btn
                   styleType="filled"
                   title="Concluir manobra"
@@ -169,11 +196,13 @@ function ManeuverProfile({navigation, route}: any) {
             styleType="filled"
             title="Confirmar"
             onPress={() => finalizeManeuver()}
+            loading={loading}
           />
           <Btn
             styleType="outlined"
             title="Cancelar"
             onPress={() => setConfirmModal(false)}
+            enable={!loading}
           />
         </View>
       </BottomModal>
@@ -185,6 +214,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.light_gray_1,
+  },
+  scrollView: {
+    flexGrow: 1,
   },
   content: {
     flex: 1,
