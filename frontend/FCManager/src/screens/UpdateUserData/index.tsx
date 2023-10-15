@@ -96,6 +96,7 @@ function UpdateUserData({navigation}: any) {
         sobrenome,
         email,
         telefone,
+        isAdmin: usuario?.isAdmin,
       },
       usuario?.id as string,
     );
