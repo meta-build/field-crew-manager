@@ -51,7 +51,7 @@ function ManeuverList({navigation}: any) {
     if (isRunning) {
       setAlertModal(true);
     } else {
-      navigation.navigate('NewTool');
+      navigation.navigate('ManeuverForm');
     }
   };
 
