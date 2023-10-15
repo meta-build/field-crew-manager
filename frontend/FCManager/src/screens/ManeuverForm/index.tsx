@@ -21,6 +21,9 @@ import SelectEquipment from '../../components/SelectEquipment';
 import colors from '../../styles/variables';
 
 import {EquipamentoItem} from '../../types';
+import Manobra from '../../services/Manobra';
+import useContexto from '../../hooks/useContexto';
+import {UsuarioContext} from '../../contexts/Contexto';
 
 const {width, height} = Dimensions.get('window');
 
@@ -36,6 +39,7 @@ const AlertMsg = ({children}: any) => {
 
 function ManeuverForm({navigation, route}: any) {
   const params = route.params;
+  const {usuario, setUsuario} = useContexto();
 
   const [titulo, setTitulo] = useState('');
   const [desc, setDesc] = useState('');
@@ -49,11 +53,33 @@ function ManeuverForm({navigation, route}: any) {
 
   const [loading, setLoading] = useState(false);
 
-  const create = async () => {
+  const create = () => {
     setLoading(true);
 
-    setConfirmModal(false);
-    setLoading(false);
+    Manobra.new({
+      datetimeInicio: new Date().toISOString(),
+      descricao: desc,
+      titulo,
+      equipamentos: equipamentos.map(equip => equip.id),
+    })
+      .then(res => {
+        setConfirmModal(false);
+        setLoading(false);
+
+        const tempUser = {
+          ...usuario,
+          manobraAtiva: true,
+        } as UsuarioContext;
+        setUsuario(tempUser);
+
+        navigation.push('ManeuverList');
+        navigation.navigate('ManeuverProfile', {id: res.id});
+      })
+      .catch(err => {
+        setConfirmModal(false);
+        setLoading(false);
+        console.log(err);
+      });
   };
 
   const confirm = () => {

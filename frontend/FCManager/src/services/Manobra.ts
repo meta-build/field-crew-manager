@@ -8,6 +8,13 @@ interface ManobraListReturn {
   };
 }
 
+interface ManobraForm {
+  titulo: string;
+  descricao: string;
+  equipamentos: string[];
+  datetimeInicio: string;
+}
+
 class Manobra {
   async getAll(): Promise<ManobraListReturn> {
     const {data} = await api.apiJson.get('/manobras');
@@ -16,6 +23,11 @@ class Manobra {
 
   async getById(id: string): Promise<ManobraType> {
     const {data} = await api.apiJson.get(`/manobras/${id}`);
+    return data;
+  }
+
+  async new(manobra: ManobraForm): Promise<{id: string}> {
+    const {data} = await api.apiJson.post('/manobras', manobra);
     return data;
   }
 }
