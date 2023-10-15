@@ -143,16 +143,13 @@ class Validations {
       return undefined;
     },
     passwordValidation: async (userId: string, passwordInserted: string, res: Response): Promise<undefined | { errorResponse: any}> => {
-      console.log('validando id...')
       const userValidation = await this.users.idValidation(userId, res);
       if (userValidation['errorResponse']) return userValidation;
 
       const { senha } = userValidation;
 
-      console.log('validando senha validation...')
       try {
         const isMatch = await bcrypt.compare(passwordInserted, senha);
-        console.log(isMatch);
         if (!isMatch) {
           return { errorResponse: res.sendStatus(401) };
         }
