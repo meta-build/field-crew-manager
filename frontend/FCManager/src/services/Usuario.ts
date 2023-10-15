@@ -23,8 +23,8 @@ interface UpdateUsuarioForm {
   sobrenome?: string;
   email?: string;
   telefone?: string;
-  matricula?: string;
   foto?: string;
+  isAdmin?: boolean;
 }
 
 interface ErrorType {
@@ -61,13 +61,16 @@ class Usuario {
     }
   }
 
-  async update(usuario: UpdateUsuarioForm, id: string): Promise<{id: string}> {
+  async update(
+    usuario: UpdateUsuarioForm,
+    id: string,
+  ): Promise<{id: string} | ErrorType> {
     const formData = new FormData();
     usuario.nome && formData.append('nome', usuario.nome);
-    usuario.email && formData.append('.email', usuario.email);
-    usuario.matricula && formData.append('.matricula', usuario.matricula);
-    usuario.sobrenome && formData.append('.sobrenome', usuario.sobrenome);
-    usuario.telefone && formData.append('.telefone', usuario.telefone);
+    usuario.email && formData.append('email', usuario.email);
+    usuario.sobrenome && formData.append('sobrenome', usuario.sobrenome);
+    usuario.telefone && formData.append('telefone', usuario.telefone);
+    formData.append('isAdmin', usuario.isAdmin ? 'true' : 'false');
 
     if (usuario.foto) {
       const imgName = 'foto.jpg';
@@ -78,8 +81,22 @@ class Usuario {
       });
     }
 
-    const {data} = await api.apiFormdata.put(`/usuarios/${id}`, formData);
-    return data;
+    try {
+      const {data} = await api.apiFormdata.put(`/usuarios/${id}`, formData);
+      return data;
+    } catch (error: any) {
+      // Trate o erro e retorne o JSON de erro
+      if (error.response) {
+        // A resposta contém informações de erro
+        return {
+          errorNum: error.response.status,
+          errorMsg: error.response.data.error,
+        };
+      } else {
+        // Erro de rede ou algo de errado na solicitação
+        throw error; // Rejeite o erro para que o código que chama essa função possa tratá-lo
+      }
+    }
   }
 
   async loginEmail(

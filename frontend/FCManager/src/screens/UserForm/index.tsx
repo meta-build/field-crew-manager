@@ -98,6 +98,34 @@ function UserForm({navigation, route}: any) {
     setLoading(true);
 
     if (params?.id) {
+      const retorno = await Usuario.update(
+        {
+          email,
+          nome,
+          sobrenome,
+          telefone,
+          isAdmin,
+        },
+        params?.id,
+      );
+
+      if ('errorNum' in retorno) {
+        if (retorno.errorNum === 400) {
+          if (retorno.errorMsg === 'Email já está em uso.') {
+            setAlreadyEmail(true);
+          } else {
+            console.log(retorno);
+          }
+          setLoading(false);
+          setConfirmModal(false);
+        } else {
+          console.log(retorno);
+        }
+      } else {
+        setLoading(false);
+        navigation.push('UserList');
+        navigation.navigate('UserProfile', {id: params.id});
+      }
     } else {
       const retorno = await Usuario.new({
         cpf,
@@ -153,17 +181,23 @@ function UserForm({navigation, route}: any) {
     setInvalidCpf(cpf.length !== 11);
     setInvalidMatricula(matricula.length !== 6);
 
-    const validation =
-      nome &&
-      sobrenome &&
-      email &&
-      telefone &&
-      matricula &&
-      cpf &&
-      isEmailValid() &&
-      isPhoneNumberValid() &&
-      cpf.length === 11 &&
-      matricula.length === 6;
+    const validation = !params?.id
+      ? nome &&
+        sobrenome &&
+        email &&
+        telefone &&
+        matricula &&
+        cpf &&
+        isEmailValid() &&
+        isPhoneNumberValid() &&
+        cpf.length === 11 &&
+        matricula.length === 6
+      : nome &&
+        sobrenome &&
+        email &&
+        telefone &&
+        isEmailValid() &&
+        isPhoneNumberValid();
 
     if (validation) {
       setConfirmModal(true);
@@ -183,7 +217,7 @@ function UserForm({navigation, route}: any) {
         const usuario = await Usuario.getById(params?.id);
         setNome(usuario.nome);
         setSobrenome(usuario.sobrenome);
-        setEmail(usuario.sobrenome);
+        setEmail(usuario.email);
         setTelefone(usuario.telefone);
         setTelefoneMask(usuario.telefone);
         setisAdmin(usuario.isAdmin);
