@@ -13,13 +13,18 @@ const uploadImg = async (img: any): Promise<string> => {
   const formData = new FormData();
   formData.append('image', imgBlob, imgName);
 
-  const resp = await axios.post(
-    'https://api.imgur.com/3/image',
-    formData,
-    { headers: { 'Authorization': `Client-ID ${process.env.IMGUR_CLIENT_ID}` } }
-  );
-  const url = resp.data.data.link as string;
-  return url;
+  try {
+    const resp = await axios.post(
+      'https://api.imgur.com/3/image',
+      formData,
+      { headers: { 'Authorization': `Client-ID ${process.env.IMGUR_CLIENT_ID}` } }
+    );
+    const url = resp.data.data.link as string;
+    return url;
+  } catch (error) {
+    console.log(error);
+    return '';
+  }
 }
 
 export { uploadImg };
