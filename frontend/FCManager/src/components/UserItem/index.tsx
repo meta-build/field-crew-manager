@@ -36,9 +36,13 @@ function UserItem({user, ...props}: Props) {
       <View style={styles.imgView}>
         <Image
           style={styles.img}
-          source={{
-            uri: user.foto,
-          }}
+          source={
+            user.foto
+              ? {
+                  uri: user.foto,
+                }
+              : require('../../assets/images/default-profile-img.png')
+          }
         />
       </View>
       <View style={styles.info}>
