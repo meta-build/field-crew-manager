@@ -15,6 +15,7 @@ import BottomModal from '../../components/BottomModal';
 import InputText from '../../components/InputText';
 import Usuario from '../../services/Usuario';
 import useContexto from '../../hooks/useContexto';
+import {UsuarioContext} from '../../contexts/Contexto';
 
 const logo = require('../../assets/images/logo-1.png');
 const image = require('../../assets/images/home-image.png');
@@ -92,7 +93,7 @@ const Home = ({navigation}: any) => {
       const retorno = await Usuario.login(email, password);
       if ('nome' in retorno) {
         // se senha correta
-        setUsuario(retorno);
+        setUsuario(retorno as UsuarioContext);
         goToList();
       } else if ('errorNum' in retorno) {
         if (retorno.errorNum === 401) {

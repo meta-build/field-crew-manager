@@ -19,6 +19,7 @@ import BottomModal from '../../components/BottomModal';
 import Title from '../../components/Title';
 
 import colors from '../../styles/variables';
+import Usuario from '../../services/Usuario';
 
 const {width, height} = Dimensions.get('window');
 
@@ -34,9 +35,7 @@ const AlertMsg = ({children}: any) => {
   return <Text style={styles.alert}>{children}</Text>;
 };
 
-function ChangePassword({navigation, route}: any) {
-  const {id} = route.params;
-
+function ChangePassword({navigation}: any) {
   const [senhaAntiga, setSenhaAntiga] = useState('');
   const [senhaNova, setSenhaNova] = useState('');
   const [confirmsenhaNova, setConfirmSenhaNova] = useState('');
@@ -52,6 +51,18 @@ function ChangePassword({navigation, route}: any) {
     setLoading(true);
 
     // requisição para trocar senha (pode retorar erro 401)
+    const retorno = await Usuario.updatePassowrd(senhaAntiga, senhaNova);
+    console.log(retorno);
+    if ('errorNum' in retorno) {
+      console.log(retorno);
+      if (retorno.errorNum === 401) {
+        setIncorrect(true);
+      } else {
+        console.log(retorno);
+      }
+    } else {
+      navigation.goBack();
+    }
 
     setLoading(false);
     setConfirmModal(false);
@@ -80,13 +91,15 @@ function ChangePassword({navigation, route}: any) {
     const onFocus = navigation.addListener('focus', () => {
       // pegar dados do usuário a ser editado
 
+      setSenhaAntiga('');
+      setSenhaNova('');
+      setConfirmSenhaNova('');
       setConfirmModal(false);
       setDontMatch(false);
       setIncorrect(false);
     });
 
     return onFocus;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation]);
 
   return (

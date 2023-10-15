@@ -99,6 +99,28 @@ class Usuario {
     }
   }
 
+  async updatePassowrd(
+    senhaAntiga: string,
+    senhaNova: string,
+  ): Promise<any | ErrorType> {
+    try {
+      const retorno = await api.apiJson.put('usuarios/login/senha', {
+        senhaAntiga,
+        senhaNova,
+      });
+      return retorno;
+    } catch (error: any) {
+      if (error.response) {
+        return {
+          errorNum: error.response.status,
+          errorMsg: error.response.data.error,
+        };
+      } else {
+        throw error;
+      }
+    }
+  }
+
   async loginEmail(
     email: string,
   ): Promise<{nome: string; sobrenome: string} | ErrorType> {
