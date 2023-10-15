@@ -1,19 +1,21 @@
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import colors from '../../styles/variables';
+import useContexto from '../../hooks/useContexto';
 
 interface Props {
   text: string;
-  runningManeuve?: boolean;
 }
 
-const Header = ({text, runningManeuve}: Props) => {
+const Header = ({text}: Props) => {
+  const {usuario} = useContexto();
+
   return (
     <View>
       <View style={styles.header}>
         <Text style={styles.h1}>{text}</Text>
       </View>
-      {runningManeuve ? (
+      {usuario?.manobraAtiva ? (
         <Text style={styles.warning}>Você possui uma manobra em andamento</Text>
       ) : (
         <></>

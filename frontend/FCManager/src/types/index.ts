@@ -57,8 +57,8 @@ interface Manobra {
 interface ManobraItem {
   id: string;
   titulo: string;
-  datetimeInicio: Date;
-  datetimeFim?: Date;
+  datetimeInicio: string;
+  datetimeFim?: string;
   usuario: {
     id: string;
     nome: string;

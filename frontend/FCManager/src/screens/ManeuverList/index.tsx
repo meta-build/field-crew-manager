@@ -18,19 +18,22 @@ import Dropdown from '../../components/Dropdown';
 import colors from '../../styles/variables';
 
 import FilterIcon from '../../assets/icons/filterGreen.svg';
-import Equipamento from '../../services/Equipamento';
 
-import {EquipamentoItem} from '../../types';
+import {ManobraItem} from '../../types';
 
 import LoadingToolList from '../../components/LoadingToolList';
 import Navbar from '../../components/Navbar';
 import ManeuverItem from '../../components/ManeuverItem';
+import Manobra from '../../services/Manobra';
+import useContexto from '../../hooks/useContexto';
 
 const {width, height} = Dimensions.get('window');
 
 type StatusType = 'todos' | 'concluido' | 'emAndamento';
 
 function ManeuverList({navigation}: any) {
+  const {usuario} = useContexto();
+
   const [filterModal, setFilterModal] = useState(false);
 
   const [loadingList, setLoadingList] = useState(false);
@@ -38,9 +41,8 @@ function ManeuverList({navigation}: any) {
   const [city, setCity] = useState('');
   const [titulo, setTitulo] = useState('');
   const [status, setStatus] = useState<StatusType>('todos');
-  const [lista, setLista] = useState<EquipamentoItem[]>([]);
+  const [lista, setLista] = useState<ManobraItem[]>([]);
   const [filterCount, setFilterCount] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
   const [alertModal, setAlertModal] = useState(false);
 
   const openFilter = () => {
@@ -48,7 +50,7 @@ function ManeuverList({navigation}: any) {
   };
 
   const openManeuverForm = () => {
-    if (isRunning) {
+    if (usuario?.manobraAtiva) {
       setAlertModal(true);
     } else {
       navigation.navigate('ManeuverForm');
@@ -87,10 +89,22 @@ function ManeuverList({navigation}: any) {
 
   const getManobras = async () => {
     setLoadingList(true);
-    await Equipamento.getAll('todos', '', '').then(res => {
-      const equips = res.values.filter(equip => filtrarNome(equip.tipo.value));
-      setLista(equips);
-    });
+    await Manobra.getAll()
+      .then(res => {
+        const manobras = res.values.filter(manobra => {
+          const tituloFilter = filtrarNome(manobra.titulo);
+          const statusFilter =
+            status === 'todos'
+              ? true
+              : status === 'concluido'
+              ? manobra.datetimeFim
+              : !manobra.datetimeFim;
+          return tituloFilter && statusFilter;
+        });
+        console.log(manobras);
+        setLista(manobras);
+      })
+      .catch(err => console.log(err));
     setLoadingList(false);
   };
 
@@ -108,7 +122,7 @@ function ManeuverList({navigation}: any) {
   return (
     <>
       <SafeAreaView style={styles.container}>
-        <Header text="Manobras" runningManeuve={isRunning} />
+        <Header text="Manobras" />
         <View style={styles.content}>
           <View style={styles.searchView}>
             <InputText
@@ -145,12 +159,12 @@ function ManeuverList({navigation}: any) {
               renderItem={({item}) => (
                 <View style={styles.item}>
                   <ManeuverItem
-                    highlight={isRunning}
+                    highlight={usuario?.manobraAtiva}
                     maneuver={{
-                      user: 'Nome do usuário',
-                      status: item.status === 'ativo' ? 'active' : 'deactive',
-                      title: 'Título da manobra',
-                      date: new Date().toISOString(),
+                      user: `${item.usuario.nome} ${item.usuario.sobrenome}`,
+                      status: !item.datetimeFim ? 'active' : 'deactive',
+                      title: item.titulo,
+                      date: item.datetimeFim ? item.datetimeFim : undefined,
                     }}
                     onPress={() => openItem(item.id)}
                   />
