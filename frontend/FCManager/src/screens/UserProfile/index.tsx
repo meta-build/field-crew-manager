@@ -6,7 +6,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import {Usuario} from '../../types';
+import {Usuario as UsuarioType} from '../../types';
 import colors from '../../styles/variables';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Header from '../../components/Header/Index';
@@ -14,6 +14,7 @@ import ProfileImage from '../../components/ProfileImage';
 import Info from '../../components/Info';
 import Btn from '../../components/Button';
 import Navbar from '../../components/Navbar';
+import Usuario from '../../services/Usuario';
 
 const {width, height} = Dimensions.get('window');
 
@@ -24,25 +25,39 @@ function Panel({children}: any) {
 function UserProfile({navigation, route}: any) {
   const {id} = route.params;
 
-  const [usuario, setUsuario] = useState<Usuario>();
+  const [usuario, setUsuario] = useState<UsuarioType>();
 
   const openFormUser = () => {
     navigation.navigate('UserForm', {id});
   };
 
+  function maskPhoneNumber(phoneNumber: string) {
+    // Remove todos os caracteres não numéricos do número de telefone
+    const numericOnly = phoneNumber.replace(/\D/g, '');
+
+    // Formate o número com a máscara desejada
+    const formattedNumber = `+${numericOnly.slice(0, 2)} (${numericOnly.slice(
+      2,
+      4,
+    )}) ${numericOnly.slice(4, 9)}-${numericOnly.slice(9, 13)}`;
+
+    return formattedNumber;
+  }
+
+  function maskCPF(cpf: string) {
+    // Remove todos os caracteres não numéricos do CPF
+    const numericOnly = cpf.replace(/\D/g, '');
+  
+    // Formate o CPF com a máscara desejada
+    const formattedCPF = `${numericOnly.slice(0, 3)}.${numericOnly.slice(3, 6)}.${numericOnly.slice(6, 9)}-${numericOnly.slice(9, 11)}`;
+  
+    return formattedCPF;
+  }
+
   useEffect(() => {
-    const onFocus = navigation.addListener('focus', () => {
-      setUsuario({
-        id,
-        nome: 'valor',
-        sobrenome: 'valor',
-        email: 'valor',
-        telefone: 'valor',
-        matricula: 'valor',
-        cpf: 'valor',
-        foto: '',
-        isAdmin: true,
-      });
+    const onFocus = navigation.addListener('focus', async () => {
+      const retorno = await Usuario.getById(id);
+      setUsuario(retorno);
     });
 
     return onFocus;
@@ -70,9 +85,12 @@ function UserProfile({navigation, route}: any) {
                   value={`${usuario?.nome} ${usuario?.sobrenome}`}
                 />
                 <Info label="Email" value={usuario?.email as string} />
-                <Info label="Telefone" value={usuario?.telefone as string} />
+                <Info
+                  label="Telefone"
+                  value={maskPhoneNumber(usuario?.telefone)}
+                />
                 <Info label="Matrícula" value={usuario?.matricula as string} />
-                <Info label="CPF" value={usuario?.cpf as string} />
+                <Info label="CPF" value={maskCPF(usuario?.cpf)} />
               </Panel>
               <View style={styles.space} />
               <View>
