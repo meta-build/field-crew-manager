@@ -20,6 +20,7 @@ import Title from '../../components/Title';
 
 import colors from '../../styles/variables';
 import InputMaskText from '../../components/InputMaskText';
+import Usuario from '../../services/Usuario';
 
 const {width, height} = Dimensions.get('window');
 
@@ -98,6 +99,42 @@ function UserForm({navigation, route}: any) {
 
     if (params?.id) {
     } else {
+      const retorno = await Usuario.new({
+        cpf,
+        email,
+        matricula,
+        nome,
+        sobrenome,
+        telefone,
+        isAdmin,
+      });
+      if ('id' in retorno) {
+        setLoading(false);
+        navigation.push('UserList');
+        navigation.navigate('UserProfile', {id: retorno.id});
+      } else if ('errorNum' in retorno) {
+        if (retorno.errorNum === 400) {
+          switch (retorno.errorMsg) {
+            case 'Email já está em uso.':
+              setAlreadyEmail(true);
+              break;
+            case 'CPF já está em uso.':
+              setAlreadyCpf(true);
+              break;
+            case 'N° de Matrícula já está em uso.':
+              setAlreadyMatricula(true);
+              break;
+            default:
+              console.log(retorno.errorMsg);
+          }
+          setLoading(false);
+          setConfirmModal(false);
+        } else {
+          console.log(retorno);
+        }
+      } else {
+        console.log(retorno);
+      }
     }
   };
 
@@ -116,8 +153,6 @@ function UserForm({navigation, route}: any) {
     setInvalidCpf(cpf.length !== 11);
     setInvalidMatricula(matricula.length !== 6);
 
-    // validar se email, cpf, e matrícula já existem
-
     const validation =
       nome &&
       sobrenome &&
@@ -131,7 +166,6 @@ function UserForm({navigation, route}: any) {
       matricula.length === 6;
 
     if (validation) {
-      console.log('caindo');
       setConfirmModal(true);
     }
 
@@ -143,16 +177,25 @@ function UserForm({navigation, route}: any) {
   };
 
   useEffect(() => {
-    const onFocus = navigation.addListener('focus', () => {
+    const onFocus = navigation.addListener('focus', async () => {
       if (params?.id) {
         // pegar dados do usuário a ser editado
+        const usuario = await Usuario.getById(params?.id);
+        setNome(usuario.nome);
+        setSobrenome(usuario.sobrenome);
+        setEmail(usuario.sobrenome);
+        setTelefone(usuario.telefone);
+        setTelefoneMask(usuario.telefone);
+        setisAdmin(usuario.isAdmin);
       } else {
         setNome('');
         setSobrenome('');
         setEmail('');
         setTelefone('');
+        setTelefoneMask('');
         setMatricula('');
         setCpf('');
+        setCpfMask('');
         setisAdmin(false);
       }
 
@@ -215,7 +258,7 @@ function UserForm({navigation, route}: any) {
                     value={email}
                     onChange={e => setEmail(e.nativeEvent.text)}
                     color="gray"
-                    error={emailAlert || invalidEmail}
+                    error={emailAlert || invalidEmail || alreadyEmail}
                     keyboardType="email-address"
                     placeholder="exemplo@dominio.com"
                   />
@@ -275,7 +318,9 @@ function UserForm({navigation, route}: any) {
                       }}
                       placeholder="000000"
                       keyboardType="number-pad"
-                      error={matriculaAlert || invalidMatricula}
+                      error={
+                        matriculaAlert || invalidMatricula || alreadyMatricula
+                      }
                     />
                   </View>
                   {matriculaAlert ? (
@@ -306,7 +351,7 @@ function UserForm({navigation, route}: any) {
                         console.log(txt, mask);
                       }}
                       color="gray"
-                      error={cpfAlert || invalidCpf}
+                      error={cpfAlert || invalidCpf || alreadyCpf}
                       placeholder="xxx.xxx.xxx-xx"
                       keyboardType="decimal-pad"
                     />

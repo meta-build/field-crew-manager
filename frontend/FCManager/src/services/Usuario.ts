@@ -15,6 +15,7 @@ interface NewUsuarioForm {
   telefone: string;
   matricula: string;
   cpf: string;
+  isAdmin: boolean;
 }
 
 interface UpdateUsuarioForm {
@@ -42,9 +43,22 @@ class Usuario {
     return data;
   }
 
-  async new(usuario: NewUsuarioForm): Promise<{id: string}> {
-    const {data} = await api.apiJson.post('/equipamentos', usuario);
-    return data;
+  async new(usuario: NewUsuarioForm): Promise<{id: string} | ErrorType> {
+    try {
+      const {data} = await api.apiJson.post('/usuarios', usuario);
+      return data;
+    } catch (error: any) {
+      if (error.response) {
+        // A resposta contém informações de erro
+        return {
+          errorNum: error.response.status,
+          errorMsg: error.response.data.error,
+        };
+      } else {
+        // Erro de rede ou algo de errado na solicitação
+        throw error; // Rejeite o erro para que o código que chama essa função possa tratá-lo
+      }
+    }
   }
 
   async update(usuario: UpdateUsuarioForm, id: string): Promise<{id: string}> {
