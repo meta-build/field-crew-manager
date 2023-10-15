@@ -11,33 +11,22 @@ import OptionBtn from '../../components/OptionBtn';
 import BottomModal from '../../components/BottomModal';
 import Btn from '../../components/Button';
 
-import {Usuario} from '../../types';
-
 import colors from '../../styles/variables';
+import useContexto from '../../hooks/useContexto';
 
 const {width, height} = Dimensions.get('window');
 
-function OwnUserProfile({navigation, route}: any) {
-  const [usuario, setUsuario] = useState<Usuario>({
-    cpf: '123',
-    email: '123',
-    foto: '',
-    id: '123',
-    isAdmin: true,
-    matricula: '123',
-    nome: 'FULANO',
-    sobrenome: '123',
-    telefone: '12312',
-  });
+function OwnUserProfile({navigation}: any) {
+  const {usuario} = useContexto();
 
   const [exitModal, setExitModal] = useState(false);
 
   const openUpdateUser = () => {
-    navigation.navigate('UpdateUserData', {id: usuario.id});
+    navigation.navigate('UpdateUserData', {id: usuario?.id});
   };
-  
+
   const openChangePassword = () => {
-    navigation.navigate('ChangePassword', {id: usuario.id});
+    navigation.navigate('ChangePassword', {id: usuario?.id});
   };
 
   const openExitModal = () => {
@@ -59,7 +48,7 @@ function OwnUserProfile({navigation, route}: any) {
             <View style={styles.infoView}>
               <Title
                 color="gray"
-                text={`${usuario.nome} ${usuario.sobrenome}`}
+                text={`${usuario?.nome} ${usuario?.sobrenome}`}
               />
               {usuario?.isAdmin ? (
                 <Text style={styles.adminLabel}>Administrador(a)</Text>

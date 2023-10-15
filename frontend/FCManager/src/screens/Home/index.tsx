@@ -14,6 +14,7 @@ import Title from '../../components/Title';
 import BottomModal from '../../components/BottomModal';
 import InputText from '../../components/InputText';
 import Usuario from '../../services/Usuario';
+import useContexto from '../../hooks/useContexto';
 
 const logo = require('../../assets/images/logo-1.png');
 const image = require('../../assets/images/home-image.png');
@@ -21,6 +22,8 @@ const image = require('../../assets/images/home-image.png');
 const {width, height} = Dimensions.get('window');
 
 const Home = ({navigation}: any) => {
+  const {setUsuario} = useContexto();
+
   const [loginMailModal, setLoginMailModal] = useState(false);
   const [loginPasswordModal, setloginPasswordModal] = useState(false);
 
@@ -89,6 +92,7 @@ const Home = ({navigation}: any) => {
       const retorno = await Usuario.login(email, password);
       if ('nome' in retorno) {
         // se senha correta
+        setUsuario(retorno);
         goToList();
       } else if ('errorNum' in retorno) {
         if (retorno.errorNum === 401) {
