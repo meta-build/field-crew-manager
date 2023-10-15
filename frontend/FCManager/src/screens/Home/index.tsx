@@ -94,6 +94,8 @@ const Home = ({navigation}: any) => {
       if ('nome' in retorno) {
         // se senha correta
         setUsuario(retorno as UsuarioContext);
+        setLoading(false);
+        closeLoginModals();
         goToList();
       } else if ('errorNum' in retorno) {
         if (retorno.errorNum === 401) {
@@ -104,13 +106,11 @@ const Home = ({navigation}: any) => {
           console.log(retorno);
         }
       } else {
+        setLoading(false);
         // Algo inesperado aconteceu
         console.error('Resposta inesperada da API');
         console.log(retorno);
       }
-
-      // depois da requisição
-      setLoading(false);
     }
   };
 

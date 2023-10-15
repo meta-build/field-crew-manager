@@ -13,11 +13,12 @@ import Btn from '../../components/Button';
 
 import colors from '../../styles/variables';
 import useContexto from '../../hooks/useContexto';
+import Usuario from '../../services/Usuario';
 
 const {width, height} = Dimensions.get('window');
 
 function OwnUserProfile({navigation}: any) {
-  const {usuario} = useContexto();
+  const {usuario, setUsuario} = useContexto();
 
   const [exitModal, setExitModal] = useState(false);
 
@@ -35,6 +36,8 @@ function OwnUserProfile({navigation}: any) {
 
   const exit = () => {
     setExitModal(false);
+    setUsuario(undefined);
+    Usuario.exit();
     navigation.navigate('Home');
   };
 
