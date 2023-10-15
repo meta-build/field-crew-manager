@@ -7,6 +7,7 @@ import { uploadImg } from "../utils/imageUploader";
 import encryptPassword from "../utils/encryptPassword";
 
 import generateToken from "../middlewares/generateToken";
+import manobraSchema from "../models/manobraSchema";
 
 interface RequestFiles extends Request {
   files: any[] | any;
@@ -148,7 +149,7 @@ class UsuarioController {
     if (!usuario) {
       return res.status(404).json({ error: "Usuário não encontrado" });
     }
-    
+
     if (email && email !== usuario.email) {
       const emailAlert = await Validations.users.emailValidation(email, res);
       if (emailAlert) return emailAlert;
@@ -243,6 +244,20 @@ class UsuarioController {
       const validation = await Validations.users.passwordValidation(usuario.id, senha, res);
       if (validation && validation['errorResponse']) return validation['errorResponse'];
 
+      let manobraAtiva = false;
+      try {
+        const manobra = await manobraSchema.findOne({
+          'funcionario.id': usuario.id,
+          datetimeFim: { $exists: false },
+        });
+        if (manobra) {
+          manobraAtiva = true;
+        }
+      } catch (err) {
+        console.log(err);
+        return null;
+      }
+
       const token = generateToken({ id: usuario.id, isAdmin: usuario.isAdmin });
 
       return res.status(200).json({
@@ -256,6 +271,7 @@ class UsuarioController {
           cpf: usuario.cpf,
           foto: usuario.foto,
           isAdmin: usuario.isAdmin,
+          manobraAtiva
         },
         token
       });
