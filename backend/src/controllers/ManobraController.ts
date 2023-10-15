@@ -137,6 +137,9 @@ class ManobraController {
   }
 
   public async getManobras (req: Request, res: Response) {
+    const user = req.user;
+    console.log(user);
+
     try {
       const titulo: string | undefined = req.query.titulo as string | undefined;
       let manobras;
@@ -149,13 +152,22 @@ class ManobraController {
         manobras = await manobraSchema.find();
       }
 
-      const manobrasValues = manobras.map((manobra) => ({
+      const manobrasValues: any[] = manobras.map((manobra) => ({
         id: manobra._id,
         titulo: manobra.titulo,
         datetimeFim: manobra.datetimeFim ? manobra.datetimeFim.toISOString() : null,
         usuario: manobra.funcionario,
-      }));
-
+      })).sort((manobraA, manobraB) => {
+        if (!manobraA.datetimeFim && manobraA.usuario?.id === user.id) {
+          return -1;
+        }
+        if (!manobraB.datetimeFim && manobraB.usuario?.id === user.id) {
+          return 1;
+        }
+        else {
+          return 0;
+        }
+      });
       return res.status(200).json({
         values: manobrasValues,
         metadata: {
@@ -187,6 +199,7 @@ class ManobraController {
           return {
             id: equipamento._id,
             tipo: equipamento.tipo.value,
+            serial: equipamento.serial,
             img: equipamento.imgs[0], // A primeira imagem
           };
         })
