@@ -1,15 +1,19 @@
 import React, {createContext, useState} from 'react';
 import {Usuario as UsuarioType} from '../types';
 
+interface UsuarioContext extends UsuarioType {
+  manobraAtiva: boolean;
+}
+
 interface ContextProps {
-  usuario: UsuarioType | undefined;
-  setUsuario: React.Dispatch<React.SetStateAction<UsuarioType | undefined>>;
+  usuario: UsuarioContext | undefined;
+  setUsuario: React.Dispatch<React.SetStateAction<UsuarioContext | undefined>>;
 }
 
 const Contexto = createContext({} as ContextProps);
 
 function ContextoProvider({children}: any) {
-  const [usuario, setUsuario] = useState<UsuarioType>();
+  const [usuario, setUsuario] = useState<UsuarioContext>();
 
   // fazer requisição get aqui!!! não fazer nos outros componentes, use useEffect!!!!
   return (
@@ -20,3 +24,4 @@ function ContextoProvider({children}: any) {
 }
 
 export {ContextoProvider, Contexto};
+export type {UsuarioContext};

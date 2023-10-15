@@ -20,6 +20,9 @@ import InputMaskText from '../../components/InputMaskText';
 import InputProfileImage from '../../components/InputProfileImage';
 
 import colors from '../../styles/variables';
+import useContexto from '../../hooks/useContexto';
+import Usuario from '../../services/Usuario';
+import {UsuarioContext} from '../../contexts/Contexto';
 
 const {width, height} = Dimensions.get('window');
 
@@ -33,8 +36,8 @@ const AlertMsg = ({children}: any) => {
   return <Text style={styles.alert}>{children}</Text>;
 };
 
-function UpdateUserData({navigation, route}: any) {
-  const {id} = route.params;
+function UpdateUserData({navigation}: any) {
+  const {usuario, setUsuario} = useContexto();
 
   const [nome, setNome] = useState('');
   const [sobrenome, setSobrenome] = useState('');
@@ -85,6 +88,41 @@ function UpdateUserData({navigation, route}: any) {
 
   const create = async () => {
     setLoading(true);
+
+    const retorno = await Usuario.update(
+      {
+        foto,
+        nome,
+        sobrenome,
+        email,
+        telefone,
+      },
+      usuario?.id as string,
+    );
+
+    if ('errorNum' in retorno) {
+      setLoading(false);
+      setConfirmModal(false);
+      if (retorno.errorMsg === 'Email já está em uso.') {
+        setAlreadyEmail(true);
+      } else {
+        console.log(retorno);
+      }
+    } else {
+      setLoading(false);
+      setConfirmModal(false);
+      const updatedUser = {
+        ...usuario,
+        foto: foto,
+        nome: nome,
+        sobrenome: sobrenome,
+        email: email,
+        telefone: telefone,
+      } as UsuarioContext;
+      setUsuario(updatedUser);
+      navigation.push('OwnUserProfile');
+      navigation.navigate('OwnUserProfile');
+    }
   };
 
   const confirm = () => {
@@ -122,6 +160,12 @@ function UpdateUserData({navigation, route}: any) {
   useEffect(() => {
     const onFocus = navigation.addListener('focus', () => {
       // pegar dados do usuário a ser editado
+      setNome(usuario?.nome as string);
+      setSobrenome(usuario?.sobrenome as string);
+      setEmail(usuario?.email as string);
+      setTelefone(usuario?.telefone as string);
+      setTelefoneMask(usuario?.telefone as string);
+      setFoto(usuario?.foto as string);
 
       setConfirmModal(false);
       setNomeAlert(false);
@@ -131,8 +175,7 @@ function UpdateUserData({navigation, route}: any) {
     });
 
     return onFocus;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigation]);
+  }, [navigation, usuario]);
 
   return (
     <>
@@ -180,7 +223,7 @@ function UpdateUserData({navigation, route}: any) {
                     value={email}
                     onChange={e => setEmail(e.nativeEvent.text)}
                     color="gray"
-                    error={emailAlert || invalidEmail}
+                    error={emailAlert || invalidEmail || alreadyEmail}
                     keyboardType="email-address"
                     placeholder="exemplo@dominio.com"
                   />
