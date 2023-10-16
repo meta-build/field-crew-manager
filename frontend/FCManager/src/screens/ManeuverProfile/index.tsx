@@ -25,6 +25,7 @@ import {Manobra as ManobraType} from '../../types';
 import Manobra from '../../services/Manobra';
 import useContexto from '../../hooks/useContexto';
 import {UsuarioContext} from '../../contexts/Contexto';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Panel = ({children}: any) => {
   return <View style={styles.panel}>{children}</View>;
@@ -61,6 +62,7 @@ function ManeuverProfile({navigation, route}: any) {
           manobraAtiva: false,
         } as UsuarioContext;
         setUsuario(tempUser);
+        await AsyncStorage.setItem('usuario', JSON.stringify(tempUser));
       })
       .catch(err => console.log(err));
 

@@ -24,6 +24,7 @@ import {EquipamentoItem} from '../../types';
 import Manobra from '../../services/Manobra';
 import useContexto from '../../hooks/useContexto';
 import {UsuarioContext} from '../../contexts/Contexto';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const {width, height} = Dimensions.get('window');
 
@@ -62,7 +63,7 @@ function ManeuverForm({navigation, route}: any) {
       titulo,
       equipamentos: equipamentos.map(equip => equip.id),
     })
-      .then(res => {
+      .then(async res => {
         setConfirmModal(false);
         setLoading(false);
 
@@ -71,6 +72,8 @@ function ManeuverForm({navigation, route}: any) {
           manobraAtiva: true,
         } as UsuarioContext;
         setUsuario(tempUser);
+
+        await AsyncStorage.setItem('usuario', JSON.stringify(tempUser));
 
         navigation.push('ManeuverList');
         navigation.navigate('ManeuverProfile', {id: res.id});

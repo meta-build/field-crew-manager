@@ -23,6 +23,7 @@ import colors from '../../styles/variables';
 import useContexto from '../../hooks/useContexto';
 import Usuario from '../../services/Usuario';
 import {UsuarioContext} from '../../contexts/Contexto';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const {width, height} = Dimensions.get('window');
 
@@ -121,6 +122,7 @@ function UpdateUserData({navigation}: any) {
         telefone: telefone,
       } as UsuarioContext;
       setUsuario(updatedUser);
+      await AsyncStorage.setItem('usuario', JSON.stringify(updatedUser));
       navigation.push('OwnUserProfile');
       navigation.navigate('OwnUserProfile');
     }
