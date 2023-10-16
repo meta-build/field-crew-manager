@@ -39,7 +39,7 @@ const AlertMsg = ({children}: any) => {
   return <Text style={styles.alert}>{children}</Text>;
 };
 
-function NewTool({navigation, route}: any) {
+function ToolForm({navigation, route}: any) {
   const params = route.params;
 
   const [imgs, setImgs] = useState<string[]>([]);
@@ -389,4 +389,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NewTool;
+export default ToolForm;

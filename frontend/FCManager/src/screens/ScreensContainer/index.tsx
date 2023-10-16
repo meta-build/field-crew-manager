@@ -11,7 +11,7 @@ import colors from '../../styles/variables';
 import Home from '../Home';
 import ToolList from '../ToolList';
 import ToolProfile from '../ToolProfile';
-import NewTool from '../NewTool';
+import ToolForm from '../ToolForm';
 import UserList from '../UserList';
 import UserProfile from '../UserProfile';
 import UserForm from '../UserForm';
@@ -41,7 +41,7 @@ const ScreensContainer = () => {
             <Stack.Screen name="Home" component={Home} />
             <Stack.Screen name="ToolList" component={ToolList} />
             <Stack.Screen name="ToolProfile" component={ToolProfile} />
-            <Stack.Screen name="NewTool" component={NewTool} />
+            <Stack.Screen name="ToolForm" component={ToolForm} />
             <Stack.Screen name="UserList" component={UserList} />
             <Stack.Screen name="UserProfile" component={UserProfile} />
             <Stack.Screen name="UserForm" component={UserForm} />

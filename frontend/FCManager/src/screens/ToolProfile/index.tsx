@@ -38,7 +38,7 @@ function ToolProfile({navigation, route}: any) {
   const {id} = route.params;
 
   const edit = () => {
-    navigation.navigate('NewTool', {id});
+    navigation.navigate('ToolForm', {id});
   };
 
   const activate = () => {

@@ -50,7 +50,7 @@ function ToolList({navigation}: any) {
   };
 
   const openNewTool = () => {
-    navigation.navigate('NewTool');
+    navigation.navigate('ToolForm');
   };
 
   const openItem = (serie: string) => {
