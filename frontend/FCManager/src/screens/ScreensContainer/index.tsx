@@ -21,6 +21,7 @@ import ChangePassword from '../ChangePassword';
 import ManeuverList from '../ManeuverList';
 import ManeuverProfile from '../ManeuverProfile';
 import ManeuverForm from '../ManeuverForm';
+import Loading from '../Loading';
 
 const Stack = createNativeStackNavigator();
 
@@ -36,6 +37,7 @@ const ScreensContainer = () => {
               header: () => null,
               navigationBarColor: colors.white,
             }}>
+            <Stack.Screen name="Loading" component={Loading} />
             <Stack.Screen name="Home" component={Home} />
             <Stack.Screen name="ToolList" component={ToolList} />
             <Stack.Screen name="ToolProfile" component={ToolProfile} />

@@ -34,10 +34,10 @@ function OwnUserProfile({navigation}: any) {
     setExitModal(true);
   };
 
-  const exit = () => {
+  const exit = async () => {
     setExitModal(false);
     setUsuario(undefined);
-    Usuario.exit();
+    await Usuario.exit();
     navigation.navigate('Home');
   };
 

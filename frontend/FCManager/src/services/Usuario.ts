@@ -1,6 +1,8 @@
 import {Usuario as UsuarioType, UsuarioItem, ErrorType} from '../types';
 import api from './api';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 interface UsuarioListReturn {
   values: UsuarioItem[];
   metadata: {
@@ -145,6 +147,10 @@ class Usuario {
       });
 
       api.setToken(data.token);
+
+      await AsyncStorage.setItem('token', data.token);
+      await AsyncStorage.setItem('usuario', JSON.stringify(data.user));
+
       return data.user;
     } catch (error: any) {
       // Trate o erro e retorne o JSON de erro
@@ -161,8 +167,11 @@ class Usuario {
     }
   }
 
-  exit() {
+  async exit() {
     api.setToken(null);
+
+    await AsyncStorage.removeItem('token');
+    await AsyncStorage.removeItem('usuario');
   }
 }
 
