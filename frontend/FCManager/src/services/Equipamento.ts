@@ -1,5 +1,5 @@
 import {EquipamentoItem, Equipamento as EquipamentoType} from '../types';
-import {apiFormdata, apiJson} from './api';
+import api from './api';
 
 interface EquipamentoListReturn {
   values: EquipamentoItem[];
@@ -30,22 +30,22 @@ class Equipamento {
       .filter(param => param !== '')
       .join('&');
 
-    const {data} = await apiJson.get(`/equipamentos?${query}`);
+    const {data} = await api.apiJson.get(`/equipamentos?${query}`);
     return data;
   }
 
   async getById(id: string): Promise<EquipamentoType> {
-    const {data} = await apiJson.get(`/equipamentos/${id}`);
+    const {data} = await api.apiJson.get(`/equipamentos/${id}`);
     return data;
   }
 
   async active(id: string): Promise<{id: string}> {
-    const {data} = await apiFormdata.put(`/equipamentos/ativar/${id}`);
+    const {data} = await api.apiFormdata.put(`/equipamentos/ativar/${id}`);
     return data;
   }
 
   async deactive(id: string): Promise<{id: string}> {
-    const {data} = await apiFormdata.put(`/equipamentos/desativar/${id}`);
+    const {data} = await api.apiFormdata.put(`/equipamentos/desativar/${id}`);
     return data;
   }
 
@@ -65,7 +65,7 @@ class Equipamento {
       });
     });
 
-    const {data} = await apiFormdata.post('/equipamentos', formData);
+    const {data} = await api.apiFormdata.post('/equipamentos', formData);
     return data;
   }
 
@@ -88,7 +88,7 @@ class Equipamento {
       });
     });
 
-    const {data} = await apiFormdata.put(`/equipamentos/${id}`, formData);
+    const {data} = await api.apiFormdata.put(`/equipamentos/${id}`, formData);
     return data;
   }
 }

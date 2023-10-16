@@ -7,8 +7,13 @@ import {
   Text,
   View,
 } from 'react-native';
+
 import Badget from '../Badget';
+
 import ArrowRight from '../../assets/icons/arrowRightGreen.svg';
+import CheckboxIcon from '../../assets/icons/box.svg';
+import CheckedboxIcon from '../../assets/icons/filledBoxChecked.svg';
+
 import colors from '../../styles/variables';
 
 interface Props extends PressableProps {
@@ -18,6 +23,8 @@ interface Props extends PressableProps {
     n_serie: string;
     status: 'active' | 'deactive';
   };
+  checkbox?: boolean;
+  checked?: boolean;
 }
 
 function ToolItem({tool, ...props}: Props) {
@@ -44,7 +51,13 @@ function ToolItem({tool, ...props}: Props) {
           <Badget status={tool.status} size="tiny" />
         </View>
       </View>
-      <ArrowRight style={styles.arrow} width={10} height={15} />
+      {!props.checkbox ? (
+        <ArrowRight style={styles.arrow} width={10} height={15} />
+      ) : !props.checked ? (
+        <CheckboxIcon style={styles.arrow} width={16} height={16} />
+      ) : (
+        <CheckedboxIcon style={styles.arrow} width={16} height={16} />
+      )}
     </Pressable>
   );
 }
@@ -52,8 +65,9 @@ function ToolItem({tool, ...props}: Props) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.white,
-    height: 90,
+    minHeight: 90,
     flexDirection: 'row',
+    paddingVertical: 4,
     gap: 12,
     alignItems: 'center',
     borderRadius: 12,

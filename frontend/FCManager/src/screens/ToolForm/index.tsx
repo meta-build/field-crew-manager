@@ -8,6 +8,7 @@ import {
   Text,
   View,
   LogBox,
+  Platform,
 } from 'react-native';
 
 import Header from '../../components/Header/Index';
@@ -25,6 +26,7 @@ import citiesJson from '../../assets/data/cities.json';
 
 import Equipamento from '../../services/Equipamento';
 import Tipo from '../../services/Tipo';
+import OverlayLoading from '../../components/OverlayLoading';
 
 const {width, height} = Dimensions.get('window');
 
@@ -38,7 +40,7 @@ const AlertMsg = ({children}: any) => {
   return <Text style={styles.alert}>{children}</Text>;
 };
 
-function NewTool({navigation, route}: any) {
+function ToolForm({navigation, route}: any) {
   const params = route.params;
 
   const [imgs, setImgs] = useState<string[]>([]);
@@ -56,6 +58,10 @@ function NewTool({navigation, route}: any) {
 
   const [confirmModal, setConfirmModal] = useState(false);
 
+  const [loading, setLoading] = useState(false);
+
+  const [loadingOverlay, setLoadingOverlay] = useState(false);
+
   const [imgAlert, setImgAlert] = useState(false);
   const [typeAlert, setTypeAlert] = useState(false);
   const [serialAlert, setSerialAlert] = useState(false);
@@ -68,6 +74,8 @@ function NewTool({navigation, route}: any) {
   }));
 
   const create = async () => {
+    setLoading(true);
+
     let tipo = '';
     if (newTypeCheck) {
       try {
@@ -93,9 +101,11 @@ function NewTool({navigation, route}: any) {
           },
           params.id,
         );
+        setLoading(false);
         navigation.push('ToolList');
         navigation.navigate('ToolProfile', {id: params.id});
       } catch (err) {
+        setLoading(false);
         console.log('erro ao criar equip');
         console.log(err);
       }
@@ -108,10 +118,12 @@ function NewTool({navigation, route}: any) {
         tipo,
       })
         .then(res => {
+          setLoading(false);
           navigation.push('ToolList');
           navigation.navigate('ToolProfile', {id: res.id});
         })
         .catch(err => {
+          setLoading(false);
           console.log('erro ao criar equip');
           console.log(err);
         });
@@ -143,7 +155,7 @@ function NewTool({navigation, route}: any) {
   };
 
   useEffect(() => {
-    const onFocus = navigation.addListener('focus', () => {
+    const onFocus = navigation.addListener('focus', async () => {
       Tipo.getAll().then(res => {
         const tipos: {value: string; label: string}[] = res.map(tipo => ({
           label: tipo.value,
@@ -153,7 +165,8 @@ function NewTool({navigation, route}: any) {
       });
 
       if (params?.id) {
-        Equipamento.getById(params.id).then(equip => {
+        setLoadingOverlay(true);
+        await Equipamento.getById(params.id).then(equip => {
           setImgs(equip.imgs);
           setSelectedTypeValue(equip.tipo.id);
           setSerial(equip.serial);
@@ -161,6 +174,7 @@ function NewTool({navigation, route}: any) {
           setObs(equip.obs);
           setNewTypeCheck(false);
         });
+        setLoadingOverlay(false);
       } else {
         setImgs([]);
         setNewTypeCheck(false);
@@ -179,13 +193,21 @@ function NewTool({navigation, route}: any) {
       setObsAlert(false);
     });
 
-    // Return the function to unsubscribe from the event so it gets removed on unmount
     return onFocus;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation]);
 
   return (
     <>
-      <KeyboardAvoidingView>
+      <OverlayLoading
+        visible={loadingOverlay}
+        onClose={() => {
+          setLoadingOverlay(false);
+          cancel();
+        }}
+      />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <SafeAreaView style={styles.container}>
           <Header
             text={params?.id ? 'Editar Equipamento' : 'Novo Equipamento'}
@@ -315,7 +337,12 @@ function NewTool({navigation, route}: any) {
           align="center"
         />
         <View style={styles.confirmBtnView}>
-          <Btn styleType="filled" title="Confirmar" onPress={() => create()} />
+          <Btn
+            styleType="filled"
+            title="Confirmar"
+            onPress={() => !loading && create()}
+            loading={loading}
+          />
           <Btn
             styleType="outlined"
             title="Cancelar"
@@ -374,4 +401,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NewTool;
+export default ToolForm;

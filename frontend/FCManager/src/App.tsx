@@ -1,27 +1,15 @@
 import React from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import Home from './screens/Home';
-import ToolList from './screens/ToolList';
-import ToolProfile from './screens/ToolProfile';
-import NewTool from './screens/NewTool';
 
-const Stack = createNativeStackNavigator();
+import ScreensContainer from './screens/ScreensContainer';
+import {ContextoProvider} from './contexts/Contexto';
 
 const App = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-          header: () => null,
-        }}>
-        <Stack.Screen name="Home" component={Home} />
-        <Stack.Screen name="ToolList" component={ToolList} />
-        <Stack.Screen name="ToolProfile" component={ToolProfile} />
-        <Stack.Screen name="NewTool" component={NewTool} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <>
+      <ContextoProvider>
+        <ScreensContainer />
+      </ContextoProvider>
+    </>
   );
 };
 
