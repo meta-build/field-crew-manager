@@ -7,6 +7,7 @@ import ManeuversIcon from '../../assets/icons/maneuvers.svg';
 import UsersIcon from '../../assets/icons/users.svg';
 
 import colors from '../../styles/variables';
+import useContexto from '../../hooks/useContexto';
 
 interface NavItemProps extends PressableProps {
   icon: ReactElement<any, string | JSXElementConstructor<any>>;
@@ -16,12 +17,7 @@ interface NavItemProps extends PressableProps {
 
 function NavItem({icon, selected, title, ...props}: NavItemProps) {
   return (
-    <Pressable
-      onPress={props.onPress}
-      style={[
-        navItemStyles.container,
-        // navItemStyles[selected ? 'containerSelected' : 'containerUnselected'],
-      ]}>
+    <Pressable onPress={props.onPress} style={navItemStyles.container}>
       {React.cloneElement(icon, {
         height: 25,
         color: selected ? colors.green_1 : colors.gray_2,
@@ -43,7 +39,6 @@ const navItemStyles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     flex: 1,
-    // backgroundColor: colors.white,
   },
   title: {
     fontSize: 10,
@@ -62,6 +57,8 @@ interface NavbarProps {
 }
 
 function Navbar({selected, navigation}: NavbarProps) {
+  const {usuario} = useContexto();
+
   const goToUsuarios = () => {
     navigation.navigate('UserList');
   };
@@ -81,23 +78,27 @@ function Navbar({selected, navigation}: NavbarProps) {
   return (
     <>
       <View style={navBarStyles.container}>
+        {usuario?.isAdmin ? (
+          <NavItem
+            onPress={() => goToUsuarios()}
+            title="Usuários"
+            selected={selected === 'Usuários'}
+            icon={<UsersIcon />}
+          />
+        ) : (
+          <></>
+        )}
         <NavItem
-          onPress={() => goToUsuarios()}
-          title="Usuários"
-          selected={selected === 'Usuários'}
-          icon={<UsersIcon />}
+          onPress={() => goToManobras()}
+          title="Manobras"
+          selected={selected === 'Manobras'}
+          icon={<ManeuversIcon />}
         />
         <NavItem
           onPress={() => goToTools()}
           title="Equipamentos"
           selected={selected === 'Equipamentos'}
           icon={<ToolsIcon />}
-        />
-        <NavItem
-          onPress={() => goToManobras()}
-          title="Manobras"
-          selected={selected === 'Manobras'}
-          icon={<ManeuversIcon />}
         />
         <NavItem
           onPress={() => goToPerfil()}
