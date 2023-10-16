@@ -26,6 +26,7 @@ import Navbar from '../../components/Navbar';
 import ManeuverItem from '../../components/ManeuverItem';
 import Manobra from '../../services/Manobra';
 import useContexto from '../../hooks/useContexto';
+import LoadingManeuverList from '../../components/LoadingManeuverList';
 
 const {width, height} = Dimensions.get('window');
 
@@ -149,7 +150,7 @@ function ManeuverList({navigation}: any) {
             title="Criar nova manobra"
           />
           {loadingList ? (
-            <LoadingToolList />
+            <LoadingManeuverList />
           ) : (
             <FlatList
               style={styles.equipsList}

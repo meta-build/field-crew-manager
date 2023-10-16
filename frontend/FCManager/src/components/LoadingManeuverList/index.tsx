@@ -1,11 +1,10 @@
 import React from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import colors from '../../styles/variables';
 
-function LoadingToolItem() {
+function LoadingManeuverItem() {
   return (
     <View style={stylesItem.container}>
-      <View style={stylesItem.img} />
       <View style={stylesItem.infoContainer}>
         <View style={stylesItem.title} />
         <View style={stylesItem.info} />
@@ -18,21 +17,16 @@ function LoadingToolItem() {
 const stylesItem = StyleSheet.create({
   container: {
     backgroundColor: colors.white,
-    height: 90,
+    height: 92,
     flexDirection: 'row',
     gap: 12,
     alignItems: 'center',
     borderRadius: 12,
     overflow: 'hidden',
   },
-  img: {
-    width: 84,
-    height: '100%',
-    backgroundColor: colors.light_gray_2,
-  },
   infoContainer: {
     height: '100%',
-    paddingVertical: 10,
+    padding: 10,
     gap: 8,
   },
   title: {
@@ -52,15 +46,15 @@ const stylesItem = StyleSheet.create({
     borderRadius: 12,
   },
 });
-
-function LoadingToolList() {
+ 
+function LoadingManeuverList() {
   return (
     <View style={styles.list}>
-      <LoadingToolItem />
-      <LoadingToolItem />
-      <LoadingToolItem />
-      <LoadingToolItem />
-      <LoadingToolItem />
+      <LoadingManeuverItem />
+      <LoadingManeuverItem />
+      <LoadingManeuverItem />
+      <LoadingManeuverItem />
+      <LoadingManeuverItem />
     </View>
   );
 }
@@ -71,4 +65,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoadingToolList;
+export default LoadingManeuverList;
