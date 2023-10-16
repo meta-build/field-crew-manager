@@ -21,6 +21,7 @@ import Title from '../../components/Title';
 import colors from '../../styles/variables';
 import InputMaskText from '../../components/InputMaskText';
 import Usuario from '../../services/Usuario';
+import OverlayLoading from '../../components/OverlayLoading';
 
 const {width, height} = Dimensions.get('window');
 
@@ -52,6 +53,7 @@ function UserForm({navigation, route}: any) {
   const [confirmModal, setConfirmModal] = useState(false);
 
   const [loading, setLoading] = useState(false);
+  const [loadingOverlay, setLoadingOverlay] = useState(false);
 
   const [nomeAlert, setNomeAlert] = useState(false);
   const [sobrenomeAlert, setSobrenomeAlert] = useState(false);
@@ -213,6 +215,8 @@ function UserForm({navigation, route}: any) {
   useEffect(() => {
     const onFocus = navigation.addListener('focus', async () => {
       if (params?.id) {
+        setLoadingOverlay(true);
+
         // pegar dados do usuário a ser editado
         const usuario = await Usuario.getById(params?.id);
         setNome(usuario.nome);
@@ -221,6 +225,8 @@ function UserForm({navigation, route}: any) {
         setTelefone(usuario.telefone);
         setTelefoneMask(usuario.telefone);
         setisAdmin(usuario.isAdmin);
+
+        setLoadingOverlay(false);
       } else {
         setNome('');
         setSobrenome('');
@@ -248,6 +254,13 @@ function UserForm({navigation, route}: any) {
 
   return (
     <>
+      <OverlayLoading
+        visible={loadingOverlay}
+        onClose={() => {
+          setLoadingOverlay(false);
+          cancel();
+        }}
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <SafeAreaView style={styles.container}>

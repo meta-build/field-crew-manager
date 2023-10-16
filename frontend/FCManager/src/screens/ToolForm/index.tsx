@@ -26,6 +26,7 @@ import citiesJson from '../../assets/data/cities.json';
 
 import Equipamento from '../../services/Equipamento';
 import Tipo from '../../services/Tipo';
+import OverlayLoading from '../../components/OverlayLoading';
 
 const {width, height} = Dimensions.get('window');
 
@@ -58,6 +59,8 @@ function ToolForm({navigation, route}: any) {
   const [confirmModal, setConfirmModal] = useState(false);
 
   const [loading, setLoading] = useState(false);
+
+  const [loadingOverlay, setLoadingOverlay] = useState(false);
 
   const [imgAlert, setImgAlert] = useState(false);
   const [typeAlert, setTypeAlert] = useState(false);
@@ -152,7 +155,7 @@ function ToolForm({navigation, route}: any) {
   };
 
   useEffect(() => {
-    const onFocus = navigation.addListener('focus', () => {
+    const onFocus = navigation.addListener('focus', async () => {
       Tipo.getAll().then(res => {
         const tipos: {value: string; label: string}[] = res.map(tipo => ({
           label: tipo.value,
@@ -162,7 +165,8 @@ function ToolForm({navigation, route}: any) {
       });
 
       if (params?.id) {
-        Equipamento.getById(params.id).then(equip => {
+        setLoadingOverlay(true);
+        await Equipamento.getById(params.id).then(equip => {
           setImgs(equip.imgs);
           setSelectedTypeValue(equip.tipo.id);
           setSerial(equip.serial);
@@ -170,6 +174,7 @@ function ToolForm({navigation, route}: any) {
           setObs(equip.obs);
           setNewTypeCheck(false);
         });
+        setLoadingOverlay(false);
       } else {
         setImgs([]);
         setNewTypeCheck(false);
@@ -194,6 +199,13 @@ function ToolForm({navigation, route}: any) {
 
   return (
     <>
+      <OverlayLoading
+        visible={loadingOverlay}
+        onClose={() => {
+          setLoadingOverlay(false);
+          cancel();
+        }}
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <SafeAreaView style={styles.container}>
