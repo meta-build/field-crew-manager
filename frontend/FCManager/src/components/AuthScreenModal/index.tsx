@@ -1,63 +1,49 @@
 import React, {useEffect, useState} from 'react';
-import {Dimensions, Image, StyleSheet, Text, View} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import {
+  Dimensions,
+  Image,
+  Modal,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import colors from '../../styles/variables';
-
-import api from '../../services/api';
+import BottomModal from '../BottomModal';
+import Btn from '../Button';
+import InputText from '../InputText';
+import Title from '../Title';
 import useContexto from '../../hooks/useContexto';
 
-import {UsuarioContext} from '../../contexts/Contexto';
-import Btn from '../../components/Button';
-import BottomModal from '../../components/BottomModal';
-import InputText from '../../components/InputText';
-import Title from '../../components/Title';
-
-import Usuario from '../../services/Usuario';
-
 import * as Keychain from 'react-native-keychain';
-
-const {width, height} = Dimensions.get('screen');
+import Usuario from '../../services/Usuario';
 
 const logo = require('../../assets/images/loading-logo.png');
 
-function Loading({navigation}: any) {
-  const {setUsuario} = useContexto();
+const {width, height} = Dimensions.get('screen');
+
+interface Props {
+  visible: boolean;
+  onClose: () => void;
+}
+
+function AuthScreenModal({visible, onClose}: Props) {
+  const {usuario} = useContexto();
 
   const [password, setPassword] = useState('');
-  const [nome, setNome] = useState('');
-
-  const [token, setToken] = useState('');
-  const [user, setUser] = useState('');
 
   const [modal, setModal] = useState(false);
   const [failPassword, setFailPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  const getData = async () => {
-    const tokenStorage = await AsyncStorage.getItem('token');
-    const userStorage = await AsyncStorage.getItem('usuario');
-
-    if (!tokenStorage || !userStorage) {
-      navigation.navigate('Home');
-    } else {
-      setToken(tokenStorage);
-      setUser(userStorage);
-      const usuario = await JSON.parse(userStorage);
-      setNome(usuario.nome);
-      setModal(true);
-    }
-  };
 
   const submitPassword = async () => {
     setLoading(true);
     try {
       const credentials: any = await Keychain.getGenericPassword();
       if (credentials.password === password) {
-        await passUser();
         setLoading(false);
         setModal(false);
+        onClose();
       } else {
         setFailPassword(true);
       }
@@ -67,36 +53,34 @@ function Loading({navigation}: any) {
     }
   };
 
-  const passUser = async () => {
-    api.setToken(token);
-    setUsuario(JSON.parse(user) as UsuarioContext);
-
-    navigation.navigate('ToolList');
-  };
-
   const exitUser = () => {
     Usuario.exit();
     setModal(false);
+    onClose();
   };
 
   useEffect(() => {
-    getData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (visible) {
+      setModal(true);
+    }
+  }, [visible]);
+
   return (
     <>
-      <View style={styles.view}>
-        <SafeAreaView style={styles.container}>
-          <Image source={logo} style={styles.logo} />
-        </SafeAreaView>
-      </View>
+      <Modal visible={visible} onRequestClose={() => {}}>
+        <View style={styles.view}>
+          <SafeAreaView style={styles.container}>
+            <Image source={logo} style={styles.logo} />
+          </SafeAreaView>
+        </View>
+      </Modal>
       <BottomModal visible={modal} onPressOutside={() => {}}>
         <Title
           text="Seja bem-vindo(a) de volta,"
           color={'green'}
           align={'left'}
         />
-        <Title text={nome} color={'green'} align={'left'} />
+        <Title text={usuario?.nome as string} color={'green'} align={'left'} />
 
         <View style={styles.loginView}>
           {failPassword ? (
@@ -166,4 +150,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Loading;
+export default AuthScreenModal;

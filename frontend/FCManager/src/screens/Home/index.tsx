@@ -18,8 +18,6 @@ import Usuario from '../../services/Usuario';
 import useContexto from '../../hooks/useContexto';
 import {UsuarioContext} from '../../contexts/Contexto';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 const logo = require('../../assets/images/logo-1.png');
 const image = require('../../assets/images/home-image.png');
 
@@ -97,8 +95,6 @@ const Home = ({navigation}: any) => {
       if ('nome' in retorno) {
         // se senha correta
         setUsuario(retorno as UsuarioContext);
-
-        await AsyncStorage.setItem('usuario', JSON.stringify(retorno));
 
         setLoading(false);
         closeLoginModals();
