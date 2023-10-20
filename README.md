@@ -50,6 +50,31 @@ A entrega da primeira sprint do projeto marcou um importante marco, concentrando
 #### Apresentação das telas
 ![metabuilders-apres-projeto](https://github.com/meta-build/field-crew-manager/assets/111146527/773003df-d09b-42a8-8dd4-8c294615d49c)
 
+### Sprint 2
+<p>
+ Na segunda sprint do projeto, avançamos significativamente na construção da aplicação. Foram implementados recursos essenciais, como o sistema de gerenciamento de usuários, que permite o cadastro, edição e atribuição de privilégios administrativos. A autenticação agora é um elemento central, garantindo a segurança do acesso à aplicação. Além disso, introduzimos o gerenciamento de manobras, onde cada manobra pode envolver um número variável de equipamentos. Uma característica notável é que, ao cadastrar uma manobra, os equipamentos selecionados são automaticamente desativados, e quando a manobra é marcada como concluída, eles são reativados. Uma regra importante estabelecida é que um usuário pode cadastrar apenas uma manobra por vez, assegurando um controle eficaz das operações. Essas adições são fundamentais para a funcionalidade geral do projeto, tornando-o mais completo e eficiente.
+</p>
+
+#### Funcionlalidades
+<ul>
+ <li>Cadastro de usuários (somente administrador)</li>
+ <li>Edição de usuários (somente administrador)</li>
+ <li>Autenticação (login)</li>
+ <li>Alterar senha</li>
+ <li>Editar próprios dados</li>
+ <li>Cadastro de manobras</li>
+ <li>Listagem de manobras</li>
+ <li>Ativação/desativação automática de equipamentos ao criar/conlcuir manobra</li>
+ <li>Listagem de manobras na tela de equipamento</li>
+</ul>
+
+#### Apresentação das telas
+##### Usuários
+![usuarios](https://github.com/meta-build/field-crew-manager/assets/111146527/16b320f8-b4b0-4bb0-aace-8d04edd2ddc3)
+
+##### Manobras
+![manobras](https://github.com/meta-build/field-crew-manager/assets/111146527/556c4400-5da2-4356-8911-0e5223c4cfce)
+
 <!-- tecnologias -->
 ## :computer: Tecnologias utilizadas
 <!-- 
