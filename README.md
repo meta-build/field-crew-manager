@@ -35,23 +35,20 @@ Versão atual (v3.0) <br> -->
 </h2>
 
 ### Sprint 1
-<a href='https://www.youtube.com/watch?v=jTcLtERkjKo'>Vídeo Sprint Review 1</a>
+<p>
+A entrega da primeira sprint do projeto marcou um importante marco, concentrando-se na funcionalidade fundamental de criação, edição, ativação e desativação de equipamentos, juntamente com a capacidade de listar esses itens. Essas conquistas iniciais representam a base sólida sobre a qual construiremos as futuras etapas do projeto, prometendo maior eficiência e controle na gestão de equipamentos. Para uma visão mais detalhada dessas realizações, você pode conferir a apresentação em vídeo desta sprint <a href="https://www.youtube.com/watch?v=jTcLtERkjKo">aqui.</a>
+</p>
 
-<!-- <ul>
-<li> <a href="https://github.com/meta-build/Projeto-IONIC-Health/blob/main/Sprint1.md">Sprint 1</a> </li>
+##### Funcionalidades
+<ul>
+ <li>Cadastro de equipamentos (com fotos, tipo de equipamento, n° serial, observações e cidade em que se encontra;</li>
+ <li>Edição de equipamentos;</li>
+ <li>Ativação/Desativação de equipamentos;</li>
+ <li>Listagem de equipamentos (com filtros de tipo de equipamento e status ativo ou inativo);</li>
 </ul>
 
-<ul>
- <li> <a href="https://github.com/meta-build/Projeto-IONIC-Health/blob/main/Sprint2.md">Sprint 2 </a> </li> 
-</ul>
-
-<ul>
- <li> <a href="https://github.com/meta-build/Projeto-IONIC-Health/blob/main/Sprint3.md">Sprint 3 </a> </li> 
-</ul>
-
-<ul>
- <li> <a href="https://github.com/meta-build/Projeto-IONIC-Health/blob/main/Sprint4.md">Sprint 4 </a> </li> 
-</ul> -->
+#### Apresentação das telas
+![metabuilders-apres-projeto](https://github.com/meta-build/field-crew-manager/assets/111146527/773003df-d09b-42a8-8dd4-8c294615d49c)
 
 <!-- tecnologias -->
 ## :computer: Tecnologias utilizadas
