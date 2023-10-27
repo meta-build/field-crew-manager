@@ -60,14 +60,17 @@ const Home = ({navigation}: any) => {
       const retorno = await Usuario.loginEmail(email);
       if ('nome' in retorno) {
         // se encontrar email
+        setLoading(false);
         setName(retorno.nome);
         openLoginPasswordModal();
       } else if ('errorNum' in retorno) {
         if (retorno.errorNum === 404) {
           // se não encontrar email
+          setLoading(false);
           setFailEmail(true);
         } else {
           // um erro diferente aconteceu
+          setLoading(false);
           console.log(retorno);
         }
       } else {
@@ -75,9 +78,6 @@ const Home = ({navigation}: any) => {
         console.error('Resposta inesperada da API');
         console.log(retorno);
       }
-
-      // depois da requisição
-      setLoading(false);
     }
   };
 
@@ -102,9 +102,11 @@ const Home = ({navigation}: any) => {
       } else if ('errorNum' in retorno) {
         if (retorno.errorNum === 401) {
           //  se senha incorreta
+          setLoading(false);
           setFailPassword(true);
         } else {
           // um erro diferente aconteceu
+          setLoading(false);
           console.log(retorno);
         }
       } else {

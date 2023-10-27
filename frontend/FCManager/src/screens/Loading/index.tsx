@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Dimensions, Image, StyleSheet, Text, View} from 'react-native';
+import {Image, StyleSheet, Text, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -17,8 +17,6 @@ import Title from '../../components/Title';
 import Usuario from '../../services/Usuario';
 
 import * as Keychain from 'react-native-keychain';
-
-const {width, height} = Dimensions.get('screen');
 
 const logo = require('../../assets/images/loading-logo.png');
 
@@ -59,10 +57,12 @@ function Loading({navigation}: any) {
         setLoading(false);
         setModal(false);
       } else {
+        setLoading(false);
         setFailPassword(true);
       }
     } catch (error) {
       console.log(error);
+      setLoading(false);
       setFailPassword(true);
     }
   };
@@ -77,6 +77,7 @@ function Loading({navigation}: any) {
   const exitUser = () => {
     Usuario.exit();
     setModal(false);
+    navigation.navigate('Home');
   };
 
   useEffect(() => {
@@ -89,8 +90,17 @@ function Loading({navigation}: any) {
         <SafeAreaView style={styles.container}>
           <Image source={logo} style={styles.logo} />
         </SafeAreaView>
+        {nome ? (
+          <Btn
+            styleType="blank"
+            title="Entrar"
+            onPress={() => setModal(true)}
+          />
+        ) : (
+          <></>
+        )}
       </View>
-      <BottomModal visible={modal} onPressOutside={() => {}}>
+      <BottomModal visible={modal} onPressOutside={() => setModal(false)}>
         <Title
           text="Seja bem-vindo(a) de volta,"
           color={'green'}
@@ -133,13 +143,17 @@ function Loading({navigation}: any) {
 const styles = StyleSheet.create({
   view: {
     backgroundColor: colors.green_1,
-    width,
-    height,
+    // width,
+    // height,
+    flex: 1,
+    padding: 18,
+    flexDirection: 'column',
   },
   container: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
   },
   logo: {
     width: '100%',
