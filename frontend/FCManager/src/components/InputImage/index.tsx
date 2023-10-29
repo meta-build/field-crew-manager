@@ -35,7 +35,6 @@ function InputImage({
     launchImageLibrary(options, response => {
       if (response.assets) {
         const uris = response.assets.map(item => item.uri as string);
-        console.log(uris);
         onAddImage(uris);
       }
     });

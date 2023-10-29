@@ -82,8 +82,7 @@ function ToolForm({navigation, route}: any) {
         const resId = await Tipo.new(newType);
         tipo = resId.id;
       } catch (err) {
-        console.log('erro ao criar type');
-        console.log(err);
+        console.log('erro ao criar type', err);
       }
     } else {
       tipo = selectedTypeValue;
@@ -106,8 +105,7 @@ function ToolForm({navigation, route}: any) {
         navigation.navigate('ToolProfile', {id: params.id});
       } catch (err) {
         setLoading(false);
-        console.log('erro ao criar equip');
-        console.log(err);
+        console.log('erro ao criar equip', err);
       }
     } else {
       Equipamento.new({
@@ -124,8 +122,7 @@ function ToolForm({navigation, route}: any) {
         })
         .catch(err => {
           setLoading(false);
-          console.log('erro ao criar equip');
-          console.log(err);
+          console.log('erro ao criar equip', err);
         });
     }
   };

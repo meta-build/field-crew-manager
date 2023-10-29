@@ -100,7 +100,6 @@ function ManeuverList({navigation}: any) {
               : !manobra.datetimeFim;
           return tituloFilter && statusFilter;
         });
-        console.log(manobras);
         setLista(manobras);
       })
       .catch(err => console.log(err));

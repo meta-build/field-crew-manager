@@ -89,7 +89,6 @@ function ToolList({navigation}: any) {
   ) => {
     setLoadingList(true);
     await Equipamento.getAll(statusFilter, '', cidade).then(res => {
-      console.log(res);
       const equips = res.values.filter(equip => filtrarNome(equip.tipo.value));
       setLista(equips);
     });
