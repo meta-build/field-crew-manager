@@ -150,9 +150,7 @@ class Usuario {
 
       api.setToken(data.token);
 
-      console.log('salvando...');
       await Keychain.setGenericPassword(email, senha);
-      console.log('foi');
 
       await AsyncStorage.setItem('token', data.token);
       await AsyncStorage.setItem('usuario', JSON.stringify(data.user));
