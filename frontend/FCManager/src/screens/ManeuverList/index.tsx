@@ -18,15 +18,16 @@ import Dropdown from '../../components/Dropdown';
 import colors from '../../styles/variables';
 
 import FilterIcon from '../../assets/icons/filterGreen.svg';
+import MapIcon from '../../assets/icons/map.svg';
 
 import {ManobraItem} from '../../types';
 
-import LoadingToolList from '../../components/LoadingToolList';
 import Navbar from '../../components/Navbar';
 import ManeuverItem from '../../components/ManeuverItem';
 import Manobra from '../../services/Manobra';
 import useContexto from '../../hooks/useContexto';
 import LoadingManeuverList from '../../components/LoadingManeuverList';
+import MapModal from './MapModal';
 
 const {width, height} = Dimensions.get('window');
 
@@ -37,6 +38,7 @@ function ManeuverList({navigation}: any) {
 
   const [filterModal, setFilterModal] = useState(false);
   const [alertModal, setAlertModal] = useState(false);
+  const [mapModal, setMapModal] = useState(false);
 
   const [loadingList, setLoadingList] = useState(false);
 
@@ -109,6 +111,7 @@ function ManeuverList({navigation}: any) {
   useEffect(() => {
     const onFocus = navigation.addListener('focus', () => {
       cancelFilter();
+      setMapModal(false);
 
       // ver se usuário possui manobra em andamento
     });
@@ -130,6 +133,13 @@ function ManeuverList({navigation}: any) {
               onChange={e => setTitulo(e.nativeEvent.text)}
               value={titulo}
             />
+            <View style={styles.filterView}>
+              <Btn
+                onPress={() => setMapModal(true)}
+                styleType="blank"
+                icon={<MapIcon width={18} height={15} color={colors.green_1} />}
+              />
+            </View>
             <View style={styles.filterView}>
               <Btn
                 onPress={() => openFilter()}
@@ -228,6 +238,13 @@ function ManeuverList({navigation}: any) {
           title="Ok"
         />
       </BottomModal>
+
+      <MapModal
+        visible={mapModal}
+        onClose={() => setMapModal(false)}
+        maneuvers={lista}
+        loading={loadingList}
+      />
     </>
   );
 }
