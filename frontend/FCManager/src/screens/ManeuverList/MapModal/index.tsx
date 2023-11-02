@@ -54,6 +54,7 @@ function MapModal(props: Props) {
         <View style={styles.mapView}>
           <MapView
             style={styles.map}
+            customMapStyle={mapStyle}
             showsUserLocation
             loadingEnabled
             onPress={() => {
@@ -168,6 +169,25 @@ function MapModal(props: Props) {
     </>
   );
 }
+
+const mapStyle = [
+  {
+    featureType: 'poi',
+    stylers: [
+      {
+        visibility: 'off',
+      },
+    ],
+  },
+  {
+    featureType: 'transit',
+    stylers: [
+      {
+        visibility: 'off',
+      },
+    ],
+  },
+];
 
 const styles = StyleSheet.create({
   container: {
