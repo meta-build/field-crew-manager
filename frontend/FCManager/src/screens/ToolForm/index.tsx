@@ -27,6 +27,8 @@ import citiesJson from '../../assets/data/cities.json';
 import Equipamento from '../../services/Equipamento';
 import Tipo from '../../services/Tipo';
 import OverlayLoading from '../../components/OverlayLoading';
+import InputLocation from '../../components/InputLocation';
+import useContexto from '../../hooks/useContexto';
 
 const {width, height} = Dimensions.get('window');
 
@@ -41,6 +43,8 @@ const AlertMsg = ({children}: any) => {
 };
 
 function ToolForm({navigation, route}: any) {
+  const {location} = useContexto();
+
   const params = route.params;
 
   const [imgs, setImgs] = useState<string[]>([]);
@@ -49,6 +53,9 @@ function ToolForm({navigation, route}: any) {
   const [newTypeCheck, setNewTypeCheck] = useState(false);
   const [newType, setNewType] = useState('');
   const [selectedTypeValue, setSelectedTypeValue] = useState('');
+
+  const [latitude, setLatitude] = useState(location.latitude);
+  const [longitude, setLongitude] = useState(location.longitude);
 
   const [serial, setSerial] = useState('');
 
@@ -170,6 +177,8 @@ function ToolForm({navigation, route}: any) {
           setSelectedCity(equip.cidade);
           setObs(equip.obs);
           setNewTypeCheck(false);
+          setLatitude(0);
+          setLongitude(0);
         });
         setLoadingOverlay(false);
       } else {
@@ -180,6 +189,8 @@ function ToolForm({navigation, route}: any) {
         setSerial('');
         setSelectedCity('');
         setObs('');
+        setLatitude(location.latitude);
+        setLongitude(location.longitude);
       }
 
       setConfirmModal(false);
@@ -306,6 +317,13 @@ function ToolForm({navigation, route}: any) {
                   <></>
                 )}
               </Panel>
+              <InputLocation
+                value={{latitude, longitude}}
+                onChange={locate => {
+                  setLatitude(locate.latitude);
+                  setLongitude(locate.longitude);
+                }}
+              />
               <View style={styles.btnView}>
                 <Btn
                   onPress={() => confirm()}

@@ -25,6 +25,7 @@ import Manobra from '../../services/Manobra';
 import useContexto from '../../hooks/useContexto';
 import {UsuarioContext} from '../../contexts/Contexto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import InputLocation from '../../components/InputLocation';
 
 const {width, height} = Dimensions.get('window');
 
@@ -40,7 +41,7 @@ const AlertMsg = ({children}: any) => {
 
 function ManeuverForm({navigation, route}: any) {
   const params = route.params;
-  const {usuario, setUsuario} = useContexto();
+  const {usuario, setUsuario, location} = useContexto();
 
   const [titulo, setTitulo] = useState('');
   const [desc, setDesc] = useState('');
@@ -51,6 +52,9 @@ function ManeuverForm({navigation, route}: any) {
   const [tituloAlert, setTituloAlert] = useState(false);
   const [descAlert, setDescAlert] = useState(false);
   const [equipsAlert, setEquipsAlert] = useState(false);
+
+  const [latitude, setLatitude] = useState(location.latitude);
+  const [longitude, setLongitude] = useState(location.longitude);
 
   const [loading, setLoading] = useState(false);
 
@@ -110,6 +114,8 @@ function ManeuverForm({navigation, route}: any) {
       setTitulo('');
       setDesc('');
       setEquipamentos([]);
+      setLatitude(location.latitude);
+      setLongitude(location.longitude);
 
       setConfirmModal(false);
       setTituloAlert(false);
@@ -118,6 +124,7 @@ function ManeuverForm({navigation, route}: any) {
     });
 
     return onFocus;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation]);
 
   return (
@@ -181,6 +188,13 @@ function ManeuverForm({navigation, route}: any) {
                   <></>
                 )}
               </Panel>
+              <InputLocation
+                value={{latitude, longitude}}
+                onChange={locate => {
+                  setLatitude(locate.latitude);
+                  setLongitude(locate.longitude);
+                }}
+              />
               <View style={styles.btnView}>
                 <Btn
                   onPress={() => confirm()}
