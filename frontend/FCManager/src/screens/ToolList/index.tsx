@@ -15,22 +15,27 @@ import ToolItem from '../../components/ToolItem';
 import BottomModal from '../../components/BottomModal';
 import Title from '../../components/Title';
 import Dropdown from '../../components/Dropdown';
+import LoadingToolList from '../../components/LoadingToolList';
+import Navbar from '../../components/Navbar';
 
 import colors from '../../styles/variables';
 
 import FilterIcon from '../../assets/icons/filterGreen.svg';
+import MapIcon from '../../assets/icons/map.svg';
+
 import CitiesJson from '../../assets/data/cities.json';
 
 import Equipamento from '../../services/Equipamento';
 
 import {EquipamentoItem} from '../../types';
-import LoadingToolList from '../../components/LoadingToolList';
-import Navbar from '../../components/Navbar';
+
+import MapModal from './MapModal';
 
 const {width, height} = Dimensions.get('window');
 
 function ToolList({navigation}: any) {
   const [filterModal, setFilterModal] = useState(false);
+  const [mapModal, setMapModal] = useState(false);
 
   const [loadingList, setLoadingList] = useState(false);
 
@@ -120,6 +125,13 @@ function ToolList({navigation}: any) {
             />
             <View style={styles.filterView}>
               <Btn
+                onPress={() => setMapModal(true)}
+                styleType="blank"
+                icon={<MapIcon width={18} height={15} color={colors.green_1} />}
+              />
+            </View>
+            <View style={styles.filterView}>
+              <Btn
                 onPress={() => openFilter()}
                 styleType="blank"
                 icon={<FilterIcon width={18} height={15} />}
@@ -167,16 +179,6 @@ function ToolList({navigation}: any) {
         <Title color="green" text="Filtros" align="center" />
         <View style={styles.filterFields}>
           <View>
-            <Text style={styles.label}>Cidade</Text>
-            <Dropdown
-              items={cities}
-              onSelect={value => setCity(value)}
-              color="gray"
-              placeholder="Cidade"
-              value={city}
-            />
-          </View>
-          <View>
             <Text style={styles.label}>Status</Text>
             <Dropdown
               items={[
@@ -206,6 +208,13 @@ function ToolList({navigation}: any) {
           />
         </View>
       </BottomModal>
+
+      <MapModal
+        visible={mapModal}
+        onClose={() => setMapModal(false)}
+        equipments={lista}
+        loading={loadingList}
+      />
     </>
   );
 }
