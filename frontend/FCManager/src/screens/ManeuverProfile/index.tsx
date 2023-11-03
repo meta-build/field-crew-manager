@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Navbar from '../../components/Navbar';
 import Header from '../../components/Header/Index';
@@ -23,9 +24,11 @@ import colors from '../../styles/variables';
 import {Manobra as ManobraType} from '../../types';
 
 import Manobra from '../../services/Manobra';
+
 import useContexto from '../../hooks/useContexto';
 import {UsuarioContext} from '../../contexts/Contexto';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import OpenMapBtn from '../../components/OpenMapBtn';
+import MapModal from './MapModal';
 
 const Panel = ({children}: any) => {
   return <View style={styles.panel}>{children}</View>;
@@ -39,6 +42,8 @@ function ManeuverProfile({navigation, route}: any) {
   const [manobra, setManobra] = useState<ManobraType | undefined>();
 
   const [confirmModal, setConfirmModal] = useState(false);
+
+  const [mapModal, setMapModal] = useState(false);
 
   const [loading, setLoading] = useState(false);
 
@@ -92,52 +97,36 @@ function ManeuverProfile({navigation, route}: any) {
       <SafeAreaView style={styles.container}>
         <Header text="Manobras" />
         {manobra ? (
-          <ScrollView contentContainerStyle={styles.scrollView}>
-            <View style={styles.content}>
-              <Panel>
-                <Title color="gray" text={manobra?.titulo as string} />
-                <Info
-                  label="Responsável"
-                  value={`${manobra.usuario.nome} ${manobra.usuario.sobrenome}`}
-                />
-                <Info label="Descrição" value={manobra.descricao} />
-              </Panel>
-              <Panel>
-                <View style={styles.infoView}>
-                  <Text style={styles.title}>Status</Text>
-                  <View style={styles.badgetView}>
-                    {manobra.datetimeFim ? (
-                      <Badget status="deactive" customText="Concluído" />
-                    ) : (
-                      <Badget status="active" customText="Em andamento" />
-                    )}
+          <>
+            <ScrollView contentContainerStyle={styles.scrollView}>
+              <View style={styles.content}>
+                <Panel>
+                  <Title color="gray" text={manobra?.titulo as string} />
+                  <Info
+                    label="Responsável"
+                    value={`${manobra.usuario.nome} ${manobra.usuario.sobrenome}`}
+                  />
+                  <Info label="Descrição" value={manobra.descricao} />
+                </Panel>
+                <Panel>
+                  <View style={styles.infoView}>
+                    <Text style={styles.title}>Status</Text>
+                    <View style={styles.badgetView}>
+                      {manobra.datetimeFim ? (
+                        <Badget status="deactive" customText="Concluído" />
+                      ) : (
+                        <Badget status="active" customText="Em andamento" />
+                      )}
+                    </View>
                   </View>
-                </View>
-                <View>
-                  <Text style={styles.title}>Data e hora de início</Text>
-                  <Text style={styles.info}>
-                    {new Date(manobra.datetimeInicio).toLocaleDateString(
-                      'pt-BR',
-                    )}{' '}
-                    às{' '}
-                    {new Date(manobra.datetimeInicio).toLocaleTimeString(
-                      'pt-BR',
-                      {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      },
-                    )}
-                  </Text>
-                </View>
-                {manobra.datetimeFim ? (
                   <View>
-                    <Text style={styles.title}>Data e hora de conclusão</Text>
+                    <Text style={styles.title}>Data e hora de início</Text>
                     <Text style={styles.info}>
-                      {new Date(manobra.datetimeFim).toLocaleDateString(
+                      {new Date(manobra.datetimeInicio).toLocaleDateString(
                         'pt-BR',
                       )}{' '}
                       às{' '}
-                      {new Date(manobra.datetimeFim).toLocaleTimeString(
+                      {new Date(manobra.datetimeInicio).toLocaleTimeString(
                         'pt-BR',
                         {
                           hour: '2-digit',
@@ -146,39 +135,63 @@ function ManeuverProfile({navigation, route}: any) {
                       )}
                     </Text>
                   </View>
+                  {manobra.datetimeFim ? (
+                    <View>
+                      <Text style={styles.title}>Data e hora de conclusão</Text>
+                      <Text style={styles.info}>
+                        {new Date(manobra.datetimeFim).toLocaleDateString(
+                          'pt-BR',
+                        )}{' '}
+                        às{' '}
+                        {new Date(manobra.datetimeFim).toLocaleTimeString(
+                          'pt-BR',
+                          {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          },
+                        )}
+                      </Text>
+                    </View>
+                  ) : (
+                    <></>
+                  )}
+                </Panel>
+                <OpenMapBtn onPress={() => setMapModal(true)} />
+                <Panel>
+                  <Text style={styles.title}>Equipamentos utilizados</Text>
+                  <FlatList
+                    data={manobra.equipamentos}
+                    renderItem={({item}) => (
+                      <MiniToolItem
+                        tool={{
+                          img_uri: item.img,
+                          n_serie: item.serial,
+                          tipoLabel: item.tipo,
+                        }}
+                        onPress={() => openToolItem(item.id)}
+                      />
+                    )}
+                    keyExtractor={item => item.id}
+                  />
+                </Panel>
+                <View style={styles.spacing} />
+                {!manobra.datetimeFim && manobra.usuario.id === usuario?.id ? (
+                  <Btn
+                    styleType="filled"
+                    title="Concluir manobra"
+                    onPress={() => openModal()}
+                  />
                 ) : (
                   <></>
                 )}
-              </Panel>
-              <Panel>
-                <Text style={styles.title}>Equipamentos utilizados</Text>
-                <FlatList
-                  data={manobra.equipamentos}
-                  renderItem={({item}) => (
-                    <MiniToolItem
-                      tool={{
-                        img_uri: item.img,
-                        n_serie: item.serial,
-                        tipoLabel: item.tipo,
-                      }}
-                      onPress={() => openToolItem(item.id)}
-                    />
-                  )}
-                  keyExtractor={item => item.id}
-                />
-              </Panel>
-              <View style={styles.spacing} />
-              {!manobra.datetimeFim && manobra.usuario.id === usuario?.id ? (
-                <Btn
-                  styleType="filled"
-                  title="Concluir manobra"
-                  onPress={() => openModal()}
-                />
-              ) : (
-                <></>
-              )}
-            </View>
-          </ScrollView>
+              </View>
+            </ScrollView>
+            <MapModal
+              maneuver={manobra as ManobraType}
+              onClose={() => setMapModal(false)}
+              visible={mapModal}
+            />
+          </>
         ) : (
           <View style={styles.loadingView}>
             <ActivityIndicator size={52} color={colors.green_1} />
@@ -261,6 +274,21 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  openMapBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 24,
+  },
+  openMapBtnText: {
+    color: colors.green_1,
+    fontSize: 16,
+  },
+  openMatBtnBg: {
+    position: 'relative',
+    padding: 0,
   },
 });
 
