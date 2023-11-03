@@ -37,7 +37,7 @@ function ImageCarousel(props: Props) {
   };
 
   return (
-    <View>
+    <View style={styles.view}>
       <FlatList
         data={props.images}
         renderItem={item => (
@@ -94,6 +94,9 @@ const circleStyle = {
 };
 
 const styles = StyleSheet.create({
+  view: {
+    marginBottom: 5,
+  },
   container: {
     flex: 1,
     position: 'relative',
