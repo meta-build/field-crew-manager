@@ -1,6 +1,13 @@
 import React, {useEffect, useState} from 'react';
-import {Dimensions, Modal, StyleSheet, View} from 'react-native';
-import MapView, {Marker} from 'react-native-maps';
+import {
+  Dimensions,
+  FlatList,
+  Image,
+  Modal,
+  StyleSheet,
+  View,
+} from 'react-native';
+import MapView, {Callout, Marker} from 'react-native-maps';
 
 import colors from '../../../styles/variables';
 
@@ -17,6 +24,10 @@ import OverlayLoading from '../../../components/OverlayLoading';
 import ManeuverModal from './ManeuverModal';
 
 const {width, height} = Dimensions.get('window');
+
+const grayIcon = require('../../../assets/images/map-icon-gray.png');
+const greenIcon = require('../../../assets/images/map-icon-green.png');
+const blueIcon = require('../../../assets/images/map-icon-blue.png');
 
 interface Props {
   visible: boolean;
@@ -73,18 +84,13 @@ function MapModal(props: Props) {
                     key={maneuver.id}
                     // inserir coordenadas vindas da api
                     coordinate={{latitude: -1, longitude: -1}}
-                    onPress={() => {
-                      setMarkerIsClicked(true);
-                      setSelectedManeuver(maneuver);
-                    }}>
-                    <View style={styles.point}>
-                      <MapPoint
-                        color={maneuver.datetimeFim ? 'gray' : 'green'}
-                        expanded={selectedManeuver?.id === maneuver.id}
-                        onPress={() => console.log('foi')}
-                      />
-                    </View>
-                  </Marker>
+                    onPress={() => setSelectedManeuver(maneuver)}
+                    icon={
+                      maneuver.id === selectedManeuver?.id
+                        ? require('../../../assets/images/map-icon-blue.png')
+                        : require('../../../assets/images/map-icon-green.png')
+                    }
+                  />
                 ))}
             {/* closed maneuvers layer */}
             {closedManeuversLayer &&
@@ -95,15 +101,13 @@ function MapModal(props: Props) {
                     key={maneuver.id}
                     // inserir coordenadas vindas da api
                     coordinate={{latitude: index, longitude: index}}
-                    onPress={() => setSelectedManeuver(maneuver)}>
-                    <View style={styles.point}>
-                      <MapPoint
-                        color={maneuver.datetimeFim ? 'gray' : 'green'}
-                        expanded={selectedManeuver?.id === maneuver.id}
-                        onPress={() => console.log('foi')}
-                      />
-                    </View>
-                  </Marker>
+                    onPress={() => setSelectedManeuver(maneuver)}
+                    icon={
+                      maneuver.id === selectedManeuver?.id
+                        ? require('../../../assets/images/map-icon-blue.png')
+                        : require('../../../assets/images/map-icon-gray.png')
+                    }
+                  />
                 ))}
           </MapView>
         </View>
@@ -215,11 +219,9 @@ const styles = StyleSheet.create({
     gap: 8,
     marginVertical: 24,
   },
-  point: {
-    width: 28,
-    height: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
+  mapPoint: {
+    width: 18,
+    height: 18,
   },
 });
 
