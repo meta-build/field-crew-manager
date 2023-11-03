@@ -1,13 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {
-  Dimensions,
-  FlatList,
-  Image,
-  Modal,
-  StyleSheet,
-  View,
-} from 'react-native';
-import MapView, {Callout, Marker} from 'react-native-maps';
+import {Dimensions, Modal, StyleSheet, View} from 'react-native';
+import MapView, {Marker} from 'react-native-maps';
 
 import colors from '../../../styles/variables';
 
@@ -22,12 +15,9 @@ import LegendBtn from '../../../components/LegendBtn';
 import OverlayLoading from '../../../components/OverlayLoading';
 
 import ManeuverModal from './ManeuverModal';
+import useContexto from '../../../hooks/useContexto';
 
 const {width, height} = Dimensions.get('window');
-
-const grayIcon = require('../../../assets/images/map-icon-gray.png');
-const greenIcon = require('../../../assets/images/map-icon-green.png');
-const blueIcon = require('../../../assets/images/map-icon-blue.png');
 
 interface Props {
   visible: boolean;
@@ -37,6 +27,8 @@ interface Props {
 }
 
 function MapModal(props: Props) {
+  const {location} = useContexto();
+
   const [layerModal, setLayerModal] = useState(false);
 
   const [activeManeuversLayer, setActiveManeuversLayer] = useState(true);
@@ -74,6 +66,12 @@ function MapModal(props: Props) {
               } else {
                 setSelectedManeuver(undefined);
               }
+            }}
+            initialRegion={{
+              latitude: location.latitude,
+              longitude: location.longitude,
+              latitudeDelta: 0.02,
+              longitudeDelta: 0.02,
             }}>
             {/* active maneuvers layer */}
             {activeManeuversLayer &&

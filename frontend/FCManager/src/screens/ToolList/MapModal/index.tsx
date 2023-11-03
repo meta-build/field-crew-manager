@@ -15,6 +15,7 @@ import LegendBtn from '../../../components/LegendBtn';
 import OverlayLoading from '../../../components/OverlayLoading';
 
 import ToolModal from './ToolModal';
+import useContexto from '../../../hooks/useContexto';
 
 const {width, height} = Dimensions.get('window');
 
@@ -26,6 +27,8 @@ interface Props {
 }
 
 function MapModal(props: Props) {
+  const {location} = useContexto();
+
   const [layerModal, setLayerModal] = useState(false);
 
   const [activeEquipmentsLayer, setActiveEquipmentsLayer] = useState(true);
@@ -63,6 +66,12 @@ function MapModal(props: Props) {
               } else {
                 setSelectedEquipment(undefined);
               }
+            }}
+            initialRegion={{
+              latitude: location.latitude,
+              longitude: location.longitude,
+              latitudeDelta: 0.02,
+              longitudeDelta: 0.02,
             }}>
             {/* active equipments layer */}
             {activeEquipmentsLayer &&
