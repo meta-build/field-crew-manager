@@ -14,45 +14,52 @@ import Btn from '../../components/Button';
 import BottomModal from '../../components/BottomModal';
 import Title from '../../components/Title';
 import Dropdown from '../../components/Dropdown';
+import ManeuverItem from '../../components/ManeuverItem';
+import Navbar from '../../components/Navbar';
+import LoadingManeuverList from '../../components/LoadingManeuverList';
+import SwitchBtn from '../../components/SwitchBtn';
 
 import colors from '../../styles/variables';
 
 import FilterIcon from '../../assets/icons/filterGreen.svg';
+import MapIcon from '../../assets/icons/map.svg';
 
 import {ManobraItem} from '../../types';
 
-import LoadingToolList from '../../components/LoadingToolList';
-import Navbar from '../../components/Navbar';
-import ManeuverItem from '../../components/ManeuverItem';
 import Manobra from '../../services/Manobra';
 import useContexto from '../../hooks/useContexto';
-import LoadingManeuverList from '../../components/LoadingManeuverList';
+
+import MapModal from './MapModal';
 
 const {width, height} = Dimensions.get('window');
 
 type StatusType = 'todos' | 'concluido' | 'emAndamento';
 
 function ManeuverList({navigation}: any) {
-  const {usuario} = useContexto();
+  const {usuario, location} = useContexto();
 
   const [filterModal, setFilterModal] = useState(false);
   const [alertModal, setAlertModal] = useState(false);
+  const [mapModal, setMapModal] = useState(false);
 
   const [loadingList, setLoadingList] = useState(false);
 
   const [titulo, setTitulo] = useState('');
   const [status, setStatus] = useState<StatusType>('todos');
+  const [distMaxFilter, setDistMaxFilter] = useState(true);
+  const [distMax, setDistMax] = useState(2);
+  const [distMaxStr, setDistMaxStr] = useState('2');
 
   const [lista, setLista] = useState<ManobraItem[]>([]);
 
-  const [filterCount, setFilterCount] = useState(0);
+  const [filterCount, setFilterCount] = useState(1);
 
   const openFilter = () => {
     setFilterModal(true);
   };
 
   const openManeuverForm = () => {
-    if (usuario?.manobraAtiva) {
+    if (usuario?.manobrasAtivas && usuario?.manobrasAtivas >= 10) {
       setAlertModal(true);
     } else {
       navigation.navigate('ManeuverForm');
@@ -64,11 +71,14 @@ function ManeuverList({navigation}: any) {
   };
 
   const confirmFilter = () => {
+    let count = 0;
     if (status !== 'todos') {
-      setFilterCount(1);
-    } else {
-      setFilterCount(0);
+      count += 1;
     }
+    if (distMaxFilter) {
+      count += 1;
+    }
+    setFilterCount(count);
     getManobras();
     setFilterModal(false);
   };
@@ -76,7 +86,10 @@ function ManeuverList({navigation}: any) {
   const cancelFilter = () => {
     setStatus('todos');
     setTitulo('');
-    setFilterCount(0);
+    setFilterCount(1);
+    setDistMax(2);
+    setDistMaxStr('2');
+    setDistMaxFilter(true);
     getManobras();
     setFilterModal(false);
   };
@@ -88,7 +101,15 @@ function ManeuverList({navigation}: any) {
 
   const getManobras = async () => {
     setLoadingList(true);
-    await Manobra.getAll()
+    await Manobra.getAll(
+      distMaxFilter
+        ? {
+            latitude: location.latitude,
+            longitude: location.longitude,
+            distance: distMax,
+          }
+        : undefined,
+    )
       .then(res => {
         const manobras = res.values.filter(manobra => {
           const tituloFilter = filtrarNome(manobra.titulo);
@@ -100,7 +121,6 @@ function ManeuverList({navigation}: any) {
               : !manobra.datetimeFim;
           return tituloFilter && statusFilter;
         });
-        console.log(manobras);
         setLista(manobras);
       })
       .catch(err => console.log(err));
@@ -110,6 +130,8 @@ function ManeuverList({navigation}: any) {
   useEffect(() => {
     const onFocus = navigation.addListener('focus', () => {
       cancelFilter();
+      setMapModal(false);
+      getManobras();
 
       // ver se usuário possui manobra em andamento
     });
@@ -131,6 +153,13 @@ function ManeuverList({navigation}: any) {
               onChange={e => setTitulo(e.nativeEvent.text)}
               value={titulo}
             />
+            <View style={styles.filterView}>
+              <Btn
+                onPress={() => setMapModal(true)}
+                styleType="blank"
+                icon={<MapIcon width={18} height={15} color={colors.green_1} />}
+              />
+            </View>
             <View style={styles.filterView}>
               <Btn
                 onPress={() => openFilter()}
@@ -183,6 +212,34 @@ function ManeuverList({navigation}: any) {
         visible={filterModal}>
         <Title color="green" text="Filtros" align="center" />
         <View style={styles.filterFields}>
+          <View style={styles.bufferContainer}>
+            <SwitchBtn
+              onPress={() => setDistMaxFilter(!distMaxFilter)}
+              value={distMaxFilter}
+            />
+            <View
+              style={[
+                styles.bufferContainer,
+                !distMaxFilter ? styles.unactiveContainer : {},
+              ]}>
+              <Text style={styles.label}>Distância máxima:</Text>
+              <InputText
+                color="gray"
+                onChange={e => {
+                  setDistMaxStr(e.nativeEvent.text);
+                  if (!isNaN(Number(e.nativeEvent.text))) {
+                    setDistMax(Number(e.nativeEvent.text));
+                  }
+                }}
+                keyboardType="number-pad"
+                style={styles.bufferInput}
+                value={distMaxFilter ? distMaxStr : '\u221E'}
+                enable={distMaxFilter}
+                textAlign="center"
+              />
+              <Text style={styles.label}>Km</Text>
+            </View>
+          </View>
           <View>
             <Text style={styles.label}>Status</Text>
             <Dropdown
@@ -209,7 +266,7 @@ function ManeuverList({navigation}: any) {
           <Btn
             onPress={() => cancelFilter()}
             styleType="outlined"
-            title="Limpar filtros"
+            title="Resetar filtros"
           />
         </View>
       </BottomModal>
@@ -220,7 +277,7 @@ function ManeuverList({navigation}: any) {
         <View style={styles.alertView}>
           <Title color="green" text="Atenção" align="center" />
           <Text style={styles.alertTxt}>
-            Não é possível criar uma nova manobra enquanto possui outra ativa.
+            Não é possível criar mais de 10 manobras ativas simultaneamente.
           </Text>
         </View>
         <Btn
@@ -229,6 +286,13 @@ function ManeuverList({navigation}: any) {
           title="Ok"
         />
       </BottomModal>
+
+      <MapModal
+        visible={mapModal}
+        onClose={() => setMapModal(false)}
+        maneuvers={lista}
+        loading={loadingList}
+      />
     </>
   );
 }
@@ -294,6 +358,18 @@ const styles = StyleSheet.create({
   alertTxt: {
     textAlign: 'center',
     color: colors.dark_gray,
+  },
+  bufferContainer: {
+    flexDirection: 'row',
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    gap: 12,
+  },
+  bufferInput: {
+    maxWidth: 52,
+  },
+  unactiveContainer: {
+    opacity: 0.5,
   },
 });
 

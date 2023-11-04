@@ -10,6 +10,7 @@ import {
   LogBox,
   Platform,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from '../../components/Header/Index';
 import InputText from '../../components/InputText';
@@ -17,14 +18,15 @@ import Btn from '../../components/Button';
 import BottomModal from '../../components/BottomModal';
 import Title from '../../components/Title';
 import SelectEquipment from '../../components/SelectEquipment';
+import InputLocation from '../../components/InputLocation';
 
 import colors from '../../styles/variables';
 
 import {EquipamentoItem} from '../../types';
 import Manobra from '../../services/Manobra';
+
 import useContexto from '../../hooks/useContexto';
 import {UsuarioContext} from '../../contexts/Contexto';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const {width, height} = Dimensions.get('window');
 
@@ -40,7 +42,7 @@ const AlertMsg = ({children}: any) => {
 
 function ManeuverForm({navigation, route}: any) {
   const params = route.params;
-  const {usuario, setUsuario} = useContexto();
+  const {usuario, setUsuario, location} = useContexto();
 
   const [titulo, setTitulo] = useState('');
   const [desc, setDesc] = useState('');
@@ -52,6 +54,9 @@ function ManeuverForm({navigation, route}: any) {
   const [descAlert, setDescAlert] = useState(false);
   const [equipsAlert, setEquipsAlert] = useState(false);
 
+  const [latitude, setLatitude] = useState(location.latitude);
+  const [longitude, setLongitude] = useState(location.longitude);
+
   const [loading, setLoading] = useState(false);
 
   const create = () => {
@@ -62,6 +67,8 @@ function ManeuverForm({navigation, route}: any) {
       descricao: desc,
       titulo,
       equipamentos: equipamentos.map(equip => equip.id),
+      latitude,
+      longitude,
     })
       .then(async res => {
         setConfirmModal(false);
@@ -69,7 +76,7 @@ function ManeuverForm({navigation, route}: any) {
 
         const tempUser = {
           ...usuario,
-          manobraAtiva: true,
+          manobrasAtivas: (usuario?.manobrasAtivas as number) + 1,
         } as UsuarioContext;
         setUsuario(tempUser);
 
@@ -110,6 +117,8 @@ function ManeuverForm({navigation, route}: any) {
       setTitulo('');
       setDesc('');
       setEquipamentos([]);
+      setLatitude(location.latitude);
+      setLongitude(location.longitude);
 
       setConfirmModal(false);
       setTituloAlert(false);
@@ -118,6 +127,7 @@ function ManeuverForm({navigation, route}: any) {
     });
 
     return onFocus;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation]);
 
   return (
@@ -181,6 +191,13 @@ function ManeuverForm({navigation, route}: any) {
                   <></>
                 )}
               </Panel>
+              <InputLocation
+                value={{latitude, longitude}}
+                onChange={locate => {
+                  setLatitude(locate.latitude);
+                  setLongitude(locate.longitude);
+                }}
+              />
               <View style={styles.btnView}>
                 <Btn
                   onPress={() => confirm()}

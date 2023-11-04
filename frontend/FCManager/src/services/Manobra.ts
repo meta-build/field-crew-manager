@@ -1,4 +1,4 @@
-import {ManobraItem, Manobra as ManobraType} from '../types';
+import {BufferType, ManobraItem, Manobra as ManobraType} from '../types';
 import api from './api';
 
 interface ManobraListReturn {
@@ -13,11 +13,16 @@ interface ManobraForm {
   descricao: string;
   equipamentos: string[];
   datetimeInicio: string;
+  latitude: number;
+  longitude: number;
 }
 
 class Manobra {
-  async getAll(): Promise<ManobraListReturn> {
-    const {data} = await api.apiJson.get('/manobras');
+  async getAll(buffer?: BufferType): Promise<ManobraListReturn> {
+    const url = buffer
+      ? `/manobras?latitude=${buffer.latitude}&longitude=${buffer.longitude}&dist=${buffer.distance}`
+      : '/manobras';
+    const {data} = await api.apiJson.get(url);
     return data;
   }
 

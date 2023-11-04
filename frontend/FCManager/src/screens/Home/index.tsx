@@ -18,8 +18,6 @@ import Usuario from '../../services/Usuario';
 import useContexto from '../../hooks/useContexto';
 import {UsuarioContext} from '../../contexts/Contexto';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 const logo = require('../../assets/images/logo-1.png');
 const image = require('../../assets/images/home-image.png');
 
@@ -62,14 +60,17 @@ const Home = ({navigation}: any) => {
       const retorno = await Usuario.loginEmail(email);
       if ('nome' in retorno) {
         // se encontrar email
+        setLoading(false);
         setName(retorno.nome);
         openLoginPasswordModal();
       } else if ('errorNum' in retorno) {
         if (retorno.errorNum === 404) {
           // se não encontrar email
+          setLoading(false);
           setFailEmail(true);
         } else {
           // um erro diferente aconteceu
+          setLoading(false);
           console.log(retorno);
         }
       } else {
@@ -77,9 +78,6 @@ const Home = ({navigation}: any) => {
         console.error('Resposta inesperada da API');
         console.log(retorno);
       }
-
-      // depois da requisição
-      setLoading(false);
     }
   };
 
@@ -98,17 +96,17 @@ const Home = ({navigation}: any) => {
         // se senha correta
         setUsuario(retorno as UsuarioContext);
 
-        await AsyncStorage.setItem('usuario', JSON.stringify(retorno));
-
         setLoading(false);
         closeLoginModals();
         goToList();
       } else if ('errorNum' in retorno) {
         if (retorno.errorNum === 401) {
           //  se senha incorreta
+          setLoading(false);
           setFailPassword(true);
         } else {
           // um erro diferente aconteceu
+          setLoading(false);
           console.log(retorno);
         }
       } else {

@@ -37,14 +37,11 @@ function ImageCarousel(props: Props) {
   };
 
   return (
-    <View>
+    <View style={styles.view}>
       <FlatList
         data={props.images}
         renderItem={item => (
-          <TouchableOpacity
-            style={styles.imageBackground}
-            activeOpacity={1}
-            onPress={() => console.log('clicou')}>
+          <TouchableOpacity style={styles.imageBackground} activeOpacity={1}>
             <Image source={{uri: item.item}} style={styles.image} />
           </TouchableOpacity>
         )}
@@ -65,8 +62,7 @@ function ImageCarousel(props: Props) {
       ) : (
         <TouchableOpacity
           style={[styles.imageBackground, styles.noImageView]}
-          activeOpacity={1}
-          onPress={() => console.log('clicou')}>
+          activeOpacity={1}>
           <View>
             <ImageIcon width={84} height={84} />
           </View>
@@ -98,6 +94,9 @@ const circleStyle = {
 };
 
 const styles = StyleSheet.create({
+  view: {
+    marginBottom: 5,
+  },
   container: {
     flex: 1,
     position: 'relative',

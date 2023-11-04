@@ -9,7 +9,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import colors from '../../styles/variables';
 
 import Header from '../../components/Header/Index';
 import ImageCarousel from '../../components/ImageCarousel';
@@ -20,12 +19,20 @@ import Btn from '../../components/Button';
 import BottomModal from '../../components/BottomModal';
 import Navbar from '../../components/Navbar';
 import MiniManeuverItem from '../../components/MiniManeuverItem';
+import OpenMapBtn from '../../components/OpenMapBtn';
 
 import Equipamento from '../../services/Equipamento';
-
 import {Equipamento as EquipamentoType} from '../../types';
 
+import colors from '../../styles/variables';
+
+import MapModal from './MapModal';
+
 const {width, height} = Dimensions.get('window');
+
+const Panel = ({children}: any) => {
+  return <View style={styles.panel}>{children}</View>;
+};
 
 function ToolProfile({navigation, route}: any) {
   const [confirmActive, setConfirmActive] = useState(false);
@@ -34,6 +41,8 @@ function ToolProfile({navigation, route}: any) {
   const [equipamento, setEquipamento] = useState<EquipamentoType>();
 
   const [loading, setLoading] = useState(false);
+
+  const [mapModal, setMapModal] = useState(false);
 
   const {id} = route.params;
 
@@ -95,32 +104,44 @@ function ToolProfile({navigation, route}: any) {
             <ImageCarousel images={equipamento?.imgs as string[]} />
             <ScrollView contentContainerStyle={styles.scrollView}>
               <View style={styles.content}>
-                <Title color="gray" text={equipamento?.tipo.value as string} />
-                <View style={styles.info}>
-                  <View style={styles.status}>
-                    <Text style={styles.label}>Status:</Text>
+                <Panel>
+                  <Title
+                    color="gray"
+                    text={equipamento?.tipo.value as string}
+                  />
+                  <View style={styles.info}>
+                    <View style={styles.status}>
+                      <Text style={styles.label}>Status:</Text>
+                      <View>
+                        <Badget
+                          status={
+                            equipamento?.status === 'ativo'
+                              ? 'active'
+                              : 'deactive'
+                          }
+                          size="small"
+                        />
+                      </View>
+                    </View>
+                    <Info
+                      label="N° Serial"
+                      value={equipamento?.serial as string}
+                    />
+                    <Info label="ID" value={id} />
                     <View>
-                      <Badget
-                        status={
-                          equipamento?.status === 'ativo'
-                            ? 'active'
-                            : 'deactive'
-                        }
-                        size="small"
-                      />
+                      <Text style={styles.label}>Observações:</Text>
+                      <Text style={styles.value}>
+                        {equipamento?.obs as string}
+                      </Text>
                     </View>
                   </View>
-                  <Info
-                    label="N° Serial"
-                    value={equipamento?.serial as string}
-                  />
-                  <Info label="ID" value={id} />
-                  <View>
-                    <Text style={styles.label}>Observações:</Text>
-                    <Text style={styles.value}>
-                      {equipamento?.obs as string}
-                    </Text>
-                  </View>
+                </Panel>
+                {equipamento.latitude && equipamento.longitude ? (
+                  <OpenMapBtn onPress={() => setMapModal(true)} />
+                ) : (
+                  <></>
+                )}
+                <Panel>
                   <View style={styles.info}>
                     <Text style={styles.label}>Histórico de Manobras:</Text>
                     <FlatList
@@ -141,7 +162,7 @@ function ToolProfile({navigation, route}: any) {
                       keyExtractor={item => item.id}
                     />
                   </View>
-                </View>
+                </Panel>
               </View>
               <View style={styles.btnView}>
                 <View style={styles.btn}>
@@ -168,6 +189,11 @@ function ToolProfile({navigation, route}: any) {
                 </View>
               </View>
             </ScrollView>
+            <MapModal
+              equipement={equipamento as EquipamentoType}
+              onClose={() => setMapModal(false)}
+              visible={mapModal}
+            />
           </>
         ) : (
           <View style={styles.loadingView}>
@@ -222,7 +248,7 @@ const styles = StyleSheet.create({
   container: {
     width,
     height,
-    backgroundColor: colors.white,
+    backgroundColor: colors.white_2,
   },
   scrollView: {
     flexGrow: 1,
@@ -230,6 +256,7 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
     flex: 1,
+    gap: 12,
   },
   info: {
     marginTop: 18,
@@ -271,6 +298,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  panel: {
+    backgroundColor: colors.white,
+    padding: 12,
+    borderRadius: 12,
   },
 });
 

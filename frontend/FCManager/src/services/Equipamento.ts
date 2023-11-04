@@ -1,4 +1,8 @@
-import {EquipamentoItem, Equipamento as EquipamentoType} from '../types';
+import {
+  BufferType,
+  EquipamentoItem,
+  Equipamento as EquipamentoType,
+} from '../types';
 import api from './api';
 
 interface EquipamentoListReturn {
@@ -11,22 +15,25 @@ interface EquipamentoListReturn {
 interface EquipamentoForm {
   tipo: string;
   serial: string;
-  cidade: string;
   obs: string;
   imgs: string[];
+  latitude: number;
+  longitude: number;
 }
 
 class Equipamento {
   async getAll(
     status: 'ativo' | 'inativo' | 'todos',
     tipo: string,
-    cidade: string,
+    buffer?: BufferType,
   ): Promise<EquipamentoListReturn> {
     const statusFilter = status === 'todos' ? '' : `status=${status}`;
     const tipoFilter = tipo ? `tipo=${tipo}` : '';
-    const cidadeFilter = cidade ? `cidade=${encodeURIComponent(cidade)}` : '';
+    const bufferFilter = buffer
+      ? `latitude=${buffer.latitude}&longitude=${buffer.longitude}&dist=${buffer.distance}`
+      : '';
 
-    const query = [statusFilter, tipoFilter, cidadeFilter]
+    const query = [statusFilter, tipoFilter, bufferFilter]
       .filter(param => param !== '')
       .join('&');
 
@@ -53,7 +60,8 @@ class Equipamento {
     const formData = new FormData();
     formData.append('tipo', equipamento.tipo);
     formData.append('serial', equipamento.serial);
-    formData.append('cidade', equipamento.cidade);
+    formData.append('latitude', equipamento.latitude);
+    formData.append('longitude', equipamento.longitude);
     formData.append('obs', equipamento.obs);
 
     equipamento.imgs.forEach((img, index) => {
@@ -76,7 +84,8 @@ class Equipamento {
     const formData = new FormData();
     formData.append('tipo', equipamento.tipo);
     formData.append('serial', equipamento.serial);
-    formData.append('cidade', equipamento.cidade);
+    formData.append('latitude', equipamento.latitude);
+    formData.append('longitude', equipamento.longitude);
     formData.append('obs', equipamento.obs);
 
     equipamento.imgs.forEach((img, index) => {

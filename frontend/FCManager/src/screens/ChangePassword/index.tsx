@@ -52,7 +52,6 @@ function ChangePassword({navigation}: any) {
 
     // requisição para trocar senha (pode retorar erro 401)
     const retorno = await Usuario.updatePassowrd(senhaAntiga, senhaNova);
-    console.log(retorno);
     if ('errorNum' in retorno) {
       console.log(retorno);
       if (retorno.errorNum === 401) {
@@ -76,7 +75,6 @@ function ChangePassword({navigation}: any) {
     const validation = senhaNova === confirmsenhaNova;
 
     if (validation) {
-      console.log(validation);
       setConfirmModal(true);
     }
 

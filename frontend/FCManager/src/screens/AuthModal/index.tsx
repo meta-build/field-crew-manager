@@ -1,14 +1,12 @@
-import React, {useEffect, useState} from 'react';
-import {Image, StyleSheet, Text, View} from 'react-native';
+import React, {useState} from 'react';
+import {Image, Modal, StyleSheet, Text, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useNavigation} from '@react-navigation/native';
 
 import colors from '../../styles/variables';
 
-import api from '../../services/api';
 import useContexto from '../../hooks/useContexto';
 
-import {UsuarioContext} from '../../contexts/Contexto';
 import Btn from '../../components/Button';
 import BottomModal from '../../components/BottomModal';
 import InputText from '../../components/InputText';
@@ -20,40 +18,28 @@ import * as Keychain from 'react-native-keychain';
 
 const logo = require('../../assets/images/loading-logo.png');
 
-function Loading({navigation}: any) {
-  const {setUsuario} = useContexto();
+interface Props {
+  visible: boolean;
+  onClose: () => void;
+}
+
+function AuthModal(props: Props) {
+  const nav = useNavigation();
+
+  const {usuario, setUsuario} = useContexto();
 
   const [password, setPassword] = useState('');
-  const [nome, setNome] = useState('');
-
-  const [token, setToken] = useState('');
-  const [user, setUser] = useState('');
 
   const [modal, setModal] = useState(false);
   const [failPassword, setFailPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  const getData = async () => {
-    const tokenStorage = await AsyncStorage.getItem('token');
-    const userStorage = await AsyncStorage.getItem('usuario');
-
-    if (!tokenStorage || !userStorage) {
-      navigation.navigate('Home');
-    } else {
-      setToken(tokenStorage);
-      setUser(userStorage);
-      const usuario = await JSON.parse(userStorage);
-      setNome(usuario.nome);
-      setModal(true);
-    }
-  };
 
   const submitPassword = async () => {
     setLoading(true);
     try {
       const credentials: any = await Keychain.getGenericPassword();
       if (credentials.password === password) {
-        await passUser();
+        passUser();
         setLoading(false);
         setModal(false);
       } else {
@@ -67,46 +53,46 @@ function Loading({navigation}: any) {
     }
   };
 
-  const passUser = async () => {
-    api.setToken(token);
-    setUsuario(JSON.parse(user) as UsuarioContext);
-
-    navigation.navigate('ToolList');
+  const passUser = () => {
+    setModal(false);
+    setPassword('');
+    props.onClose();
   };
 
   const exitUser = () => {
     Usuario.exit();
+    setUsuario(undefined);
     setModal(false);
-    navigation.navigate('Home');
+    setPassword('');
+    nav.navigate('Home' as never);
+    props.onClose();
   };
 
-  useEffect(() => {
-    getData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
   return (
     <>
-      <View style={styles.view}>
-        <SafeAreaView style={styles.container}>
-          <Image source={logo} style={styles.logo} />
-        </SafeAreaView>
-        {nome ? (
-          <Btn
-            styleType="blank"
-            title="Entrar"
-            onPress={() => setModal(true)}
-          />
-        ) : (
-          <></>
-        )}
-      </View>
+      <Modal visible={props.visible} onRequestClose={() => {}}>
+        <View style={styles.view}>
+          <SafeAreaView style={styles.container}>
+            <Image source={logo} style={styles.logo} />
+          </SafeAreaView>
+          {usuario?.nome ? (
+            <Btn
+              styleType="blank"
+              title="Entrar"
+              onPress={() => setModal(true)}
+            />
+          ) : (
+            <></>
+          )}
+        </View>
+      </Modal>
       <BottomModal visible={modal} onPressOutside={() => setModal(false)}>
         <Title
           text="Seja bem-vindo(a) de volta,"
           color={'green'}
           align={'left'}
         />
-        <Title text={nome} color={'green'} align={'left'} />
+        <Title text={usuario?.nome as string} color={'green'} align={'left'} />
 
         <View style={styles.loginView}>
           {failPassword ? (
@@ -180,4 +166,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Loading;
+export default AuthModal;

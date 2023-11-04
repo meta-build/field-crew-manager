@@ -395,7 +395,6 @@ function UserForm({navigation, route}: any) {
                       onChangeText={(mask, txt) => {
                         setCpf(txt);
                         setCpfMask(mask);
-                        console.log(txt, mask);
                       }}
                       color="gray"
                       error={cpfAlert || invalidCpf || alreadyCpf}

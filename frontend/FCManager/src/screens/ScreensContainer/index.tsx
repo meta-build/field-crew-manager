@@ -1,6 +1,6 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 
-import {StatusBar, StyleSheet} from 'react-native';
+import {AppState, StatusBar, StyleSheet} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {NavigationContainer} from '@react-navigation/native';
@@ -22,15 +22,34 @@ import ManeuverList from '../ManeuverList';
 import ManeuverProfile from '../ManeuverProfile';
 import ManeuverForm from '../ManeuverForm';
 import Loading from '../Loading';
+import AuthModal from '../AuthModal';
+import useContexto from '../../hooks/useContexto';
 
 const Stack = createNativeStackNavigator();
 
 const ScreensContainer = () => {
+  const {usuario} = useContexto();
+
+  const [modal, setModal] = useState(false);
+
+  useEffect(() => {
+    AppState.addEventListener('change', appState => {
+      if (appState === 'background') {
+        if (usuario) {
+          setModal(true);
+        } else {
+          setModal(false);
+        }
+      }
+    });
+  }, [usuario]);
+
   return (
     <>
       <StatusBar backgroundColor={colors.white} />
       <NavigationContainer>
         <SafeAreaView style={styles.container}>
+          <AuthModal visible={modal} onClose={() => setModal(false)} />
           <Stack.Navigator
             screenOptions={{
               headerShown: false,
