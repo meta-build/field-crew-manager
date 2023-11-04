@@ -9,6 +9,8 @@ interface EquipamentoItem {
   serial: string;
   status: 'ativo' | 'inativo';
   img: string;
+  latitude: number;
+  longitude: number;
 }
 
 interface Equipamento {
@@ -20,6 +22,8 @@ interface Equipamento {
   status: 'ativo' | 'inativo';
   imgs: string[];
   manobras: ManobraItem[];
+  latitude: number;
+  longitude: number;
 }
 
 interface Usuario {
@@ -58,6 +62,8 @@ interface Manobra {
     nome: string;
     sobrenome: string;
   };
+  latitude: number;
+  longitude: number;
 }
 
 interface ManobraItem {
@@ -69,11 +75,19 @@ interface ManobraItem {
     nome: string;
     sobrenome: string;
   };
+  latitude: number;
+  longitude: number;
 }
 
 interface ErrorType {
   errorNum: number;
   errorMsg: string;
+}
+
+interface BufferType {
+  latitude: number;
+  longitude: number;
+  distance: number;
 }
 
 export type {
@@ -85,4 +99,5 @@ export type {
   Manobra,
   ManobraItem,
   ErrorType,
+  BufferType
 };
