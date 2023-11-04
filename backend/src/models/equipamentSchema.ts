@@ -10,10 +10,6 @@ const equipamentSchema = new mongoose.Schema({
         type: String
     },
 
-    cidade: {
-        type: String
-    },
-
     obs: {
         type: String
     },
@@ -24,7 +20,15 @@ const equipamentSchema = new mongoose.Schema({
 
     imgs: {
         type: [String]
-    }
+    },
+
+    latitude: {
+        type: Number
+    },
+
+    longitude: {
+        type: Number
+    },
 });
 
 export default mongoose.model("equipamentos", equipamentSchema);
