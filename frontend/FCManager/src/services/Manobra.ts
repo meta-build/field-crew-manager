@@ -13,6 +13,8 @@ interface ManobraForm {
   descricao: string;
   equipamentos: string[];
   datetimeInicio: string;
+  latitude: number;
+  longitude: number;
 }
 
 class Manobra {

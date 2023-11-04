@@ -19,15 +19,13 @@ import Dropdown from '../../components/Dropdown';
 import Btn from '../../components/Button';
 import BottomModal from '../../components/BottomModal';
 import Title from '../../components/Title';
+import OverlayLoading from '../../components/OverlayLoading';
+import InputLocation from '../../components/InputLocation';
 
 import colors from '../../styles/variables';
 
-import citiesJson from '../../assets/data/cities.json';
-
 import Equipamento from '../../services/Equipamento';
 import Tipo from '../../services/Tipo';
-import OverlayLoading from '../../components/OverlayLoading';
-import InputLocation from '../../components/InputLocation';
 import useContexto from '../../hooks/useContexto';
 
 const {width, height} = Dimensions.get('window');
@@ -59,8 +57,6 @@ function ToolForm({navigation, route}: any) {
 
   const [serial, setSerial] = useState('');
 
-  const [selectedCity, setSelectedCity] = useState('');
-
   const [obs, setObs] = useState('');
 
   const [confirmModal, setConfirmModal] = useState(false);
@@ -72,13 +68,7 @@ function ToolForm({navigation, route}: any) {
   const [imgAlert, setImgAlert] = useState(false);
   const [typeAlert, setTypeAlert] = useState(false);
   const [serialAlert, setSerialAlert] = useState(false);
-  const [cityAlert, setCityAlert] = useState(false);
   const [obsAlert, setObsAlert] = useState(false);
-
-  const cities = citiesJson.cities.map(city => ({
-    label: city,
-    value: city,
-  }));
 
   const create = async () => {
     setLoading(true);
@@ -99,11 +89,12 @@ function ToolForm({navigation, route}: any) {
       try {
         await Equipamento.update(
           {
-            cidade: selectedCity,
             imgs,
             obs,
             serial,
             tipo,
+            latitude,
+            longitude,
           },
           params.id,
         );
@@ -116,11 +107,12 @@ function ToolForm({navigation, route}: any) {
       }
     } else {
       Equipamento.new({
-        cidade: selectedCity,
         imgs,
         obs,
         serial,
         tipo,
+        latitude,
+        longitude,
       })
         .then(res => {
           setLoading(false);
@@ -138,17 +130,10 @@ function ToolForm({navigation, route}: any) {
     setImgAlert(!imgs.length);
     setTypeAlert(!selectedTypeValue && !newType);
     setSerialAlert(!serial);
-    setCityAlert(!selectedCity);
     setObsAlert(!obs);
 
     if (
-      !(
-        !imgs.length ||
-        (!selectedTypeValue && !newType) ||
-        !serial ||
-        !selectedCity ||
-        !obs
-      )
+      !(!imgs.length || (!selectedTypeValue && !newType) || !serial || !obs)
     ) {
       setConfirmModal(true);
     }
@@ -174,11 +159,10 @@ function ToolForm({navigation, route}: any) {
           setImgs(equip.imgs);
           setSelectedTypeValue(equip.tipo.id);
           setSerial(equip.serial);
-          setSelectedCity(equip.cidade);
           setObs(equip.obs);
           setNewTypeCheck(false);
-          setLatitude(0);
-          setLongitude(0);
+          setLatitude(equip.latitude);
+          setLongitude(equip.longitude);
         });
         setLoadingOverlay(false);
       } else {
@@ -187,7 +171,6 @@ function ToolForm({navigation, route}: any) {
         setNewType('');
         setSelectedTypeValue('');
         setSerial('');
-        setSelectedCity('');
         setObs('');
         setLatitude(location.latitude);
         setLongitude(location.longitude);
@@ -197,7 +180,6 @@ function ToolForm({navigation, route}: any) {
       setImgAlert(false);
       setTypeAlert(false);
       setSerialAlert(false);
-      setCityAlert(false);
       setObsAlert(false);
     });
 
@@ -289,17 +271,6 @@ function ToolForm({navigation, route}: any) {
                 ) : (
                   <></>
                 )}
-                <View>
-                  <Text style={styles.label}>Cidade</Text>
-                  <Dropdown
-                    items={cities}
-                    placeholder="Escolha a cidade"
-                    color="gray"
-                    onSelect={value => setSelectedCity(value)}
-                    value={selectedCity}
-                  />
-                </View>
-                {cityAlert ? <AlertMsg>Escolha 1 cidade.</AlertMsg> : <></>}
                 <View style={[styles.obsView, styles.fill]}>
                   <Text style={styles.label}>Observações</Text>
                   <InputText
@@ -318,7 +289,10 @@ function ToolForm({navigation, route}: any) {
                 )}
               </Panel>
               <InputLocation
-                value={{latitude, longitude}}
+                value={{
+                  latitude: latitude || location.latitude,
+                  longitude: longitude || location.longitude,
+                }}
                 onChange={locate => {
                   setLatitude(locate.latitude);
                   setLongitude(locate.longitude);

@@ -10,6 +10,7 @@ import {
   LogBox,
   Platform,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from '../../components/Header/Index';
 import InputText from '../../components/InputText';
@@ -17,15 +18,15 @@ import Btn from '../../components/Button';
 import BottomModal from '../../components/BottomModal';
 import Title from '../../components/Title';
 import SelectEquipment from '../../components/SelectEquipment';
+import InputLocation from '../../components/InputLocation';
 
 import colors from '../../styles/variables';
 
 import {EquipamentoItem} from '../../types';
 import Manobra from '../../services/Manobra';
+
 import useContexto from '../../hooks/useContexto';
 import {UsuarioContext} from '../../contexts/Contexto';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import InputLocation from '../../components/InputLocation';
 
 const {width, height} = Dimensions.get('window');
 
@@ -66,6 +67,8 @@ function ManeuverForm({navigation, route}: any) {
       descricao: desc,
       titulo,
       equipamentos: equipamentos.map(equip => equip.id),
+      latitude,
+      longitude,
     })
       .then(async res => {
         setConfirmModal(false);

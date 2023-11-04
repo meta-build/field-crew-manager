@@ -15,9 +15,10 @@ interface EquipamentoListReturn {
 interface EquipamentoForm {
   tipo: string;
   serial: string;
-  cidade: string;
   obs: string;
   imgs: string[];
+  latitude: number;
+  longitude: number;
 }
 
 class Equipamento {
@@ -59,7 +60,8 @@ class Equipamento {
     const formData = new FormData();
     formData.append('tipo', equipamento.tipo);
     formData.append('serial', equipamento.serial);
-    formData.append('cidade', equipamento.cidade);
+    formData.append('latitude', equipamento.latitude);
+    formData.append('longitude', equipamento.longitude);
     formData.append('obs', equipamento.obs);
 
     equipamento.imgs.forEach((img, index) => {
@@ -82,7 +84,8 @@ class Equipamento {
     const formData = new FormData();
     formData.append('tipo', equipamento.tipo);
     formData.append('serial', equipamento.serial);
-    formData.append('cidade', equipamento.cidade);
+    formData.append('latitude', equipamento.latitude);
+    formData.append('longitude', equipamento.longitude);
     formData.append('obs', equipamento.obs);
 
     equipamento.imgs.forEach((img, index) => {
