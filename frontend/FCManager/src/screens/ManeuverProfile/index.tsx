@@ -156,7 +156,11 @@ function ManeuverProfile({navigation, route}: any) {
                     <></>
                   )}
                 </Panel>
-                <OpenMapBtn onPress={() => setMapModal(true)} />
+                {manobra.latitude && manobra.longitude ? (
+                  <OpenMapBtn onPress={() => setMapModal(true)} />
+                ) : (
+                  <></>
+                )}
                 <Panel>
                   <Text style={styles.title}>Equipamentos utilizados</Text>
                   <FlatList

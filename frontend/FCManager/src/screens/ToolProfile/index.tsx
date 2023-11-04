@@ -9,7 +9,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import colors from '../../styles/variables';
 
 import Header from '../../components/Header/Index';
 import ImageCarousel from '../../components/ImageCarousel';
@@ -20,11 +19,13 @@ import Btn from '../../components/Button';
 import BottomModal from '../../components/BottomModal';
 import Navbar from '../../components/Navbar';
 import MiniManeuverItem from '../../components/MiniManeuverItem';
+import OpenMapBtn from '../../components/OpenMapBtn';
 
 import Equipamento from '../../services/Equipamento';
-
 import {Equipamento as EquipamentoType} from '../../types';
-import OpenMapBtn from '../../components/OpenMapBtn';
+
+import colors from '../../styles/variables';
+
 import MapModal from './MapModal';
 
 const {width, height} = Dimensions.get('window');
@@ -135,7 +136,11 @@ function ToolProfile({navigation, route}: any) {
                     </View>
                   </View>
                 </Panel>
-                <OpenMapBtn onPress={() => setMapModal(true)} />
+                {equipamento.latitude && equipamento.longitude ? (
+                  <OpenMapBtn onPress={() => setMapModal(true)} />
+                ) : (
+                  <></>
+                )}
                 <Panel>
                   <View style={styles.info}>
                     <Text style={styles.label}>Histórico de Manobras:</Text>

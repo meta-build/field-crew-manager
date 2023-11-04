@@ -8,6 +8,7 @@ import {Manobra as ManobraType} from '../../../types';
 
 import Btn from '../../../components/Button';
 import MapPoint from '../../../components/MapPoint';
+import useContexto from '../../../hooks/useContexto';
 
 const {width, height} = Dimensions.get('window');
 
@@ -18,6 +19,8 @@ interface Props {
 }
 
 function MapModal(props: Props) {
+  const {location} = useContexto();
+
   return (
     <>
       <Modal
@@ -30,22 +33,29 @@ function MapModal(props: Props) {
             style={styles.map}
             customMapStyle={mapStyle}
             initialRegion={{
-              latitude: -23.193507,
-              longitude: -45.878779,
+              latitude: props.maneuver.latitude || location.latitude,
+              longitude: props.maneuver.longitude || location.longitude,
               latitudeDelta: 0.01,
               longitudeDelta: 0.01,
             }}
             showsUserLocation
             loadingEnabled>
-            <Marker
-              // inserir coordenadas vindas da api
-              coordinate={{latitude: -23.193507, longitude: -45.878779}}>
-              <View style={styles.point}>
-                <MapPoint
-                  color={props.maneuver.datetimeFim ? 'gray' : 'green'}
-                />
-              </View>
-            </Marker>
+            {props.maneuver.latitude && props.maneuver.longitude ? (
+              <Marker
+                // inserir coordenadas vindas da api
+                coordinate={{
+                  latitude: props.maneuver.latitude,
+                  longitude: props.maneuver.longitude,
+                }}>
+                <View style={styles.point}>
+                  <MapPoint
+                    color={props.maneuver.datetimeFim ? 'gray' : 'green'}
+                  />
+                </View>
+              </Marker>
+            ) : (
+              <></>
+            )}
           </MapView>
         </View>
         <View style={styles.btnView}>

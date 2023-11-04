@@ -9,6 +9,8 @@ import {Equipamento as EquipamentoType} from '../../../types';
 import Btn from '../../../components/Button';
 import MapPoint from '../../../components/MapPoint';
 
+import useContexto from '../../../hooks/useContexto';
+
 const {width, height} = Dimensions.get('window');
 
 interface Props {
@@ -18,6 +20,8 @@ interface Props {
 }
 
 function MapModal(props: Props) {
+  const {location} = useContexto();
+
   return (
     <>
       <Modal
@@ -30,24 +34,31 @@ function MapModal(props: Props) {
             style={styles.map}
             customMapStyle={mapStyle}
             initialRegion={{
-              latitude: -23.193507,
-              longitude: -45.878779,
+              latitude: props.equipement.latitude || location.latitude,
+              longitude: props.equipement.longitude || location.longitude,
               latitudeDelta: 0.01,
               longitudeDelta: 0.01,
             }}
             showsUserLocation
             loadingEnabled>
-            <Marker
-              // inserir coordenadas vindas da api
-              coordinate={{latitude: -23.193507, longitude: -45.878779}}>
-              <View style={styles.point}>
-                <MapPoint
-                  color={
-                    props.equipement.status === 'inativo' ? 'gray' : 'green'
-                  }
-                />
-              </View>
-            </Marker>
+            {props.equipement.latitude && props.equipement.longitude ? (
+              <Marker
+                // inserir coordenadas vindas da api
+                coordinate={{
+                  latitude: props.equipement.latitude,
+                  longitude: props.equipement.longitude,
+                }}>
+                <View style={styles.point}>
+                  <MapPoint
+                    color={
+                      props.equipement.status === 'inativo' ? 'gray' : 'green'
+                    }
+                  />
+                </View>
+              </Marker>
+            ) : (
+              <></>
+            )}
           </MapView>
         </View>
         <View style={styles.btnView}>
