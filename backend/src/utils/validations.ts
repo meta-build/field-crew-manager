@@ -158,7 +158,13 @@ class Validations {
         console.log(e);
         return { errorResponse: res.status(500).json({ error: e }) };
       }
-    }
+    },
+    maxActiveManeuversValidation: (activeManeuvers: number, res: Response) => {
+      if (activeManeuvers >= 10) {
+        return res.status(401).json({ error: "Usuário possui número máximo de manobras em andamento."});
+      }
+      return undefined;
+    },
   }
 
   public verifyFields(fields: object, res: Response) {

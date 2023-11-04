@@ -10,6 +10,13 @@ class ManobraController {
     const idUser = req.user?.id;
 
     try {
+      const usuario = await usuarioSchema.findById(idUser);
+
+      if (usuario.manobrasAtivas) {
+        const maxManeuversAlert = Validations.users.maxActiveManeuversValidation(usuario.manobrasAtivas, res);
+        if (maxManeuversAlert) return maxManeuversAlert;
+      }
+
       const { titulo, descricao, equipamentos, datetimeInicio, latitude, longitude } = req.body;
 
       const invalidFieldsAlert = Validations.verifyFields({ titulo, descricao, equipamentos, datetimeInicio, latitude, longitude }, res);
@@ -35,7 +42,6 @@ class ManobraController {
       }
 
       // Obtenha o funcionário a partir do modelo de funcionário
-      const usuario = await usuarioSchema.findById(idUser);
 
       // Crie a manobra
       const manobra = await manobraSchema.create({
@@ -56,6 +62,8 @@ class ManobraController {
         await equipamentSchema.findByIdAndUpdate(equipId, { isActive: false });
       });
 
+      await usuarioSchema.findByIdAndUpdate(idUser, { manobrasAtivas: usuario.manobrasAtivas ? usuario.manobrasAtivas + 1 : 1 });
+
       return res.status(201).json({ id: manobra._id });
     } catch (error) {
       console.error(error);
@@ -64,7 +72,11 @@ class ManobraController {
   }
 
   public async finalizarManobra(req: Request, res: Response) {
+    const idUser = req.user?.id;
+
     try {
+      const usuario = await usuarioSchema.findById(idUser);
+
       const { id } = req.params;
       const { datetimeFim } = req.body;
 
@@ -84,6 +96,8 @@ class ManobraController {
       manobra.equipamentos.forEach(async (equipId) => {
         await equipamentSchema.findByIdAndUpdate(equipId, { isActive: true });
       });
+
+      await usuarioSchema.findByIdAndUpdate(idUser, { manobrasAtivas: usuario.manobrasAtivas ? usuario.manobrasAtivas - 1 : 0 });
 
       return res.status(200).json({});
     } catch (error) {
@@ -150,7 +164,7 @@ class ManobraController {
     if (latitude || longitude || dist) {
       const invalidFieldsAlert = Validations.verifyFields({ latitude, longitude, dist }, res);
       if (invalidFieldsAlert) return invalidFieldsAlert;
-    }  
+    }
 
     try {
       const titulo: string | undefined = req.query.titulo as string | undefined;
@@ -165,38 +179,38 @@ class ManobraController {
       }
 
       const manobrasValues: any[] = manobras
-      .filter(manobra => {
-        const bufferFilter = ((manobra.latitude && manobra.longitude) && (latitude && longitude && dist)) ? 
-          filterByBuffer({
-            latitude: Number(latitude),
-            longitude: Number(longitude),
-          }, 
-          Number(dist), {
-            latitude: manobra.latitude,
-            longitude: manobra.longitude,  
-          }) : 
-          true;
+        .filter(manobra => {
+          const bufferFilter = ((manobra.latitude && manobra.longitude) && (latitude && longitude && dist)) ?
+            filterByBuffer({
+              latitude: Number(latitude),
+              longitude: Number(longitude),
+            },
+              Number(dist), {
+              latitude: manobra.latitude,
+              longitude: manobra.longitude,
+            }) :
+            true;
 
           return bufferFilter;
-      })
-      .map((manobra) => ({
-        id: manobra._id,
-        titulo: manobra.titulo,
-        datetimeFim: manobra.datetimeFim ? manobra.datetimeFim.toISOString() : null,
-        usuario: manobra.funcionario,
-        latitude: manobra.latitude,
-        longitude: manobra.longitude,
-      })).sort((manobraA, manobraB) => {
-        if (!manobraA.datetimeFim && manobraA.usuario?.id === user.id) {
-          return -1;
-        }
-        if (!manobraB.datetimeFim && manobraB.usuario?.id === user.id) {
-          return 1;
-        }
-        else {
-          return 0;
-        }
-      });
+        })
+        .map((manobra) => ({
+          id: manobra._id,
+          titulo: manobra.titulo,
+          datetimeFim: manobra.datetimeFim ? manobra.datetimeFim.toISOString() : null,
+          usuario: manobra.funcionario,
+          latitude: manobra.latitude,
+          longitude: manobra.longitude,
+        })).sort((manobraA, manobraB) => {
+          if (!manobraA.datetimeFim && manobraA.usuario?.id === user.id) {
+            return -1;
+          }
+          if (!manobraB.datetimeFim && manobraB.usuario?.id === user.id) {
+            return 1;
+          }
+          else {
+            return 0;
+          }
+        });
       return res.status(200).json({
         values: manobrasValues,
         metadata: {

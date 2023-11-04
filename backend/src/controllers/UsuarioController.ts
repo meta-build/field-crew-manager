@@ -100,7 +100,8 @@ class UsuarioController {
         matricula,
         cpf,
         isAdmin,
-        senha: passwordHash
+        senha: passwordHash,
+        manobrasAtivas: 0,
       });
 
       const id = usuario._id;
@@ -244,20 +245,6 @@ class UsuarioController {
       const validation = await Validations.users.passwordValidation(usuario.id, senha, res);
       if (validation && validation['errorResponse']) return validation['errorResponse'];
 
-      let manobraAtiva = false;
-      try {
-        const manobra = await manobraSchema.findOne({
-          'funcionario.id': usuario.id,
-          datetimeFim: { $exists: false },
-        });
-        if (manobra) {
-          manobraAtiva = true;
-        }
-      } catch (err) {
-        console.log(err);
-        return null;
-      }
-
       const token = generateToken({ id: usuario.id, isAdmin: usuario.isAdmin });
 
       return res.status(200).json({
@@ -271,7 +258,7 @@ class UsuarioController {
           cpf: usuario.cpf,
           foto: usuario.foto,
           isAdmin: usuario.isAdmin,
-          manobraAtiva
+          manobrasAtivas: usuario.manobrasAtivas ? usuario.manobrasAtivas : 0,
         },
         token
       });

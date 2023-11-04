@@ -35,8 +35,11 @@ const usuarioSchema = new mongoose.Schema({
 
   isAdmin: {
     type: Boolean
-  }
+  },
 
+  manobrasAtivas: {
+    type: Number
+  },
 });
 
 export default mongoose.model("usuarios", usuarioSchema);
