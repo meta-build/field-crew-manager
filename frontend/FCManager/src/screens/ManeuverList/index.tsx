@@ -28,6 +28,7 @@ import Manobra from '../../services/Manobra';
 import useContexto from '../../hooks/useContexto';
 import LoadingManeuverList from '../../components/LoadingManeuverList';
 import MapModal from './MapModal';
+import SwitchBtn from '../../components/SwitchBtn';
 
 const {width, height} = Dimensions.get('window');
 
@@ -44,10 +45,12 @@ function ManeuverList({navigation}: any) {
 
   const [titulo, setTitulo] = useState('');
   const [status, setStatus] = useState<StatusType>('todos');
+  const [distMaxFilter, setDistMaxFilter] = useState(true);
+  const [distMax, setDistMax] = useState(2);
 
   const [lista, setLista] = useState<ManobraItem[]>([]);
 
-  const [filterCount, setFilterCount] = useState(0);
+  const [filterCount, setFilterCount] = useState(1);
 
   const openFilter = () => {
     setFilterModal(true);
@@ -66,11 +69,14 @@ function ManeuverList({navigation}: any) {
   };
 
   const confirmFilter = () => {
+    let count = 0;
     if (status !== 'todos') {
-      setFilterCount(1);
-    } else {
-      setFilterCount(0);
+      count += 1;
     }
+    if (distMaxFilter) {
+      count += 1;
+    }
+    setFilterCount(count);
     getManobras();
     setFilterModal(false);
   };
@@ -78,7 +84,9 @@ function ManeuverList({navigation}: any) {
   const cancelFilter = () => {
     setStatus('todos');
     setTitulo('');
-    setFilterCount(0);
+    setFilterCount(1);
+    setDistMax(2);
+    setDistMaxFilter(true);
     getManobras();
     setFilterModal(false);
   };
@@ -192,6 +200,29 @@ function ManeuverList({navigation}: any) {
         visible={filterModal}>
         <Title color="green" text="Filtros" align="center" />
         <View style={styles.filterFields}>
+          <View style={styles.bufferContainer}>
+            <SwitchBtn
+              onPress={() => setDistMaxFilter(!distMaxFilter)}
+              value={distMaxFilter}
+            />
+            <View
+              style={[
+                styles.bufferContainer,
+                !distMaxFilter ? styles.unactiveContainer : {},
+              ]}>
+              <Text style={styles.label}>Distância máxima:</Text>
+              <InputText
+                color="gray"
+                onChange={e => setDistMax(Number(e.nativeEvent.text))}
+                keyboardType="number-pad"
+                style={styles.bufferInput}
+                value={distMaxFilter ? `${distMax}` : '\u221E'}
+                enable={distMaxFilter}
+                textAlign="center"
+              />
+              <Text style={styles.label}>Km</Text>
+            </View>
+          </View>
           <View>
             <Text style={styles.label}>Status</Text>
             <Dropdown
@@ -218,7 +249,7 @@ function ManeuverList({navigation}: any) {
           <Btn
             onPress={() => cancelFilter()}
             styleType="outlined"
-            title="Limpar filtros"
+            title="Resetar filtros"
           />
         </View>
       </BottomModal>
@@ -310,6 +341,18 @@ const styles = StyleSheet.create({
   alertTxt: {
     textAlign: 'center',
     color: colors.dark_gray,
+  },
+  bufferContainer: {
+    flexDirection: 'row',
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    gap: 12,
+  },
+  bufferInput: {
+    maxWidth: 52,
+  },
+  unactiveContainer: {
+    opacity: 0.5,
   },
 });
 

@@ -23,13 +23,12 @@ import colors from '../../styles/variables';
 import FilterIcon from '../../assets/icons/filterGreen.svg';
 import MapIcon from '../../assets/icons/map.svg';
 
-import CitiesJson from '../../assets/data/cities.json';
-
 import Equipamento from '../../services/Equipamento';
 
 import {EquipamentoItem} from '../../types';
 
 import MapModal from './MapModal';
+import SwitchBtn from '../../components/SwitchBtn';
 
 const {width, height} = Dimensions.get('window');
 
@@ -42,13 +41,12 @@ function ToolList({navigation}: any) {
   const [city, setCity] = useState('');
   const [tipoName, setTipoName] = useState('');
   const [status, setStatus] = useState<'todos' | 'ativo' | 'inativo'>('todos');
-  const [lista, setLista] = useState<EquipamentoItem[]>([]);
-  const [filterCount, setFilterCount] = useState(0);
+  const [distMaxFilter, setDistMaxFilter] = useState(true);
+  const [distMax, setDistMax] = useState(2);
 
-  const cities = CitiesJson.cities.map(item => ({
-    value: item,
-    label: item,
-  }));
+  const [filterCount, setFilterCount] = useState(1);
+
+  const [lista, setLista] = useState<EquipamentoItem[]>([]);
 
   const openFilter = () => {
     setFilterModal(true);
@@ -63,13 +61,14 @@ function ToolList({navigation}: any) {
   };
 
   const confirmFilter = () => {
-    if (city && status !== 'todos') {
-      setFilterCount(2);
-    } else if (city || status !== 'todos') {
-      setFilterCount(1);
-    } else {
-      setFilterCount(0);
+    let count = 0;
+    if (status !== 'todos') {
+      count += 1;
     }
+    if (distMaxFilter) {
+      count += 1;
+    }
+    setFilterCount(count);
     getEquipamentos(status, city);
     setFilterModal(false);
   };
@@ -78,7 +77,9 @@ function ToolList({navigation}: any) {
     setCity('');
     setStatus('todos');
     setTipoName('');
-    setFilterCount(0);
+    setFilterCount(1);
+    setDistMax(2);
+    setDistMaxFilter(true);
     getEquipamentos('todos', '');
     setFilterModal(false);
   };
@@ -178,6 +179,29 @@ function ToolList({navigation}: any) {
         visible={filterModal}>
         <Title color="green" text="Filtros" align="center" />
         <View style={styles.filterFields}>
+        <View style={styles.bufferContainer}>
+            <SwitchBtn
+              onPress={() => setDistMaxFilter(!distMaxFilter)}
+              value={distMaxFilter}
+            />
+            <View
+              style={[
+                styles.bufferContainer,
+                !distMaxFilter ? styles.unactiveContainer : {},
+              ]}>
+              <Text style={styles.label}>Distância máxima:</Text>
+              <InputText
+                color="gray"
+                onChange={e => setDistMax(Number(e.nativeEvent.text))}
+                keyboardType="number-pad"
+                style={styles.bufferInput}
+                value={distMaxFilter ? `${distMax}` : '\u221E'}
+                enable={distMaxFilter}
+                textAlign="center"
+              />
+              <Text style={styles.label}>Km</Text>
+            </View>
+          </View>
           <View>
             <Text style={styles.label}>Status</Text>
             <Dropdown
@@ -204,7 +228,7 @@ function ToolList({navigation}: any) {
           <Btn
             onPress={() => cancelFilter()}
             styleType="outlined"
-            title="Limpar filtros"
+            title="Resetar filtros"
           />
         </View>
       </BottomModal>
@@ -272,6 +296,18 @@ const styles = StyleSheet.create({
   },
   equipsList: {
     flex: 1,
+  },
+  bufferContainer: {
+    flexDirection: 'row',
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    gap: 12,
+  },
+  bufferInput: {
+    maxWidth: 52,
+  },
+  unactiveContainer: {
+    opacity: 0.5,
   },
 });
 
