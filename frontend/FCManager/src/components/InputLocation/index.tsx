@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import MapView from 'react-native-maps';
 import colors from '../../styles/variables';
@@ -11,6 +11,11 @@ interface Props {
 }
 
 function InputLocation(props: Props) {
+  const [delta, setDelta] = useState({
+    latitudeDelta: 0.02,
+    longitudeDelta: 0.02,
+  });
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Localização</Text>
@@ -18,18 +23,22 @@ function InputLocation(props: Props) {
         <MapView
           style={styles.map}
           customMapStyle={mapStyle}
-          onRegionChangeComplete={locate =>
+          onRegionChangeComplete={locate => {
             props.onChange({
               latitude: locate.latitude,
               longitude: locate.longitude,
-            })
-          }
+            });
+            setDelta({
+              latitudeDelta: locate.latitudeDelta,
+              longitudeDelta: locate.longitudeDelta,
+            });
+          }}
           showsUserLocation
           region={{
             latitude: props.value.latitude,
             longitude: props.value.longitude,
-            latitudeDelta: 0.02,
-            longitudeDelta: 0.02,
+            latitudeDelta: delta.latitudeDelta,
+            longitudeDelta: delta.longitudeDelta,
           }}
         />
         <View style={styles.pinView}>
