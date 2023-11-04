@@ -28,7 +28,8 @@ https://github.com/ikatyang/emoji-cheat-sheet#smileys--emotion
 <a href='https://user-images.githubusercontent.com/90328897/229401867-6c327c67-188d-41d4-a167-153cb717ef4c.png'>v1.0</a>
 <br><br>
 Versão atual (v3.0) <br> -->
-![backlog-2-1](https://github.com/meta-build/field-crew-manager/assets/111146527/d95c130d-7190-41f0-a124-391579c459a8)
+![backlog-novo](https://github.com/meta-build/field-crew-manager/assets/111146527/cf0c3e3a-7737-4354-897e-d4898a45d1b3)
+
 
 <h2 style="font -weight: bold; margin=bottom: margin-bottom: 0px">
     Sprints:
@@ -74,6 +75,38 @@ A entrega da primeira sprint do projeto marcou um importante marco, concentrando
 
 ##### Manobras
 ![manobras](https://github.com/meta-build/field-crew-manager/assets/111146527/556c4400-5da2-4356-8911-0e5223c4cfce)
+
+### Sprint 3
+<p>
+ Na terceira sprint do nosso projeto, direcionamos nossos esforços para aprimorar a funcionalidade de mapas no aplicativo. Introduzimos telas de mapas que permitem aos usuários localizar facilmente equipamentos e manobras. Também implementamos telas de mapas nas quais os usuários podem selecionar a localização do equipamento ou manobra diretamente nos formulários de cadastro de edição, tornando o processo mais intuitivo e eficiente. Além disso, incorporamos um filtro de distância máxima, que oferece aos usuários a capacidade de personalizar a busca por equipamentos com base na proximidade, proporcionando flexibilidade e praticidade. Aumentamos ainda o limite de manobras ativas por usuário para 10, ampliando a utilidade do aplicativo. Para reforçar a segurança, aprimoramos o processo de autenticação, agora exigindo que os usuários insiram sua senha sempre que minimizarem e abrirem novamente o aplicativo. Essas melhorias representam um avanço significativo em termos de funcionalidade e segurança.
+</p>
+
+#### Funcionalidades
+<ul>
+ <li>Visualização dos equipamentos e manobras em mapas</li>
+ <li>Visualização individual do equipamento ou manobra no mapa</li>
+ <li>Filtro de distância máxima</li>
+ <li>Seleção de localização no cadastro/edição de manobras e equipamentos</li>
+ <li>Poder de cadastrar até 10 manobras ativas simultaneamente</li>
+ <li>Autenticação ao minizar e retornar ao app</li>
+</ul>
+
+#### Apresentação das telas
+##### Autenticação ao minizar e retorar ao app
+![1-gravacao-autenticacao-ao-retornar](https://github.com/meta-build/field-crew-manager/assets/111146527/79bf5f0a-d7ef-42cc-927d-55b0e6825137)
+
+##### Localização de equipamentos/manobras em mapas
+![2-gravacao-mapas](https://github.com/meta-build/field-crew-manager/assets/111146527/1dde2b07-3eeb-4da9-be2d-0dd3def3306c)
+
+##### Seleção de localização nos formulários de criação/edição de manobras e equipamentos
+![3-gravacao-criar-manobra-equipamento ‐ Feito com o Clipchamp](https://github.com/meta-build/field-crew-manager/assets/111146527/0ca9578e-4cfc-4bf1-9441-b47e8c55618d)
+
+##### Filtro de distância máxima entre usuário e equipamento/manobra
+![4-gravacao-filtro-buffer](https://github.com/meta-build/field-crew-manager/assets/111146527/68825c74-2b4b-47e1-ae31-712837326764)
+
+##### Limite de cadastro de manobras ativas simultâneas
+![5-gravacao-max-manobras](https://github.com/meta-build/field-crew-manager/assets/111146527/3d7ed258-b2d2-432c-9875-ec39351f3ff1)
+
 
 <!-- tecnologias -->
 ## :computer: Tecnologias utilizadas
