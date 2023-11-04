@@ -12,7 +12,6 @@ const greenIcon = require('../../assets/images/map-icon-green.png');
 const blueIcon = require('../../assets/images/map-icon-blue.png');
 
 function MapPoint(props: Props) {
-  useEffect(() => console.log('aqui'));
   return (
     <Image
       style={styles.normal}

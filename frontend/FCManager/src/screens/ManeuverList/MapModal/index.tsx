@@ -76,12 +76,20 @@ function MapModal(props: Props) {
             {/* active maneuvers layer */}
             {activeManeuversLayer &&
               props.maneuvers
-                .filter(maneuver => !maneuver.datetimeFim)
+                .filter(
+                  maneuver =>
+                    !maneuver.datetimeFim &&
+                    maneuver.latitude &&
+                    maneuver.longitude,
+                )
                 .map(maneuver => (
                   <Marker
                     key={maneuver.id}
                     // inserir coordenadas vindas da api
-                    coordinate={{latitude: -1, longitude: -1}}
+                    coordinate={{
+                      latitude: maneuver.latitude,
+                      longitude: maneuver.longitude,
+                    }}
                     onPress={() => setSelectedManeuver(maneuver)}
                     icon={
                       maneuver.id === selectedManeuver?.id
@@ -93,12 +101,20 @@ function MapModal(props: Props) {
             {/* closed maneuvers layer */}
             {closedManeuversLayer &&
               props.maneuvers
-                .filter(maneuver => maneuver.datetimeFim)
-                .map((maneuver, index) => (
+                .filter(
+                  maneuver =>
+                    maneuver.datetimeFim &&
+                    maneuver.latitude &&
+                    maneuver.longitude,
+                )
+                .map(maneuver => (
                   <Marker
                     key={maneuver.id}
                     // inserir coordenadas vindas da api
-                    coordinate={{latitude: index, longitude: index}}
+                    coordinate={{
+                      latitude: maneuver.latitude,
+                      longitude: maneuver.longitude,
+                    }}
                     onPress={() => setSelectedManeuver(maneuver)}
                     icon={
                       maneuver.id === selectedManeuver?.id

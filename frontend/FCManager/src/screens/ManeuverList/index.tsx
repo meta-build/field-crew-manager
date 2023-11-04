@@ -35,7 +35,7 @@ const {width, height} = Dimensions.get('window');
 type StatusType = 'todos' | 'concluido' | 'emAndamento';
 
 function ManeuverList({navigation}: any) {
-  const {usuario} = useContexto();
+  const {usuario, location} = useContexto();
 
   const [filterModal, setFilterModal] = useState(false);
   const [alertModal, setAlertModal] = useState(false);
@@ -47,6 +47,7 @@ function ManeuverList({navigation}: any) {
   const [status, setStatus] = useState<StatusType>('todos');
   const [distMaxFilter, setDistMaxFilter] = useState(true);
   const [distMax, setDistMax] = useState(2);
+  const [distMaxStr, setDistMaxStr] = useState('2');
 
   const [lista, setLista] = useState<ManobraItem[]>([]);
 
@@ -86,6 +87,7 @@ function ManeuverList({navigation}: any) {
     setTitulo('');
     setFilterCount(1);
     setDistMax(2);
+    setDistMaxStr('2');
     setDistMaxFilter(true);
     getManobras();
     setFilterModal(false);
@@ -98,7 +100,11 @@ function ManeuverList({navigation}: any) {
 
   const getManobras = async () => {
     setLoadingList(true);
-    await Manobra.getAll()
+    await Manobra.getAll({
+      latitude: location.latitude,
+      longitude: location.longitude,
+      distance: distMax,
+    })
       .then(res => {
         const manobras = res.values.filter(manobra => {
           const tituloFilter = filtrarNome(manobra.titulo);
@@ -213,10 +219,15 @@ function ManeuverList({navigation}: any) {
               <Text style={styles.label}>Distância máxima:</Text>
               <InputText
                 color="gray"
-                onChange={e => setDistMax(Number(e.nativeEvent.text))}
+                onChange={e => {
+                  setDistMaxStr(e.nativeEvent.text);
+                  if (!isNaN(Number(e.nativeEvent.text))) {
+                    setDistMax(Number(e.nativeEvent.text));
+                  }
+                }}
                 keyboardType="number-pad"
                 style={styles.bufferInput}
-                value={distMaxFilter ? `${distMax}` : '\u221E'}
+                value={distMaxFilter ? distMaxStr : '\u221E'}
                 enable={distMaxFilter}
                 textAlign="center"
               />

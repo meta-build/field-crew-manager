@@ -29,20 +29,23 @@ import {EquipamentoItem} from '../../types';
 
 import MapModal from './MapModal';
 import SwitchBtn from '../../components/SwitchBtn';
+import useContexto from '../../hooks/useContexto';
 
 const {width, height} = Dimensions.get('window');
 
 function ToolList({navigation}: any) {
+  const {location} = useContexto();
+
   const [filterModal, setFilterModal] = useState(false);
   const [mapModal, setMapModal] = useState(false);
 
   const [loadingList, setLoadingList] = useState(false);
 
-  const [city, setCity] = useState('');
   const [tipoName, setTipoName] = useState('');
   const [status, setStatus] = useState<'todos' | 'ativo' | 'inativo'>('todos');
   const [distMaxFilter, setDistMaxFilter] = useState(true);
   const [distMax, setDistMax] = useState(2);
+  const [distMaxStr, setDistMaxStr] = useState('2');
 
   const [filterCount, setFilterCount] = useState(1);
 
@@ -69,18 +72,18 @@ function ToolList({navigation}: any) {
       count += 1;
     }
     setFilterCount(count);
-    getEquipamentos(status, city);
+    getEquipamentos();
     setFilterModal(false);
   };
 
   const cancelFilter = () => {
-    setCity('');
     setStatus('todos');
     setTipoName('');
     setFilterCount(1);
     setDistMax(2);
+    setDistMaxStr('2');
     setDistMaxFilter(true);
-    getEquipamentos('todos', '');
+    getEquipamentos();
     setFilterModal(false);
   };
 
@@ -89,12 +92,13 @@ function ToolList({navigation}: any) {
     return regex.test(titulo);
   };
 
-  const getEquipamentos = async (
-    statusFilter: 'todos' | 'ativo' | 'inativo',
-    cidade: string,
-  ) => {
+  const getEquipamentos = async () => {
     setLoadingList(true);
-    await Equipamento.getAll(statusFilter, '', cidade).then(res => {
+    await Equipamento.getAll(status, '', {
+      latitude: location.latitude,
+      longitude: location.longitude,
+      distance: distMax,
+    }).then(res => {
       const equips = res.values.filter(equip => filtrarNome(equip.tipo.value));
       setLista(equips);
     });
@@ -106,9 +110,12 @@ function ToolList({navigation}: any) {
       cancelFilter();
     });
 
-    getEquipamentos(status, city);
+    getEquipamentos();
+
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return onFocus;
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tipoName, navigation]);
 
   return (
@@ -179,7 +186,7 @@ function ToolList({navigation}: any) {
         visible={filterModal}>
         <Title color="green" text="Filtros" align="center" />
         <View style={styles.filterFields}>
-        <View style={styles.bufferContainer}>
+          <View style={styles.bufferContainer}>
             <SwitchBtn
               onPress={() => setDistMaxFilter(!distMaxFilter)}
               value={distMaxFilter}
@@ -192,10 +199,15 @@ function ToolList({navigation}: any) {
               <Text style={styles.label}>Distância máxima:</Text>
               <InputText
                 color="gray"
-                onChange={e => setDistMax(Number(e.nativeEvent.text))}
+                onChange={e => {
+                  setDistMaxStr(e.nativeEvent.text);
+                  if (!isNaN(Number(e.nativeEvent.text))) {
+                    setDistMax(Number(e.nativeEvent.text));
+                  }
+                }}
                 keyboardType="number-pad"
                 style={styles.bufferInput}
-                value={distMaxFilter ? `${distMax}` : '\u221E'}
+                value={distMaxFilter ? distMaxStr : '\u221E'}
                 enable={distMaxFilter}
                 textAlign="center"
               />

@@ -76,12 +76,20 @@ function MapModal(props: Props) {
             {/* active equipments layer */}
             {activeEquipmentsLayer &&
               props.equipments
-                .filter(equipment => equipment.status === 'ativo')
+                .filter(
+                  equipment =>
+                    equipment.status === 'ativo' &&
+                    equipment.latitude &&
+                    equipment.longitude,
+                )
                 .map(equipment => (
                   <Marker
                     key={equipment.id}
                     // inserir coordenadas vindas da api
-                    coordinate={{latitude: -1, longitude: -1}}
+                    coordinate={{
+                      latitude: equipment.latitude,
+                      longitude: equipment.longitude,
+                    }}
                     onPress={() => setSelectedEquipment(equipment)}
                     icon={
                       equipment.id === selectedEquipment?.id
@@ -93,12 +101,20 @@ function MapModal(props: Props) {
             {/* deactive Equipments layer */}
             {deactiveEquipmentsLayer &&
               props.equipments
-                .filter(maneuver => maneuver.status === 'inativo')
-                .map((equipment, index) => (
+                .filter(
+                  equipment =>
+                    equipment.status === 'inativo' &&
+                    equipment.latitude &&
+                    equipment.longitude,
+                )
+                .map(equipment => (
                   <Marker
                     key={equipment.id}
                     // inserir coordenadas vindas da api
-                    coordinate={{latitude: index, longitude: index}}
+                    coordinate={{
+                      latitude: equipment.latitude,
+                      longitude: equipment.longitude,
+                    }}
                     onPress={() => setSelectedEquipment(equipment)}
                     icon={
                       equipment.id === selectedEquipment?.id
@@ -143,12 +159,12 @@ function MapModal(props: Props) {
         <View style={styles.legendBtnView}>
           <LegendBtn
             active={activeEquipmentsLayer}
-            label="Manobras ativas"
+            label="Equipamentos ativos"
             onPress={() => setActiveEquipmentsLayer(!activeEquipmentsLayer)}
           />
           <LegendBtn
             active={deactiveEquipmentsLayer}
-            label="Manobras concluídas"
+            label="Equipamentos inativos"
             onPress={() => setDeactiveEquipmentsLayer(!deactiveEquipmentsLayer)}
           />
         </View>
