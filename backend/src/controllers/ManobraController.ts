@@ -9,10 +9,14 @@ class ManobraController {
     const idUser = req.user?.id;
 
     try {
-      const { titulo, descricao, equipamentos, datetimeInicio } = req.body;
+      const { titulo, descricao, equipamentos, datetimeInicio, latitude, longitude } = req.body;
 
-      const invalidFieldsAlert = Validations.verifyFields({ titulo, descricao, equipamentos, datetimeInicio }, res);
+      const invalidFieldsAlert = Validations.verifyFields({ titulo, descricao, equipamentos, datetimeInicio, latitude, longitude }, res);
       if (invalidFieldsAlert) return invalidFieldsAlert;
+
+      // validação das coordenadas
+      const invalidCoords = Validations.coordsValidation({ latitude, longitude }, res);
+      if (invalidCoords) return invalidCoords;
 
       if (equipamentos.length === 0) {
         return res.status(400).json({ error: 'Pelo menos um equipamento deve ser informado.' });
@@ -43,6 +47,8 @@ class ManobraController {
           sobrenome: usuario.sobrenome,
         },
         datetimeInicio,
+        latitude,
+        longitude
       });
 
       equipamentos.forEach(async (equipId) => {
@@ -136,7 +142,7 @@ class ManobraController {
     }
   }
 
-  public async getManobras (req: Request, res: Response) {
+  public async getManobras(req: Request, res: Response) {
     const user = req.user;
     console.log(user);
 
@@ -157,6 +163,8 @@ class ManobraController {
         titulo: manobra.titulo,
         datetimeFim: manobra.datetimeFim ? manobra.datetimeFim.toISOString() : null,
         usuario: manobra.funcionario,
+        latitude: manobra.latitude,
+        longitude: manobra.longitude,
       })).sort((manobraA, manobraB) => {
         if (!manobraA.datetimeFim && manobraA.usuario?.id === user.id) {
           return -1;
@@ -212,6 +220,8 @@ class ManobraController {
         datetimeInicio: manobra.datetimeInicio.toISOString(),
         datetimeFim: manobra.datetimeFim ? manobra.datetimeFim.toISOString() : null,
         usuario: manobra.funcionario,
+        latitude: manobra.latitude,
+        longitude: manobra.longitude,
       });
     } catch (error) {
       console.error(error);
