@@ -59,7 +59,7 @@ function ManeuverList({navigation}: any) {
   };
 
   const openManeuverForm = () => {
-    if (usuario?.manobraAtiva) {
+    if (usuario?.manobrasAtivas && usuario?.manobrasAtivas >= 10) {
       setAlertModal(true);
     } else {
       navigation.navigate('ManeuverForm');
@@ -277,7 +277,7 @@ function ManeuverList({navigation}: any) {
         <View style={styles.alertView}>
           <Title color="green" text="Atenção" align="center" />
           <Text style={styles.alertTxt}>
-            Não é possível criar uma nova manobra enquanto possui outra ativa.
+            Não é possível criar mais de 10 manobras ativas simultaneamente.
           </Text>
         </View>
         <Btn

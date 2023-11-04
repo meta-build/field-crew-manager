@@ -15,8 +15,11 @@ const Header = ({text}: Props) => {
       <View style={styles.header}>
         <Text style={styles.h1}>{text}</Text>
       </View>
-      {usuario?.manobraAtiva ? (
-        <Text style={styles.warning}>Você possui uma manobra em andamento</Text>
+      {usuario?.manobrasAtivas ? (
+        <Text style={styles.warning}>
+          Você possui {usuario.manobrasAtivas}{' '}
+          {usuario.manobrasAtivas > 1 ? 'manobras' : 'manobra'} em andamento
+        </Text>
       ) : (
         <></>
       )}

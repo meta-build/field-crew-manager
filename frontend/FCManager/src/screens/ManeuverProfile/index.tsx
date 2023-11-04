@@ -64,7 +64,7 @@ function ManeuverProfile({navigation, route}: any) {
         await getManobra();
         const tempUser = {
           ...usuario,
-          manobraAtiva: false,
+          manobrasAtivas: (usuario?.manobrasAtivas as number) - 1,
         } as UsuarioContext;
         setUsuario(tempUser);
         await AsyncStorage.setItem('usuario', JSON.stringify(tempUser));

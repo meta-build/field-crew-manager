@@ -76,7 +76,7 @@ function ManeuverForm({navigation, route}: any) {
 
         const tempUser = {
           ...usuario,
-          manobraAtiva: true,
+          manobrasAtivas: (usuario?.manobrasAtivas as number) + 1,
         } as UsuarioContext;
         setUsuario(tempUser);
 

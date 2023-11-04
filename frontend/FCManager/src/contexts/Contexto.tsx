@@ -3,7 +3,7 @@ import {Usuario as UsuarioType} from '../types';
 import Geolocation from '@react-native-community/geolocation';
 
 interface UsuarioContext extends UsuarioType {
-  manobraAtiva: boolean;
+  manobrasAtivas: number;
 }
 
 interface ContextProps {
