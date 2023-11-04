@@ -14,6 +14,10 @@ import Btn from '../../components/Button';
 import BottomModal from '../../components/BottomModal';
 import Title from '../../components/Title';
 import Dropdown from '../../components/Dropdown';
+import ManeuverItem from '../../components/ManeuverItem';
+import Navbar from '../../components/Navbar';
+import LoadingManeuverList from '../../components/LoadingManeuverList';
+import SwitchBtn from '../../components/SwitchBtn';
 
 import colors from '../../styles/variables';
 
@@ -22,13 +26,10 @@ import MapIcon from '../../assets/icons/map.svg';
 
 import {ManobraItem} from '../../types';
 
-import Navbar from '../../components/Navbar';
-import ManeuverItem from '../../components/ManeuverItem';
 import Manobra from '../../services/Manobra';
 import useContexto from '../../hooks/useContexto';
-import LoadingManeuverList from '../../components/LoadingManeuverList';
+
 import MapModal from './MapModal';
-import SwitchBtn from '../../components/SwitchBtn';
 
 const {width, height} = Dimensions.get('window');
 
@@ -100,11 +101,15 @@ function ManeuverList({navigation}: any) {
 
   const getManobras = async () => {
     setLoadingList(true);
-    await Manobra.getAll({
-      latitude: location.latitude,
-      longitude: location.longitude,
-      distance: distMax,
-    })
+    await Manobra.getAll(
+      distMaxFilter
+        ? {
+            latitude: location.latitude,
+            longitude: location.longitude,
+            distance: distMax,
+          }
+        : undefined,
+    )
       .then(res => {
         const manobras = res.values.filter(manobra => {
           const tituloFilter = filtrarNome(manobra.titulo);
@@ -126,6 +131,7 @@ function ManeuverList({navigation}: any) {
     const onFocus = navigation.addListener('focus', () => {
       cancelFilter();
       setMapModal(false);
+      getManobras();
 
       // ver se usuário possui manobra em andamento
     });

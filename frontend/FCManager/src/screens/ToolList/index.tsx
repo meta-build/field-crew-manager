@@ -94,11 +94,17 @@ function ToolList({navigation}: any) {
 
   const getEquipamentos = async () => {
     setLoadingList(true);
-    await Equipamento.getAll(status, '', {
-      latitude: location.latitude,
-      longitude: location.longitude,
-      distance: distMax,
-    }).then(res => {
+    await Equipamento.getAll(
+      status,
+      '',
+      distMaxFilter
+        ? {
+            latitude: location.latitude,
+            longitude: location.longitude,
+            distance: distMax,
+          }
+        : undefined,
+    ).then(res => {
       const equips = res.values.filter(equip => filtrarNome(equip.tipo.value));
       setLista(equips);
     });
@@ -108,10 +114,10 @@ function ToolList({navigation}: any) {
   useEffect(() => {
     const onFocus = navigation.addListener('focus', () => {
       cancelFilter();
+      getEquipamentos();
     });
 
     getEquipamentos();
-
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return onFocus;
 
