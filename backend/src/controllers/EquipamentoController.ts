@@ -6,6 +6,7 @@ import equipamentSchema from "../models/equipamentSchema";
 import Validations from "../utils/validations";
 import { uploadImg } from "../utils/imageUploader";
 import manobraSchema from "../models/manobraSchema";
+import filterByBuffer from "../utils/filterByBuffer";
 
 interface RequestFiles extends Request {
   files: any[] | any;
@@ -13,7 +14,12 @@ interface RequestFiles extends Request {
 
 class EquipamentoController {
   public async getEquipamentos(req: RequestFiles, res: Response) {
-    const { status, tipo } = req.query;
+    const { status, tipo, latitude, longitude, dist } = req.query;
+
+    if (latitude || longitude || dist) {
+      const invalidFieldsAlert = Validations.verifyFields({ latitude, longitude, dist }, res);
+      if (invalidFieldsAlert) return invalidFieldsAlert;
+    }
 
     const invalidStatusAlert = Validations.equipments.statusValidation(status as string, res);
     if (invalidStatusAlert) return invalidStatusAlert;
@@ -27,10 +33,20 @@ class EquipamentoController {
       const equipamentos = await equipamentSchema.find();
       const itens = equipamentos
         .filter(equip => {
+          const bufferFilter = ((equip.latitude && equip.longitude) && (latitude && longitude && dist)) ? 
+          filterByBuffer({
+            latitude: Number(latitude),
+            longitude: Number(longitude),
+          }, 
+          Number(dist), {
+            latitude: equip.latitude,
+            longitude: equip.longitude,  
+          }) : 
+          true;
           const statusFilter = Boolean(status) ? (status == 'ativo' ? equip.isActive : !equip.isActive) : true;
           const tipoFilter = Boolean(tipo) ? tipo == equip.tipo.id : true;
 
-          return statusFilter && tipoFilter;
+          return statusFilter && tipoFilter && bufferFilter;
         })
         .map(equip => ({
           id: equip._id,

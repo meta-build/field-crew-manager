@@ -3,6 +3,7 @@ import manobraSchema from "../models/manobraSchema";
 import equipamentSchema from "../models/equipamentSchema";
 import usuarioSchema from "../models/usuarioSchema";
 import Validations from "../utils/validations";
+import filterByBuffer from "../utils/filterByBuffer";
 
 class ManobraController {
   public async createManobra(req: Request, res: Response) {
@@ -144,7 +145,12 @@ class ManobraController {
 
   public async getManobras(req: Request, res: Response) {
     const user = req.user;
-    console.log(user);
+
+    const { latitude, longitude, dist } = req.query;
+    if (latitude || longitude || dist) {
+      const invalidFieldsAlert = Validations.verifyFields({ latitude, longitude, dist }, res);
+      if (invalidFieldsAlert) return invalidFieldsAlert;
+    }  
 
     try {
       const titulo: string | undefined = req.query.titulo as string | undefined;
@@ -158,7 +164,22 @@ class ManobraController {
         manobras = await manobraSchema.find();
       }
 
-      const manobrasValues: any[] = manobras.map((manobra) => ({
+      const manobrasValues: any[] = manobras
+      .filter(manobra => {
+        const bufferFilter = ((manobra.latitude && manobra.longitude) && (latitude && longitude && dist)) ? 
+          filterByBuffer({
+            latitude: Number(latitude),
+            longitude: Number(longitude),
+          }, 
+          Number(dist), {
+            latitude: manobra.latitude,
+            longitude: manobra.longitude,  
+          }) : 
+          true;
+
+          return bufferFilter;
+      })
+      .map((manobra) => ({
         id: manobra._id,
         titulo: manobra.titulo,
         datetimeFim: manobra.datetimeFim ? manobra.datetimeFim.toISOString() : null,
