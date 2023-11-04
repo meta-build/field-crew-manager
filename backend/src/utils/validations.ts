@@ -45,7 +45,7 @@ class Validations {
         }
         return { errorResponse: res.status(500).json({ err }) };
       }
-    }
+    },
   }
 
   public equipmentTypes = {
@@ -158,12 +158,28 @@ class Validations {
         console.log(e);
         return { errorResponse: res.status(500).json({ error: e }) };
       }
-    }
+    },
+    maxActiveManeuversValidation: (activeManeuvers: number, res: Response) => {
+      if (activeManeuvers >= 10) {
+        return res.status(401).json({ error: "Usuário possui número máximo de manobras em andamento."});
+      }
+      return undefined;
+    },
   }
 
   public verifyFields(fields: object, res: Response) {
     for (const key of Object.keys(fields)) {
       if (!fields[key]) return res.status(400).json({ error: `Campo ${key} não informado.` });
+    }
+    return undefined;
+  }
+  
+  public coordsValidation(coords: {latitude: number, longitude: number}, res: Response) {
+    if (coords.latitude < -90 || coords.latitude > 90) {
+      return res.status(400).json({ error: "Coordenada latitude inválida." });
+    }
+    if (coords.longitude < -180 || coords.longitude > 180) {
+      return res.status(400).json({ error: "Coordenada longitude inválida." });
     }
     return undefined;
   }

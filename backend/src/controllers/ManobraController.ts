@@ -3,16 +3,28 @@ import manobraSchema from "../models/manobraSchema";
 import equipamentSchema from "../models/equipamentSchema";
 import usuarioSchema from "../models/usuarioSchema";
 import Validations from "../utils/validations";
+import filterByBuffer from "../utils/filterByBuffer";
 
 class ManobraController {
   public async createManobra(req: Request, res: Response) {
     const idUser = req.user?.id;
 
     try {
-      const { titulo, descricao, equipamentos, datetimeInicio } = req.body;
+      const usuario = await usuarioSchema.findById(idUser);
 
-      const invalidFieldsAlert = Validations.verifyFields({ titulo, descricao, equipamentos, datetimeInicio }, res);
+      if (usuario.manobrasAtivas) {
+        const maxManeuversAlert = Validations.users.maxActiveManeuversValidation(usuario.manobrasAtivas, res);
+        if (maxManeuversAlert) return maxManeuversAlert;
+      }
+
+      const { titulo, descricao, equipamentos, datetimeInicio, latitude, longitude } = req.body;
+
+      const invalidFieldsAlert = Validations.verifyFields({ titulo, descricao, equipamentos, datetimeInicio, latitude, longitude }, res);
       if (invalidFieldsAlert) return invalidFieldsAlert;
+
+      // validação das coordenadas
+      const invalidCoords = Validations.coordsValidation({ latitude, longitude }, res);
+      if (invalidCoords) return invalidCoords;
 
       if (equipamentos.length === 0) {
         return res.status(400).json({ error: 'Pelo menos um equipamento deve ser informado.' });
@@ -30,7 +42,6 @@ class ManobraController {
       }
 
       // Obtenha o funcionário a partir do modelo de funcionário
-      const usuario = await usuarioSchema.findById(idUser);
 
       // Crie a manobra
       const manobra = await manobraSchema.create({
@@ -43,11 +54,15 @@ class ManobraController {
           sobrenome: usuario.sobrenome,
         },
         datetimeInicio,
+        latitude,
+        longitude
       });
 
       equipamentos.forEach(async (equipId) => {
         await equipamentSchema.findByIdAndUpdate(equipId, { isActive: false });
       });
+
+      await usuarioSchema.findByIdAndUpdate(idUser, { manobrasAtivas: usuario.manobrasAtivas ? usuario.manobrasAtivas + 1 : 1 });
 
       return res.status(201).json({ id: manobra._id });
     } catch (error) {
@@ -57,7 +72,11 @@ class ManobraController {
   }
 
   public async finalizarManobra(req: Request, res: Response) {
+    const idUser = req.user?.id;
+
     try {
+      const usuario = await usuarioSchema.findById(idUser);
+
       const { id } = req.params;
       const { datetimeFim } = req.body;
 
@@ -77,6 +96,8 @@ class ManobraController {
       manobra.equipamentos.forEach(async (equipId) => {
         await equipamentSchema.findByIdAndUpdate(equipId, { isActive: true });
       });
+
+      await usuarioSchema.findByIdAndUpdate(idUser, { manobrasAtivas: usuario.manobrasAtivas ? usuario.manobrasAtivas - 1 : 0 });
 
       return res.status(200).json({});
     } catch (error) {
@@ -136,9 +157,14 @@ class ManobraController {
     }
   }
 
-  public async getManobras (req: Request, res: Response) {
+  public async getManobras(req: Request, res: Response) {
     const user = req.user;
-    console.log(user);
+
+    const { latitude, longitude, dist } = req.query;
+    if (latitude || longitude || dist) {
+      const invalidFieldsAlert = Validations.verifyFields({ latitude, longitude, dist }, res);
+      if (invalidFieldsAlert) return invalidFieldsAlert;
+    }
 
     try {
       const titulo: string | undefined = req.query.titulo as string | undefined;
@@ -152,22 +178,39 @@ class ManobraController {
         manobras = await manobraSchema.find();
       }
 
-      const manobrasValues: any[] = manobras.map((manobra) => ({
-        id: manobra._id,
-        titulo: manobra.titulo,
-        datetimeFim: manobra.datetimeFim ? manobra.datetimeFim.toISOString() : null,
-        usuario: manobra.funcionario,
-      })).sort((manobraA, manobraB) => {
-        if (!manobraA.datetimeFim && manobraA.usuario?.id === user.id) {
-          return -1;
-        }
-        if (!manobraB.datetimeFim && manobraB.usuario?.id === user.id) {
-          return 1;
-        }
-        else {
-          return 0;
-        }
-      });
+      const manobrasValues: any[] = manobras
+        .filter(manobra => {
+          const bufferFilter = ((manobra.latitude && manobra.longitude) && (latitude && longitude && dist)) ?
+            filterByBuffer({
+              latitude: Number(latitude),
+              longitude: Number(longitude),
+            },
+              Number(dist), {
+              latitude: manobra.latitude,
+              longitude: manobra.longitude,
+            }) :
+            true;
+
+          return bufferFilter;
+        })
+        .map((manobra) => ({
+          id: manobra._id,
+          titulo: manobra.titulo,
+          datetimeFim: manobra.datetimeFim ? manobra.datetimeFim.toISOString() : null,
+          usuario: manobra.funcionario,
+          latitude: manobra.latitude,
+          longitude: manobra.longitude,
+        })).sort((manobraA, manobraB) => {
+          if (!manobraA.datetimeFim && manobraA.usuario?.id === user.id) {
+            return -1;
+          }
+          if (!manobraB.datetimeFim && manobraB.usuario?.id === user.id) {
+            return 1;
+          }
+          else {
+            return 0;
+          }
+        });
       return res.status(200).json({
         values: manobrasValues,
         metadata: {
@@ -212,6 +255,8 @@ class ManobraController {
         datetimeInicio: manobra.datetimeInicio.toISOString(),
         datetimeFim: manobra.datetimeFim ? manobra.datetimeFim.toISOString() : null,
         usuario: manobra.funcionario,
+        latitude: manobra.latitude,
+        longitude: manobra.longitude,
       });
     } catch (error) {
       console.error(error);

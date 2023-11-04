@@ -34,6 +34,12 @@ const manobraSchema = new mongoose.Schema({
   datetimeFim: {
     type: Date,
   },
+  latitude: {
+    type: Number,
+  },
+  longitude: {
+    type: Number,
+  },
 });
 
 export default mongoose.model("manobras", manobraSchema);

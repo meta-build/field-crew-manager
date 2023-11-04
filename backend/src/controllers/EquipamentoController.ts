@@ -6,6 +6,7 @@ import equipamentSchema from "../models/equipamentSchema";
 import Validations from "../utils/validations";
 import { uploadImg } from "../utils/imageUploader";
 import manobraSchema from "../models/manobraSchema";
+import filterByBuffer from "../utils/filterByBuffer";
 
 interface RequestFiles extends Request {
   files: any[] | any;
@@ -13,8 +14,12 @@ interface RequestFiles extends Request {
 
 class EquipamentoController {
   public async getEquipamentos(req: RequestFiles, res: Response) {
-    const { status, tipo } = req.query;
-    const cidade = decodeURIComponent(req.query.cidade as string);
+    const { status, tipo, latitude, longitude, dist } = req.query;
+
+    if (latitude || longitude || dist) {
+      const invalidFieldsAlert = Validations.verifyFields({ latitude, longitude, dist }, res);
+      if (invalidFieldsAlert) return invalidFieldsAlert;
+    }
 
     const invalidStatusAlert = Validations.equipments.statusValidation(status as string, res);
     if (invalidStatusAlert) return invalidStatusAlert;
@@ -28,11 +33,20 @@ class EquipamentoController {
       const equipamentos = await equipamentSchema.find();
       const itens = equipamentos
         .filter(equip => {
-          const cidadeFilter = cidade !== 'undefined' ? cidade == equip.cidade : true;
+          const bufferFilter = ((equip.latitude && equip.longitude) && (latitude && longitude && dist)) ? 
+          filterByBuffer({
+            latitude: Number(latitude),
+            longitude: Number(longitude),
+          }, 
+          Number(dist), {
+            latitude: equip.latitude,
+            longitude: equip.longitude,  
+          }) : 
+          true;
           const statusFilter = Boolean(status) ? (status == 'ativo' ? equip.isActive : !equip.isActive) : true;
           const tipoFilter = Boolean(tipo) ? tipo == equip.tipo.id : true;
 
-          return cidadeFilter && statusFilter && tipoFilter;
+          return statusFilter && tipoFilter && bufferFilter;
         })
         .map(equip => ({
           id: equip._id,
@@ -40,6 +54,8 @@ class EquipamentoController {
           serial: equip.serial,
           status: equip.isActive ? 'ativo' : 'inativo',
           img: equip.imgs[0],
+          latitude: equip.latitude,
+          longitude: equip.longitude
         }));
       res.status(200).json({
         values: itens,
@@ -69,11 +85,12 @@ class EquipamentoController {
         id: equipamento._id,
         tipo: equipamento.tipo,
         serial: equipamento.serial,
-        cidade: equipamento.cidade,
         obs: equipamento.obs,
         status: equipamento.isActive ? 'ativo' : 'inativo',
         imgs: equipamento.imgs,
         manobras: manobras,
+        latitude: equipamento.latitude,
+        longitude: equipamento.longitude
       });
     } catch (error) {
       if (error.name == "CastError") {
@@ -85,13 +102,17 @@ class EquipamentoController {
 
   public async new(req: RequestFiles, res: Response) {
     // informações básicas do equipamento
-    const { tipo, serial, cidade, obs } = req.body;
+    const { tipo, serial, obs, latitude, longitude } = req.body;
 
     const isActive = true;
 
     // validação das informações recebidas
-    const invalidFieldsAlert = Validations.verifyFields({ tipo, serial, cidade, obs }, res);
+    const invalidFieldsAlert = Validations.verifyFields({ tipo, serial, obs, latitude, longitude }, res);
     if (invalidFieldsAlert) return invalidFieldsAlert;
+
+    // validação das coordenadas
+    const invalidCoords = Validations.coordsValidation({ latitude, longitude }, res);
+    if (invalidCoords) return invalidCoords;
 
     // validação se existe tipo (se não existir o tipo, deve retornar true para retornar o erro)
     const tipoValidation = await Validations.equipmentTypes.idValidation(tipo as string, res);
@@ -129,10 +150,11 @@ class EquipamentoController {
           value: tipoObj.value
         },
         serial,
-        cidade,
         obs,
         isActive,
-        imgs
+        imgs,
+        latitude,
+        longitude
       });
 
       const id = equipamento._id;
@@ -149,11 +171,15 @@ class EquipamentoController {
     const { id } = req.params;
 
     try {
-      const { tipo, serial, cidade, obs } = req.body;
+      const { tipo, serial, obs, latitude, longitude } = req.body;
 
       // validação das informações recebidas
-      const invalidFieldsAlert = Validations.verifyFields({ tipo, serial, cidade, obs, id }, res);
+      const invalidFieldsAlert = Validations.verifyFields({ tipo, serial, obs, id }, res);
       if (invalidFieldsAlert) return invalidFieldsAlert;
+
+      // validação das coordenadas
+      const invalidCoords = Validations.coordsValidation({ latitude, longitude }, res);
+      if (invalidCoords) return invalidCoords;
 
       // validação se existe tipo (se não existir o tipo, deve retornar true para retornar o erro)
       const tipoValidation = await Validations.equipmentTypes.idValidation(tipo as string, res);
@@ -189,9 +215,10 @@ class EquipamentoController {
           value: tipoObj.value,
         },
         serial,
-        cidade,
         obs,
-        imgs
+        imgs,
+        latitude,
+        longitude
       });
       return res.status(200).json({ id: equipamento._id });
 
