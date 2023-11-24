@@ -100,8 +100,13 @@ class UsuarioController {
         matricula,
         cpf,
         isAdmin,
+<<<<<<< Updated upstream
         senha: passwordHash,
         manobrasAtivas: 0,
+=======
+        isNew: true,
+        senha: passwordHash
+>>>>>>> Stashed changes
       });
 
       const id = usuario._id;
@@ -231,10 +236,16 @@ class UsuarioController {
   }
 
   public async login(req: Request, res: Response) {
-    const { email, senha } = req.body;
+    const { email, senha, isNew } = req.body;
 
     const invalidFieldsAlert = Validations.verifyFields({ email, senha }, res);
     if (invalidFieldsAlert) return invalidFieldsAlert;
+
+    if (isNew == true) {
+      isNew == false;
+
+      return res.status(200).json({msg: "Usuário novo"})
+    }
 
     try {
       const usuario = await usuarioSchema.findOne({ email });
@@ -258,7 +269,12 @@ class UsuarioController {
           cpf: usuario.cpf,
           foto: usuario.foto,
           isAdmin: usuario.isAdmin,
+<<<<<<< Updated upstream
           manobrasAtivas: usuario.manobrasAtivas ? usuario.manobrasAtivas : 0,
+=======
+          isNew: usuario.isNew,
+          manobraAtiva
+>>>>>>> Stashed changes
         },
         token
       });
