@@ -32,6 +32,7 @@ import SwitchBtn from '../../components/SwitchBtn';
 import useContexto from '../../hooks/useContexto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useDistanceCalculator from '../../hooks/useDistanceCalculator';
+import Tipo from '../../services/Tipo';
 
 const {width, height} = Dimensions.get('window');
 
@@ -104,6 +105,9 @@ function ToolList({navigation}: any) {
     try {
       const equips = await Equipamento.getAll('todos', '', undefined);
       await AsyncStorage.setItem('equips', JSON.stringify(equips.values));
+
+      const tipos = await Tipo.getAll();
+      await AsyncStorage.setItem('tipos', JSON.stringify(tipos));
     } catch (e) {
       console.log(e);
     }
@@ -157,7 +161,9 @@ function ToolList({navigation}: any) {
     const onFocus = navigation.addListener('focus', () => {
       cancelFilter();
       getEquipamentos();
-      DownloadEquipamentos();
+      if (conected) {
+        DownloadEquipamentos();
+      }
     });
 
     getEquipamentos();
@@ -183,7 +189,6 @@ function ToolList({navigation}: any) {
             <View style={styles.filterView}>
               <Btn
                 onPress={() => setMapModal(true)}
-                enable={conected}
                 styleType="blank"
                 icon={<MapIcon width={18} height={15} color={colors.green_1} />}
               />

@@ -59,7 +59,6 @@ function MapModal(props: Props) {
             style={styles.map}
             customMapStyle={mapStyle}
             showsUserLocation
-            loadingEnabled
             onPress={() => {
               if (markerIsClicked) {
                 setMarkerIsClicked(false);

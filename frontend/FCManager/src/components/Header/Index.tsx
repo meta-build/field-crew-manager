@@ -49,10 +49,12 @@ const Header = ({text}: Props) => {
         <View style={styles.modalConnectionView}>
           <Title color="green" text="Sem conexão" align="center" />
           <Text style={styles.modalConnectionText}>
-            Seu dispositivo não está conectado à internet. Qualquer criação de
-            equipamento, manobra ou usuário será enviada ao servidor quando
-            haver conexão. Funcionalidades como mapa, perfil de equipamento,
-            manobra, usuário e suas edições não disponíveis sem internet.
+            Você está sem acesso à internet. Por isso, não é possível ver ou
+            editar os detalhes dos equipamentos, manobras e usuários. Mas não se
+            preocupe: as novas informações que você inserir serão sincronizadas
+            com o servidor assim que a conexão for restabelecida. Enquanto isso,
+            você ainda pode visualizar a lista dos equipamentos e manobras e o
+            mapa do local.
           </Text>
           <Btn
             styleType="filled"

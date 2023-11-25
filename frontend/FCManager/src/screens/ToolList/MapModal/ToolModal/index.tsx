@@ -10,6 +10,7 @@ import Title from '../../../../components/Title';
 import Badget from '../../../../components/Badget';
 import Btn from '../../../../components/Button';
 import BottomModal from '../../../../components/BottomModal';
+import useContexto from '../../../../hooks/useContexto';
 
 const {width} = Dimensions.get('window');
 
@@ -22,6 +23,8 @@ interface Props {
 
 function ToolModal(props: Props) {
   const nav = useNavigation();
+
+  const {conected} = useContexto();
 
   const openManeuver = (id: string) => {
     props.onManeuverOpen();
@@ -54,8 +57,16 @@ function ToolModal(props: Props) {
           <Btn
             styleType="filled"
             title="Abrir"
+            enable={conected}
             onPress={() => openManeuver(props.equipment?.id as string)}
           />
+          {!conected ? (
+            <Text style={[styles.value, {textAlign: 'center'}]}>
+              Sem conexão.
+            </Text>
+          ) : (
+            <></>
+          )}
         </View>
       </View>
     </BottomModal>
@@ -100,6 +111,7 @@ const styles = StyleSheet.create({
   },
   btnView: {
     marginVertical: 12,
+    gap: 12,
   },
 });
 
