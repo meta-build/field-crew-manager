@@ -13,6 +13,16 @@ interface EquipamentoItem {
   longitude: number;
 }
 
+interface EquipamentoItemOff {
+  tipo: string;
+  tipoValue: string;
+  serial: string;
+  imgs: string[];
+  latitude: number;
+  longitude: number;
+  obs: string;
+}
+
 interface Equipamento {
   id: string;
   tipo: Tipo;
@@ -94,6 +104,7 @@ export type {
   Tipo,
   Equipamento,
   EquipamentoItem,
+  EquipamentoItemOff,
   Usuario,
   UsuarioItem,
   Manobra,

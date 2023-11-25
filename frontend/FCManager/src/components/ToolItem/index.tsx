@@ -13,6 +13,7 @@ import Badget from '../Badget';
 import ArrowRight from '../../assets/icons/arrowRightGreen.svg';
 import CheckboxIcon from '../../assets/icons/box.svg';
 import CheckedboxIcon from '../../assets/icons/filledBoxChecked.svg';
+import ClockIcon from '../../assets/icons/clock.svg';
 
 import colors from '../../styles/variables';
 
@@ -25,6 +26,7 @@ interface Props extends PressableProps {
   };
   checkbox?: boolean;
   checked?: boolean;
+  loading?: boolean;
 }
 
 function ToolItem({tool, ...props}: Props) {
@@ -48,15 +50,36 @@ function ToolItem({tool, ...props}: Props) {
           <Text style={styles.desc}>{tool.n_serie}</Text>
         </View>
         <View style={styles.badge}>
-          <Badget status={tool.status} size="tiny" />
+          {!props.loading ? (
+            <Badget status={tool.status} size="tiny" />
+          ) : (
+            <Badget status={'deactive'} customText="Na fila" size="tiny" />
+          )}
         </View>
       </View>
-      {!props.checkbox ? (
+      {!props.checkbox && !props.loading ? (
         <ArrowRight style={styles.arrow} width={10} height={15} />
-      ) : !props.checked ? (
-        <CheckboxIcon style={styles.arrow} width={16} height={16} />
       ) : (
-        <CheckedboxIcon style={styles.arrow} width={16} height={16} />
+        <></>
+      )}
+      {props.checkbox && !props.loading ? (
+        !props.checked ? (
+          <CheckboxIcon style={styles.arrow} width={16} height={16} />
+        ) : (
+          <CheckedboxIcon style={styles.arrow} width={16} height={16} />
+        )
+      ) : (
+        <></>
+      )}
+      {!props.checkbox && props.loading ? (
+        <ClockIcon
+          style={styles.arrow}
+          width={16}
+          height={16}
+          color={colors.gray}
+        />
+      ) : (
+        <></>
       )}
     </Pressable>
   );

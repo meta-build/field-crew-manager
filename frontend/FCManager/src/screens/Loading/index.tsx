@@ -17,11 +17,12 @@ import Title from '../../components/Title';
 import Usuario from '../../services/Usuario';
 
 import * as Keychain from 'react-native-keychain';
+import {EquipamentoItemOff} from '../../types';
 
 const logo = require('../../assets/images/loading-logo.png');
 
 function Loading({navigation}: any) {
-  const {setUsuario} = useContexto();
+  const {setUsuario, queue} = useContexto();
 
   const [password, setPassword] = useState('');
   const [nome, setNome] = useState('');
@@ -36,6 +37,17 @@ function Loading({navigation}: any) {
   const getData = async () => {
     const tokenStorage = await AsyncStorage.getItem('token');
     const userStorage = await AsyncStorage.getItem('usuario');
+
+    const equipmentQueueStorageJSON = await AsyncStorage.getItem(
+      'createEquipmentQueue',
+    );
+
+    if (equipmentQueueStorageJSON) {
+      const equipmentQueueStorage = JSON.parse(equipmentQueueStorageJSON);
+      queue.equipments.setEquipments(
+        equipmentQueueStorage as EquipamentoItemOff[],
+      );
+    }
 
     if (!tokenStorage || !userStorage) {
       navigation.navigate('Home');

@@ -1,7 +1,9 @@
 import React, {createContext, useEffect, useState} from 'react';
-import {Usuario as UsuarioType} from '../types';
+import {EquipamentoItemOff, Usuario as UsuarioType} from '../types';
 import Geolocation from '@react-native-community/geolocation';
 import NetInfo from '@react-native-community/netinfo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Equipamento from '../services/Equipamento';
 
 interface UsuarioContext extends UsuarioType {
   manobrasAtivas: number;
@@ -15,6 +17,16 @@ interface ContextProps {
     longitude: number;
   };
   conected: boolean;
+  queue: {
+    equipments: {
+      addEquipment: (equipment: EquipamentoItemOff) => Promise<void>;
+      setEquipments: (equipments: EquipamentoItemOff[]) => Promise<void>;
+      removeEquipment: (index: number) => Promise<void>;
+      clearEquipments: () => Promise<void>;
+      queue: EquipamentoItemOff[];
+      updatingQueue: boolean;
+    };
+  };
 }
 
 const Contexto = createContext({} as ContextProps);
@@ -29,11 +41,75 @@ function ContextoProvider({children}: any) {
 
   const [conected, setConected] = useState(true);
 
+  const [equipmentQueue, setEquipmentQueue] = useState<EquipamentoItemOff[]>(
+    [],
+  );
+
+  const [updatingEquipmentQueue, setUpdatingEquipmentQueue] = useState(false);
+
+  const addEquipment = async (equipment: EquipamentoItemOff) => {
+    const equipmentQueueTemp = [...equipmentQueue, equipment];
+    setEquipmentQueue(equipmentQueueTemp);
+    await AsyncStorage.setItem(
+      'createEquipmentQueue',
+      JSON.stringify(equipmentQueueTemp),
+    );
+  };
+
+  const setEquipments = async (equipments: EquipamentoItemOff[]) => {
+    setEquipmentQueue(equipments);
+    await AsyncStorage.setItem(
+      'createEquipmentQueue',
+      JSON.stringify(equipments),
+    );
+  };
+
+  const removeEquipment = async (index: number) => {
+    const equipmentQueueTemp = [...equipmentQueue];
+    equipmentQueueTemp.splice(index, 1);
+    setEquipmentQueue(equipmentQueueTemp);
+    await AsyncStorage.setItem(
+      'createEquipmentQueue',
+      JSON.stringify(equipmentQueueTemp),
+    );
+  };
+
+  const clearEquipments = async () => {
+    setEquipmentQueue([]);
+    await AsyncStorage.setItem('createEquipmentQueue', JSON.stringify([]));
+  };
+
+  const updateEquipments = async () => {
+    setUpdatingEquipmentQueue(true);
+    for (let i = 0; i < equipmentQueue.length; i++) {
+      if (!conected) {
+        setUpdatingEquipmentQueue(false);
+        break;
+      }
+      const equipment = equipmentQueue[i];
+      try {
+        await Equipamento.new({
+          imgs: equipment.imgs,
+          latitude: equipment.latitude,
+          longitude: equipment.longitude,
+          obs: equipment.obs,
+          serial: equipment.serial,
+          tipo: equipment.tipo,
+        });
+        removeEquipment(i);
+      } catch (e) {
+        console.log(e);
+        setUpdatingEquipmentQueue(false);
+        break;
+      }
+    }
+    setUpdatingEquipmentQueue(false);
+  };
+
   useEffect(() => {
     const watchId = Geolocation.watchPosition(
       position => {
         const {latitude, longitude} = position.coords;
-        console.log(position.coords);
         setLocation({latitude, longitude});
       },
       error => {
@@ -53,6 +129,7 @@ function ContextoProvider({children}: any) {
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
       setConected(Boolean(state.isInternetReachable));
+      console.log('conexão:', state.isInternetReachable);
     });
 
     return () => {
@@ -61,9 +138,31 @@ function ContextoProvider({children}: any) {
     };
   }, []);
 
+  useEffect(() => {
+    if (conected) {
+      updateEquipments();
+    }
+  }, [conected]);
+
   // fazer requisição get aqui!!! não fazer nos outros componentes, use useEffect!!!!
   return (
-    <Contexto.Provider value={{usuario, setUsuario, location, conected}}>
+    <Contexto.Provider
+      value={{
+        usuario,
+        setUsuario,
+        location,
+        conected,
+        queue: {
+          equipments: {
+            addEquipment,
+            setEquipments,
+            removeEquipment,
+            clearEquipments,
+            queue: equipmentQueue,
+            updatingQueue: updatingEquipmentQueue,
+          },
+        },
+      }}>
       {children}
     </Contexto.Provider>
   );

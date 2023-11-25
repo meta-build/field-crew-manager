@@ -38,7 +38,7 @@ function DropdownItem({label, ...props}: PropsItem) {
 interface Props {
   items: {label: string; value: string}[];
   placeholder: string;
-  onSelect: (value: string) => void;
+  onSelect: (value: string, label: string) => void;
   enable?: boolean;
   color?: 'white' | 'gray';
   value?: string;
@@ -55,7 +55,7 @@ function Dropdown({
   const [open, setOpen] = useState(false);
 
   const onItemSelect = (item: {value: string; label: string}) => {
-    onSelect(item.value);
+    onSelect(item.value, item.label);
     setOpen(false);
   };
 

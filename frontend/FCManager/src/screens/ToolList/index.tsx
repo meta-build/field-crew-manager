@@ -3,6 +3,7 @@ import {
   Dimensions,
   FlatList,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -37,7 +38,7 @@ import Tipo from '../../services/Tipo';
 const {width, height} = Dimensions.get('window');
 
 function ToolList({navigation}: any) {
-  const {location, conected} = useContexto();
+  const {location, conected, queue} = useContexto();
   const distanceFilter = useDistanceCalculator();
 
   const [filterModal, setFilterModal] = useState(false);
@@ -115,6 +116,7 @@ function ToolList({navigation}: any) {
 
   const getEquipamentos = async () => {
     setLoadingList(true);
+
     if (conected) {
       await Equipamento.getAll(
         status,
@@ -173,6 +175,10 @@ function ToolList({navigation}: any) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tipoName, navigation, conected]);
 
+  useEffect(() => {
+    getEquipamentos();
+  }, [queue.equipments.queue]);
+
   return (
     <>
       <SafeAreaView style={styles.container}>
@@ -214,24 +220,59 @@ function ToolList({navigation}: any) {
           {loadingList ? (
             <LoadingToolList />
           ) : (
-            <FlatList
-              style={styles.equipsList}
-              data={lista}
-              renderItem={({item}) => (
-                <View style={styles.item}>
-                  <ToolItem
-                    tool={{
-                      img_uri: item.img,
-                      n_serie: item.serial,
-                      status: item.status === 'ativo' ? 'active' : 'deactive',
-                      tipoLabel: item.tipo.value,
-                    }}
-                    onPress={() => openItem(item.id)}
-                  />
-                </View>
-              )}
-              keyExtractor={item => item.id}
-            />
+            <ScrollView>
+              <View>
+                <FlatList
+                  data={lista}
+                  renderItem={({item}) => (
+                    <View style={styles.item}>
+                      <ToolItem
+                        tool={{
+                          img_uri: item.img,
+                          n_serie: item.serial,
+                          status:
+                            item.status === 'ativo' ? 'active' : 'deactive',
+                          tipoLabel: item.tipo.value,
+                        }}
+                        onPress={() => openItem(item.id)}
+                      />
+                    </View>
+                  )}
+                  keyExtractor={item => item.id}
+                />
+                {queue.equipments.queue.length !== 0 ? (
+                  <>
+                    <View style={{marginBottom: 12}}>
+                      <Title
+                        color="gray"
+                        text="Equipamentos na fila"
+                        align="center"
+                      />
+                    </View>
+                    <FlatList
+                      data={queue.equipments.queue}
+                      renderItem={({item}) => (
+                        <View style={styles.item}>
+                          <ToolItem
+                            loading
+                            tool={{
+                              img_uri: item.imgs[0],
+                              n_serie: item.serial,
+                              status: 'active',
+                              tipoLabel: item.tipoValue,
+                            }}
+                            onPress={() => {}}
+                          />
+                        </View>
+                      )}
+                      keyExtractor={(item, index) => `${index}`}
+                    />
+                  </>
+                ) : (
+                  <></>
+                )}
+              </View>
+            </ScrollView>
           )}
         </View>
         <Navbar selected="Equipamentos" navigation={navigation} />
@@ -376,9 +417,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     bottom: -8,
     left: -8,
-  },
-  equipsList: {
-    flex: 1,
   },
   bufferContainer: {
     flexDirection: 'row',
