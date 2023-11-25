@@ -20,11 +20,16 @@ declare global {
 class TokenValidation {
   public anyUserVerification(req: Request, res: Response, next: NextFunction) {
     const token = req.headers.authorization;
-
+    const page = req.query.page;
+  
     if (!token) {
       return res.status(401).json({ error: "Token não fornecido." });
     }
-
+  
+    if (page && isNaN(Number(page))) {
+      return res.status(400).json({ error: "Parâmetro 'page' inválido. Deve ser um número." });
+    }
+  
     const tokenWithoutBearer = token.substring("Bearer ".length);
     jwt.verify(tokenWithoutBearer, process.env.SECRET, (err, decoded) => {
       if (err) {
@@ -32,13 +37,13 @@ class TokenValidation {
         console.log(process.env.SECRET);
         return res.status(401).json({ error: "Token inválido." });
       }
-
+  
       req.user = decoded as User;
       
       next();
     });
   };
-
+  
   public adminUserVerification(req: Request, res: Response, next: NextFunction) {
     const token = req.headers.authorization;
     

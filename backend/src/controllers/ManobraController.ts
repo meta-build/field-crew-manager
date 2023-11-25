@@ -159,24 +159,30 @@ class ManobraController {
 
   public async getManobras(req: Request, res: Response) {
     const user = req.user;
+    const { latitude, longitude, dist, page } = req.query;
 
-    const { latitude, longitude, dist } = req.query;
     if (latitude || longitude || dist) {
       const invalidFieldsAlert = Validations.verifyFields({ latitude, longitude, dist }, res);
       if (invalidFieldsAlert) return invalidFieldsAlert;
     }
 
+    const pageNumber = parseInt(page as string) || 1;
+    const pageSize = 10; // Número de itens por página
+
     try {
+      const skip = (pageNumber - 1) * pageSize;
+
       const titulo: string | undefined = req.query.titulo as string | undefined;
-      let manobras;
+      let manobrasQuery;
 
       if (titulo) {
-        // Se um título foi fornecido na consulta, filtre as manobras com base nele
-        manobras = await manobraSchema.find({ titulo: { $regex: new RegExp(titulo, "i") } });
+        manobrasQuery = manobraSchema.find({ titulo: { $regex: new RegExp(titulo, "i") } });
       } else {
-        // Se nenhum título foi fornecido, retorne todas as manobras
-        manobras = await manobraSchema.find();
+        manobrasQuery = manobraSchema.find();
       }
+
+      const totalItems = await manobrasQuery.countDocuments();
+      const manobras = await manobrasQuery.skip(skip).limit(pageSize);
 
       const manobrasValues: any[] = manobras
         .filter(manobra => {
@@ -211,10 +217,14 @@ class ManobraController {
             return 0;
           }
         });
+
       return res.status(200).json({
         values: manobrasValues,
         metadata: {
-          itens: manobras.length,
+          items: manobras.length,
+          totalItems: totalItems,
+          totalPages: Math.ceil(totalItems / pageSize),
+          currentPage: pageNumber,
         },
       });
     } catch (error) {

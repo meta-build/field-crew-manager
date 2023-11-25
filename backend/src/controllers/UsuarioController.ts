@@ -16,9 +16,14 @@ interface RequestFiles extends Request {
 class UsuarioController {
   public async getUsuarios(req: Request, res: Response) {
     const idUser = req.user.id;
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = 10; // Número de itens por página
 
     try {
-      const usuarios = await usuarioSchema.find();
+      const skip = (page - 1) * pageSize;
+      const usuarios = await usuarioSchema.find().skip(skip).limit(pageSize);
+      const totalUsuarios = await usuarioSchema.countDocuments();
+
       const itens = usuarios
         .filter(user => user?.id !== idUser)
         .map(user => ({
@@ -28,10 +33,14 @@ class UsuarioController {
           matricula: user?.matricula,
           foto: user?.foto ? user?.foto : '',
         }));
+
       res.status(200).json({
         values: itens,
         metadata: {
           itens: itens.length,
+          totalItems: totalUsuarios,
+          totalPages: Math.ceil(totalUsuarios / pageSize),
+          currentPage: page,
         }
       });
     } catch (error) {

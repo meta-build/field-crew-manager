@@ -14,7 +14,7 @@ interface RequestFiles extends Request {
 
 class EquipamentoController {
   public async getEquipamentos(req: RequestFiles, res: Response) {
-    const { status, tipo, latitude, longitude, dist } = req.query;
+    const { status, tipo, latitude, longitude, dist, page } = req.query;
 
     if (latitude || longitude || dist) {
       const invalidFieldsAlert = Validations.verifyFields({ latitude, longitude, dist }, res);
@@ -29,20 +29,28 @@ class EquipamentoController {
       if (invalidTypeId['errorResponse']) return invalidTypeId['errorResponse'];
     }
 
+    const pageNumber = parseInt(page as string) || 1;
+    const pageSize = 10; // Número de itens por página
+
     try {
-      const equipamentos = await equipamentSchema.find();
+      const skip = (pageNumber - 1) * pageSize;
+
+      const equipamentosQuery = equipamentSchema.find();
+      const totalItems = await equipamentosQuery.countDocuments();
+      const equipamentos = await equipamentosQuery.skip(skip).limit(pageSize);
+
       const itens = equipamentos
         .filter(equip => {
-          const bufferFilter = ((equip.latitude && equip.longitude) && (latitude && longitude && dist)) ? 
-          filterByBuffer({
-            latitude: Number(latitude),
-            longitude: Number(longitude),
-          }, 
-          Number(dist), {
-            latitude: equip.latitude,
-            longitude: equip.longitude,  
-          }) : 
-          true;
+          const bufferFilter = ((equip.latitude && equip.longitude) && (latitude && longitude && dist)) ?
+            filterByBuffer({
+              latitude: Number(latitude),
+              longitude: Number(longitude),
+            },
+              Number(dist), {
+              latitude: equip.latitude,
+              longitude: equip.longitude,
+            }) :
+            true;
           const statusFilter = Boolean(status) ? (status == 'ativo' ? equip.isActive : !equip.isActive) : true;
           const tipoFilter = Boolean(tipo) ? tipo == equip.tipo.id : true;
 
@@ -57,14 +65,19 @@ class EquipamentoController {
           latitude: equip.latitude,
           longitude: equip.longitude
         }));
-      res.status(200).json({
+
+      return res.status(200).json({
         values: itens,
         metadata: {
-          itens: itens.length,
-        }
+          items: itens.length,
+          totalItems: totalItems,
+          totalPages: Math.ceil(totalItems / pageSize),
+          currentPage: pageNumber,
+        },
       });
     } catch (error) {
-      res.status(500).json({ error });
+      console.error(error);
+      return res.status(500).json({ error });
     }
   }
 
