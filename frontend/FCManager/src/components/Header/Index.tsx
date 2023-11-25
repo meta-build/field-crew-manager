@@ -47,14 +47,12 @@ const Header = ({text}: Props) => {
         visible={connectionModal}
         onPressOutside={() => setConnectionModal(false)}>
         <View style={styles.modalConnectionView}>
-          <Title
-            color="green"
-            text="Sem conexão com a internet"
-            align="center"
-          />
+          <Title color="green" text="Sem conexão" align="center" />
           <Text style={styles.modalConnectionText}>
-            Seu dispositivo não está conectado à internet. Quaisquer criações ou
-            edições de dados serão enviadas assim que estiver conectado.
+            Seu dispositivo não está conectado à internet. Qualquer criação de
+            equipamento, manobra ou usuário será enviada ao servidor quando
+            haver conexão. Funcionalidades como mapa, perfil de equipamento,
+            manobra, usuário e suas edições não disponíveis sem internet.
           </Text>
           <Btn
             styleType="filled"

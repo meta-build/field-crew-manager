@@ -42,7 +42,7 @@ const Btn = ({
       borderWidth: 2,
     },
     blank: {
-      backgroundColor: enable ? colors.white : colors.light_gray_1,
+      backgroundColor: enable ? colors.white : colors.white_2,
     },
     alert: {
       backgroundColor: enable ? colors.alert_1 : colors.alert_3,

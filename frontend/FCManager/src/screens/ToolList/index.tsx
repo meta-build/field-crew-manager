@@ -30,14 +30,18 @@ import {EquipamentoItem} from '../../types';
 import MapModal from './MapModal';
 import SwitchBtn from '../../components/SwitchBtn';
 import useContexto from '../../hooks/useContexto';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import useDistanceCalculator from '../../hooks/useDistanceCalculator';
 
 const {width, height} = Dimensions.get('window');
 
 function ToolList({navigation}: any) {
-  const {location} = useContexto();
+  const {location, conected} = useContexto();
+  const distanceFilter = useDistanceCalculator();
 
   const [filterModal, setFilterModal] = useState(false);
   const [mapModal, setMapModal] = useState(false);
+  const [cantOpenModal, setCantOpenModal] = useState(false);
 
   const [loadingList, setLoadingList] = useState(false);
 
@@ -60,7 +64,11 @@ function ToolList({navigation}: any) {
   };
 
   const openItem = (serie: string) => {
-    navigation.navigate('ToolProfile', {id: serie});
+    if (conected) {
+      navigation.navigate('ToolProfile', {id: serie});
+    } else {
+      setCantOpenModal(true);
+    }
   };
 
   const confirmFilter = () => {
@@ -92,22 +100,56 @@ function ToolList({navigation}: any) {
     return regex.test(titulo);
   };
 
+  const DownloadEquipamentos = async () => {
+    try {
+      const equips = await Equipamento.getAll('todos', '', undefined);
+      await AsyncStorage.setItem('equips', JSON.stringify(equips.values));
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const getEquipamentos = async () => {
     setLoadingList(true);
-    await Equipamento.getAll(
-      status,
-      '',
-      distMaxFilter
-        ? {
-            latitude: location.latitude,
-            longitude: location.longitude,
-            distance: distMax,
-          }
-        : undefined,
-    ).then(res => {
-      const equips = res.values.filter(equip => filtrarNome(equip.tipo.value));
-      setLista(equips);
-    });
+    if (conected) {
+      await Equipamento.getAll(
+        status,
+        '',
+        distMaxFilter
+          ? {
+              latitude: location.latitude,
+              longitude: location.longitude,
+              distance: distMax,
+            }
+          : undefined,
+      ).then(res => {
+        const equips = res.values.filter(equip =>
+          filtrarNome(equip.tipo.value),
+        );
+        setLista(equips);
+      });
+    } else {
+      try {
+        const equipsJSON = await AsyncStorage.getItem('equips');
+        const equips: EquipamentoItem[] = JSON.parse(equipsJSON as string);
+        setLista(
+          equips.filter(equip => {
+            const filtroNome = filtrarNome(equip.tipo.value);
+            const filtroStatus =
+              status === 'todos' ? true : equip.status === status;
+            const filtroDistancia = distMaxFilter
+              ? distanceFilter(location, distMax, {
+                  latitude: equip.latitude,
+                  longitude: equip.longitude,
+                })
+              : true;
+            return filtroNome && filtroStatus && filtroDistancia;
+          }),
+        );
+      } catch (e) {
+        console.log(e);
+      }
+    }
     setLoadingList(false);
   };
 
@@ -115,6 +157,7 @@ function ToolList({navigation}: any) {
     const onFocus = navigation.addListener('focus', () => {
       cancelFilter();
       getEquipamentos();
+      DownloadEquipamentos();
     });
 
     getEquipamentos();
@@ -122,7 +165,7 @@ function ToolList({navigation}: any) {
     return onFocus;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tipoName, navigation]);
+  }, [tipoName, navigation, conected]);
 
   return (
     <>
@@ -140,6 +183,7 @@ function ToolList({navigation}: any) {
             <View style={styles.filterView}>
               <Btn
                 onPress={() => setMapModal(true)}
+                enable={conected}
                 styleType="blank"
                 icon={<MapIcon width={18} height={15} color={colors.green_1} />}
               />
@@ -251,6 +295,22 @@ function ToolList({navigation}: any) {
         </View>
       </BottomModal>
 
+      <BottomModal
+        onPressOutside={() => setCantOpenModal(false)}
+        visible={cantOpenModal}>
+        <View style={styles.cantOpenView}>
+          <Title color="green" text="Sem conexão" align="center" />
+          <Text style={styles.cantOpenText}>
+            Não é possível abrir itens quando não há conexão.
+          </Text>
+          <Btn
+            title="Ok"
+            styleType="filled"
+            onPress={() => setCantOpenModal(false)}
+          />
+        </View>
+      </BottomModal>
+
       <MapModal
         visible={mapModal}
         onClose={() => setMapModal(false)}
@@ -326,6 +386,14 @@ const styles = StyleSheet.create({
   },
   unactiveContainer: {
     opacity: 0.5,
+  },
+  cantOpenText: {
+    fontSize: 16,
+    color: colors.dark_gray,
+    textAlign: 'center',
+  },
+  cantOpenView: {
+    gap: 24,
   },
 });
 
