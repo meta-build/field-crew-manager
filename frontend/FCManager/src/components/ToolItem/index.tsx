@@ -64,9 +64,19 @@ function ToolItem({tool, ...props}: Props) {
       )}
       {props.checkbox && !props.loading ? (
         !props.checked ? (
-          <CheckboxIcon style={styles.arrow} width={16} height={16} />
+          <CheckboxIcon
+            color={colors.dark_gray}
+            style={styles.arrow}
+            width={16}
+            height={16}
+          />
         ) : (
-          <CheckedboxIcon style={styles.arrow} width={16} height={16} />
+          <CheckedboxIcon
+            color={colors.green_1}
+            style={styles.arrow}
+            width={16}
+            height={16}
+          />
         )
       ) : (
         <></>

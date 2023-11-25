@@ -42,7 +42,7 @@ const AlertMsg = ({children}: any) => {
 
 function ManeuverForm({navigation, route}: any) {
   const params = route.params;
-  const {usuario, setUsuario, location} = useContexto();
+  const {usuario, setUsuario, location, conected, queue} = useContexto();
 
   const [titulo, setTitulo] = useState('');
   const [desc, setDesc] = useState('');
@@ -59,37 +59,61 @@ function ManeuverForm({navigation, route}: any) {
 
   const [loading, setLoading] = useState(false);
 
-  const create = () => {
+  const create = async () => {
     setLoading(true);
 
-    Manobra.new({
-      datetimeInicio: new Date().toISOString(),
-      descricao: desc,
-      titulo,
-      equipamentos: equipamentos.map(equip => equip.id),
-      latitude,
-      longitude,
-    })
-      .then(async res => {
-        setConfirmModal(false);
-        setLoading(false);
-
-        const tempUser = {
-          ...usuario,
-          manobrasAtivas: (usuario?.manobrasAtivas as number) + 1,
-        } as UsuarioContext;
-        setUsuario(tempUser);
-
-        await AsyncStorage.setItem('usuario', JSON.stringify(tempUser));
-
-        navigation.push('ManeuverList');
-        navigation.navigate('ManeuverProfile', {id: res.id});
+    if (conected) {
+      Manobra.new({
+        datetimeInicio: new Date().toISOString(),
+        descricao: desc,
+        titulo,
+        equipamentos: equipamentos.map(equip => equip.id),
+        latitude,
+        longitude,
       })
-      .catch(err => {
-        setConfirmModal(false);
-        setLoading(false);
-        console.log(err);
+        .then(async res => {
+          setConfirmModal(false);
+          setLoading(false);
+
+          const tempUser = {
+            ...usuario,
+            manobrasAtivas: (usuario?.manobrasAtivas as number) + 1,
+          } as UsuarioContext;
+          setUsuario(tempUser);
+
+          await AsyncStorage.setItem('usuario', JSON.stringify(tempUser));
+
+          navigation.push('ManeuverList');
+          navigation.navigate('ManeuverProfile', {id: res.id});
+        })
+        .catch(err => {
+          setConfirmModal(false);
+          setLoading(false);
+          console.log(err);
+        });
+    } else {
+      await queue.maneuvers.addManeuver({
+        datetimeInicio: new Date().toISOString(),
+        descricao: desc,
+        titulo,
+        equipamentos: equipamentos.map(equip => equip.id),
+        latitude,
+        longitude,
       });
+
+      const tempUser = {
+        ...usuario,
+        manobrasAtivas: (usuario?.manobrasAtivas as number) + 1,
+      } as UsuarioContext;
+
+      setUsuario(tempUser);
+      await AsyncStorage.setItem('usuario', JSON.stringify(tempUser));
+
+      setConfirmModal(false);
+      setLoading(false);
+
+      navigation.navigate('ManeuverList');
+    }
   };
 
   const confirm = () => {
@@ -219,6 +243,17 @@ function ManeuverForm({navigation, route}: any) {
         onPressOutside={() => setConfirmModal(false)}
         visible={confirmModal}>
         <Title color="green" text={'Criar nova manobra?'} align="center" />
+
+        {!conected ? (
+          <Text style={styles.warningText}>
+            Você está sem conexão com a internet. O seu cadastro ficará na fila
+            até que a conexão seja restabelecida. Assim que isso acontecer, o
+            cadastro será enviado automaticamente para o servidor.
+          </Text>
+        ) : (
+          <></>
+        )}
+
         <View style={styles.confirmBtnView}>
           <Btn
             styleType="filled"
@@ -285,6 +320,12 @@ const styles = StyleSheet.create({
   obs: {
     color: colors.dark_gray,
     fontSize: 14,
+  },
+  warningText: {
+    color: colors.dark_gray,
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 12,
   },
 });
 

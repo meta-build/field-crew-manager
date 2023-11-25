@@ -89,6 +89,15 @@ interface ManobraItem {
   longitude: number;
 }
 
+interface ManobraItemOff {
+  titulo: string;
+  descricao: string;
+  equipamentos: string[];
+  datetimeInicio: string;
+  latitude: number;
+  longitude: number;
+}
+
 interface ErrorType {
   errorNum: number;
   errorMsg: string;
@@ -109,6 +118,7 @@ export type {
   UsuarioItem,
   Manobra,
   ManobraItem,
+  ManobraItemOff,
   ErrorType,
   BufferType
 };

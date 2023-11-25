@@ -3,6 +3,7 @@ import {
   Dimensions,
   FlatList,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -38,7 +39,7 @@ const {width, height} = Dimensions.get('window');
 type StatusType = 'todos' | 'concluido' | 'emAndamento';
 
 function ManeuverList({navigation}: any) {
-  const {usuario, location, conected} = useContexto();
+  const {usuario, location, conected, queue} = useContexto();
 
   const distanceCalculator = useDistanceCalculator();
 
@@ -183,7 +184,7 @@ function ManeuverList({navigation}: any) {
     getManobras();
     return onFocus;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [titulo, navigation]);
+  }, [titulo, navigation, conected, queue.maneuvers.queue]);
 
   return (
     <>
@@ -226,27 +227,61 @@ function ManeuverList({navigation}: any) {
           {loadingList ? (
             <LoadingManeuverList />
           ) : (
-            <FlatList
-              style={styles.equipsList}
-              data={lista}
-              renderItem={({item}) => (
-                <View style={styles.item}>
-                  <ManeuverItem
-                    highlight={
-                      !item.datetimeFim && item.usuario.id === usuario?.id
-                    }
-                    maneuver={{
-                      user: `${item.usuario.nome} ${item.usuario.sobrenome}`,
-                      status: !item.datetimeFim ? 'active' : 'deactive',
-                      title: item.titulo,
-                      date: item.datetimeFim ? item.datetimeFim : undefined,
-                    }}
-                    onPress={() => openItem(item.id)}
-                  />
-                </View>
-              )}
-              keyExtractor={item => item.id}
-            />
+            <ScrollView>
+              <View>
+                <FlatList
+                  data={lista}
+                  renderItem={({item}) => (
+                    <View style={styles.item}>
+                      <ManeuverItem
+                        highlight={
+                          !item.datetimeFim && item.usuario.id === usuario?.id
+                        }
+                        maneuver={{
+                          user: `${item.usuario.nome} ${item.usuario.sobrenome}`,
+                          status: !item.datetimeFim ? 'active' : 'deactive',
+                          title: item.titulo,
+                          date: item.datetimeFim ? item.datetimeFim : undefined,
+                        }}
+                        onPress={() => openItem(item.id)}
+                      />
+                    </View>
+                  )}
+                  keyExtractor={item => item.id}
+                />
+                {queue.maneuvers.queue.length !== 0 ? (
+                  <>
+                    <View style={{marginBottom: 12}}>
+                      <Title
+                        color="gray"
+                        text="Manobras na fila (criação)"
+                        align="center"
+                      />
+                    </View>
+                    <FlatList
+                      data={queue.maneuvers.queue}
+                      renderItem={({item}) => (
+                        <View style={styles.item}>
+                          <ManeuverItem
+                            highlight={true}
+                            maneuver={{
+                              user: `${usuario?.nome} ${usuario?.sobrenome}`,
+                              status: 'active',
+                              title: item.titulo,
+                              date: undefined,
+                            }}
+                            onPress={() => {}}
+                          />
+                        </View>
+                      )}
+                      keyExtractor={(item, index) => `${index}`}
+                    />
+                  </>
+                ) : (
+                  <></>
+                )}
+              </View>
+            </ScrollView>
           )}
         </View>
         <Navbar selected="Manobras" navigation={navigation} />

@@ -1,9 +1,17 @@
 import React, {createContext, useEffect, useState} from 'react';
-import {EquipamentoItemOff, Usuario as UsuarioType} from '../types';
 import Geolocation from '@react-native-community/geolocation';
 import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import Equipamento from '../services/Equipamento';
+import Manobra from '../services/Manobra';
+
+import {
+  EquipamentoItem,
+  EquipamentoItemOff,
+  ManobraItemOff,
+  Usuario as UsuarioType,
+} from '../types';
 
 interface UsuarioContext extends UsuarioType {
   manobrasAtivas: number;
@@ -26,6 +34,14 @@ interface ContextProps {
       queue: EquipamentoItemOff[];
       updatingQueue: boolean;
     };
+    maneuvers: {
+      addManeuver: (maneuver: ManobraItemOff) => Promise<void>;
+      setManeuvers: (maneuvers: ManobraItemOff[]) => Promise<void>;
+      removeManeuver: (index: number) => Promise<void>;
+      clearManeuvers: () => Promise<void>;
+      queue: ManobraItemOff[];
+      updatingQueue: boolean;
+    };
   };
 }
 
@@ -45,7 +61,11 @@ function ContextoProvider({children}: any) {
     [],
   );
 
+  const [maneuverQueue, setManeuverQueue] = useState<ManobraItemOff[]>([]);
+
   const [updatingEquipmentQueue, setUpdatingEquipmentQueue] = useState(false);
+
+  const [updatingManeuverQueue, setUpdatingManeuverQueue] = useState(false);
 
   const addEquipment = async (equipment: EquipamentoItemOff) => {
     const equipmentQueueTemp = [...equipmentQueue, equipment];
@@ -106,6 +126,58 @@ function ContextoProvider({children}: any) {
     setUpdatingEquipmentQueue(false);
   };
 
+  const addManeuver = async (maneuver: ManobraItemOff) => {
+    const maneuverQueueTemp = [...maneuverQueue, maneuver];
+    setManeuverQueue(maneuverQueueTemp);
+    await AsyncStorage.setItem(
+      'createManeuverQueue',
+      JSON.stringify(maneuverQueueTemp),
+    );
+  };
+
+  const setManeuvers = async (maneuvers: ManobraItemOff[]) => {
+    setManeuverQueue(maneuvers);
+    await AsyncStorage.setItem(
+      'createEquipmentQueue',
+      JSON.stringify(maneuvers),
+    );
+  };
+
+  const removeManeuver = async (index: number) => {
+    const maneuverQueueTemp = [...maneuverQueue];
+    maneuverQueueTemp.splice(index, 1);
+    setManeuverQueue(maneuverQueueTemp);
+    await AsyncStorage.setItem(
+      'createEquipmentQueue',
+      JSON.stringify(maneuverQueueTemp),
+    );
+  };
+
+  const clearManeuvers = async () => {
+    setEquipmentQueue([]);
+    await AsyncStorage.setItem('createEquipmentQueue', JSON.stringify([]));
+  };
+
+  const updateManeuvers = async () => {
+    setUpdatingManeuverQueue(true);
+    for (let i = 0; i < maneuverQueue.length; i++) {
+      if (!conected) {
+        setUpdatingManeuverQueue(false);
+        break;
+      }
+      const maneuver = maneuverQueue[i];
+      try {
+        await Manobra.new(maneuver);
+        removeManeuver(i);
+      } catch (e) {
+        console.log(e);
+        setUpdatingManeuverQueue(false);
+        break;
+      }
+    }
+    setUpdatingManeuverQueue(false);
+  };
+
   useEffect(() => {
     const watchId = Geolocation.watchPosition(
       position => {
@@ -141,6 +213,7 @@ function ContextoProvider({children}: any) {
   useEffect(() => {
     if (conected) {
       updateEquipments();
+      updateManeuvers();
     }
   }, [conected]);
 
@@ -160,6 +233,14 @@ function ContextoProvider({children}: any) {
             clearEquipments,
             queue: equipmentQueue,
             updatingQueue: updatingEquipmentQueue,
+          },
+          maneuvers: {
+            addManeuver,
+            setManeuvers,
+            removeManeuver,
+            clearManeuvers,
+            queue: maneuverQueue,
+            updatingQueue: updatingManeuverQueue,
           },
         },
       }}>

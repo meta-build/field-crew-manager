@@ -11,6 +11,8 @@ import Btn from '../../Button';
 import colors from '../../../styles/variables';
 
 import Equipamento from '../../../services/Equipamento';
+import useContexto from '../../../hooks/useContexto';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Props {
   open: boolean;
@@ -20,6 +22,8 @@ interface Props {
 }
 
 function SelectingEquipmentScreen(props: Props) {
+  const {conected} = useContexto();
+
   const [tipoName, setTipoName] = useState('');
   const [lista, setLista] = useState<EquipamentoItem[]>([]);
   const [loadingList, setLoadingList] = useState(false);
@@ -48,10 +52,26 @@ function SelectingEquipmentScreen(props: Props) {
 
   const getEquipamentos = async () => {
     setLoadingList(true);
-    await Equipamento.getAll('ativo', '', '').then(res => {
-      const equips = res.values.filter(equip => filtrarNome(equip.tipo.value));
-      setLista(equips);
-    });
+    if (conected) {
+      await Equipamento.getAll('ativo', '', '').then(res => {
+        const equips = res.values.filter(equip =>
+          filtrarNome(equip.tipo.value),
+        );
+        setLista(equips);
+      });
+    } else {
+      const equipsJSON = await AsyncStorage.getItem('equips');
+      const equipsTemp: EquipamentoItem[] = JSON.parse(equipsJSON as string);
+
+      setLista(
+        equipsTemp.filter(equipment => {
+          const filtroNome = filtrarNome(equipment.tipo.value);
+          const filtroStatus = equipment.status === 'ativo';
+
+          return filtroNome && filtroStatus;
+        }),
+      );
+    }
     setLoadingList(false);
   };
 
