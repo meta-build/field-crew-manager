@@ -30,17 +30,22 @@ import Manobra from '../../services/Manobra';
 import useContexto from '../../hooks/useContexto';
 
 import MapModal from './MapModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import useDistanceCalculator from '../../hooks/useDistanceCalculator';
 
 const {width, height} = Dimensions.get('window');
 
 type StatusType = 'todos' | 'concluido' | 'emAndamento';
 
 function ManeuverList({navigation}: any) {
-  const {usuario, location} = useContexto();
+  const {usuario, location, conected} = useContexto();
+
+  const distanceCalculator = useDistanceCalculator();
 
   const [filterModal, setFilterModal] = useState(false);
   const [alertModal, setAlertModal] = useState(false);
   const [mapModal, setMapModal] = useState(false);
+  const [warningModal, setWarningModal] = useState(false);
 
   const [loadingList, setLoadingList] = useState(false);
 
@@ -67,7 +72,11 @@ function ManeuverList({navigation}: any) {
   };
 
   const openItem = (serie: string) => {
-    navigation.navigate('ManeuverProfile', {id: serie});
+    if (conected) {
+      navigation.navigate('ManeuverProfile', {id: serie});
+    } else {
+      setWarningModal(true);
+    }
   };
 
   const confirmFilter = () => {
@@ -99,19 +108,45 @@ function ManeuverList({navigation}: any) {
     return regex.test(title);
   };
 
+  const downloadManobras = async () => {
+    const maneuvers = await Manobra.getAll(undefined);
+    await AsyncStorage.setItem('manobras', JSON.stringify(maneuvers.values));
+  };
+
   const getManobras = async () => {
     setLoadingList(true);
-    await Manobra.getAll(
-      distMaxFilter
-        ? {
-            latitude: location.latitude,
-            longitude: location.longitude,
-            distance: distMax,
-          }
-        : undefined,
-    )
-      .then(res => {
-        const manobras = res.values.filter(manobra => {
+    if (conected) {
+      await Manobra.getAll(
+        distMaxFilter
+          ? {
+              latitude: location.latitude,
+              longitude: location.longitude,
+              distance: distMax,
+            }
+          : undefined,
+      )
+        .then(res => {
+          const manobras = res.values.filter(manobra => {
+            const tituloFilter = filtrarNome(manobra.titulo);
+            const statusFilter =
+              status === 'todos'
+                ? true
+                : status === 'concluido'
+                ? manobra.datetimeFim
+                : !manobra.datetimeFim;
+            return tituloFilter && statusFilter;
+          });
+          setLista(manobras);
+        })
+        .catch(err => console.log(err));
+    } else {
+      const maneuversJSON = await AsyncStorage.getItem('manobras');
+      console.log(maneuversJSON);
+      const maneuvers: ManobraItem[] = maneuversJSON
+        ? JSON.parse(maneuversJSON)
+        : [];
+      setLista(
+        maneuvers.filter(manobra => {
           const tituloFilter = filtrarNome(manobra.titulo);
           const statusFilter =
             status === 'todos'
@@ -119,11 +154,17 @@ function ManeuverList({navigation}: any) {
               : status === 'concluido'
               ? manobra.datetimeFim
               : !manobra.datetimeFim;
-          return tituloFilter && statusFilter;
-        });
-        setLista(manobras);
-      })
-      .catch(err => console.log(err));
+          const distFilter = distMaxFilter
+            ? distanceCalculator(location, distMax, {
+                latitude: manobra.latitude,
+                longitude: manobra.longitude,
+              })
+            : true;
+
+          return tituloFilter && statusFilter && distFilter;
+        }),
+      );
+    }
     setLoadingList(false);
   };
 
@@ -132,6 +173,10 @@ function ManeuverList({navigation}: any) {
       cancelFilter();
       setMapModal(false);
       getManobras();
+
+      if (conected) {
+        downloadManobras();
+      }
 
       // ver se usuário possui manobra em andamento
     });
@@ -287,6 +332,22 @@ function ManeuverList({navigation}: any) {
         />
       </BottomModal>
 
+      <BottomModal
+        onPressOutside={() => setWarningModal(false)}
+        visible={warningModal}>
+        <View style={styles.cantOpenView}>
+          <Title color="green" text="Sem conexão" align="center" />
+          <Text style={styles.cantOpenText}>
+            Não é possível abrir itens quando não há conexão.
+          </Text>
+          <Btn
+            title="Ok"
+            styleType="filled"
+            onPress={() => setWarningModal(false)}
+          />
+        </View>
+      </BottomModal>
+
       <MapModal
         visible={mapModal}
         onClose={() => setMapModal(false)}
@@ -370,6 +431,14 @@ const styles = StyleSheet.create({
   },
   unactiveContainer: {
     opacity: 0.5,
+  },
+  cantOpenText: {
+    fontSize: 16,
+    color: colors.dark_gray,
+    textAlign: 'center',
+  },
+  cantOpenView: {
+    gap: 24,
   },
 });
 
