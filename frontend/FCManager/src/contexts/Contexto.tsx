@@ -1,6 +1,7 @@
 import React, {createContext, useEffect, useState} from 'react';
 import {Usuario as UsuarioType} from '../types';
 import Geolocation from '@react-native-community/geolocation';
+import NetInfo from '@react-native-community/netinfo';
 
 interface UsuarioContext extends UsuarioType {
   manobrasAtivas: number;
@@ -13,6 +14,7 @@ interface ContextProps {
     latitude: number;
     longitude: number;
   };
+  conected: boolean;
 }
 
 const Contexto = createContext({} as ContextProps);
@@ -24,6 +26,8 @@ function ContextoProvider({children}: any) {
     latitude: 0,
     longitude: 0,
   });
+
+  const [conected, setConected] = useState(true);
 
   useEffect(() => {
     const watchId = Geolocation.watchPosition(
@@ -46,9 +50,20 @@ function ContextoProvider({children}: any) {
     return () => Geolocation.clearWatch(watchId);
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      setConected(Boolean(state.isInternetReachable));
+    });
+
+    return () => {
+      // Não se esqueça de cancelar a inscrição ao desmontar
+      unsubscribe();
+    };
+  }, []);
+
   // fazer requisição get aqui!!! não fazer nos outros componentes, use useEffect!!!!
   return (
-    <Contexto.Provider value={{usuario, setUsuario, location}}>
+    <Contexto.Provider value={{usuario, setUsuario, location, conected}}>
       {children}
     </Contexto.Provider>
   );

@@ -1,29 +1,69 @@
-import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, StyleSheet, Pressable} from 'react-native';
 import colors from '../../styles/variables';
 import useContexto from '../../hooks/useContexto';
+import InterrogationIcon from '../../assets/icons/interrogation.svg';
+import BottomModal from '../BottomModal';
+import Title from '../Title';
+import Btn from '../Button';
 
 interface Props {
   text: string;
 }
 
 const Header = ({text}: Props) => {
-  const {usuario} = useContexto();
+  const {usuario, conected} = useContexto();
+
+  const [connectionModal, setConnectionModal] = useState(false);
 
   return (
-    <View>
-      <View style={styles.header}>
-        <Text style={styles.h1}>{text}</Text>
+    <>
+      <View>
+        <View style={styles.header}>
+          <Text style={styles.h1}>{text}</Text>
+        </View>
+        {usuario?.manobrasAtivas && conected ? (
+          <Text style={styles.warning}>
+            Você possui {usuario.manobrasAtivas}{' '}
+            {usuario.manobrasAtivas > 1 ? 'manobras' : 'manobra'} em andamento
+          </Text>
+        ) : (
+          <></>
+        )}
+        {!conected ? (
+          <Pressable
+            style={styles.warningConnection}
+            onPress={() => setConnectionModal(true)}>
+            <Text style={styles.warningConnectionText}>
+              Sem conexão com a internet.
+            </Text>
+            <InterrogationIcon width={24} color={colors.white} />
+          </Pressable>
+        ) : (
+          <></>
+        )}
       </View>
-      {usuario?.manobrasAtivas ? (
-        <Text style={styles.warning}>
-          Você possui {usuario.manobrasAtivas}{' '}
-          {usuario.manobrasAtivas > 1 ? 'manobras' : 'manobra'} em andamento
-        </Text>
-      ) : (
-        <></>
-      )}
-    </View>
+      <BottomModal
+        visible={connectionModal}
+        onPressOutside={() => setConnectionModal(false)}>
+        <View style={styles.modalConnectionView}>
+          <Title
+            color="green"
+            text="Sem conexão com a internet"
+            align="center"
+          />
+          <Text style={styles.modalConnectionText}>
+            Seu dispositivo não está conectado à internet. Quaisquer criações ou
+            edições de dados serão enviadas assim que estiver conectado.
+          </Text>
+          <Btn
+            styleType="filled"
+            title="Ok"
+            onPress={() => setConnectionModal(false)}
+          />
+        </View>
+      </BottomModal>
+    </>
   );
 };
 
@@ -45,6 +85,27 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     padding: 6,
     textAlign: 'center',
+  },
+  warningConnection: {
+    backgroundColor: colors.gray_2,
+    color: colors.white,
+    fontWeight: 'bold',
+    padding: 6,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  warningConnectionText: {
+    fontWeight: 'bold',
+    color: colors.white,
+  },
+  modalConnectionView: {
+    gap: 24,
+  },
+  modalConnectionText: {
+    color: colors.dark_gray,
+    textAlign: 'center',
+    fontSize: 16,
   },
 });
 
