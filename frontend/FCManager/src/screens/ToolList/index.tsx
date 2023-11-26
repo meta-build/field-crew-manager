@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {
   Dimensions,
-  FlatList,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from '../../components/Header/Index';
 import InputText from '../../components/InputText';
@@ -18,6 +18,7 @@ import Title from '../../components/Title';
 import Dropdown from '../../components/Dropdown';
 import LoadingToolList from '../../components/LoadingToolList';
 import Navbar from '../../components/Navbar';
+import SwitchBtn from '../../components/SwitchBtn';
 
 import colors from '../../styles/variables';
 
@@ -29,9 +30,8 @@ import Equipamento from '../../services/Equipamento';
 import {EquipamentoItem} from '../../types';
 
 import MapModal from './MapModal';
-import SwitchBtn from '../../components/SwitchBtn';
+
 import useContexto from '../../hooks/useContexto';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import useDistanceCalculator from '../../hooks/useDistanceCalculator';
 import Tipo from '../../services/Tipo';
 
@@ -137,7 +137,6 @@ function ToolList({navigation}: any) {
     } else {
       try {
         const equipsJSON = await AsyncStorage.getItem('equips');
-        console.log(equipsJSON);
         const equips: EquipamentoItem[] = JSON.parse(equipsJSON as string);
         setLista(
           equips.filter(equip => {
@@ -178,6 +177,7 @@ function ToolList({navigation}: any) {
 
   useEffect(() => {
     getEquipamentos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queue.equipments.queue]);
 
   return (
@@ -223,24 +223,19 @@ function ToolList({navigation}: any) {
           ) : (
             <ScrollView>
               <View>
-                <FlatList
-                  data={lista}
-                  renderItem={({item}) => (
-                    <View style={styles.item}>
-                      <ToolItem
-                        tool={{
-                          img_uri: item.img,
-                          n_serie: item.serial,
-                          status:
-                            item.status === 'ativo' ? 'active' : 'deactive',
-                          tipoLabel: item.tipo.value,
-                        }}
-                        onPress={() => openItem(item.id)}
-                      />
-                    </View>
-                  )}
-                  keyExtractor={item => item.id}
-                />
+                {lista.map(item => (
+                  <View style={styles.item} key={item.id}>
+                    <ToolItem
+                      tool={{
+                        img_uri: item.img,
+                        n_serie: item.serial,
+                        status: item.status === 'ativo' ? 'active' : 'deactive',
+                        tipoLabel: item.tipo.value,
+                      }}
+                      onPress={() => openItem(item.id)}
+                    />
+                  </View>
+                ))}
                 {queue.equipments.queue.length !== 0 ? (
                   <>
                     <View style={{marginBottom: 12}}>
@@ -250,24 +245,20 @@ function ToolList({navigation}: any) {
                         align="center"
                       />
                     </View>
-                    <FlatList
-                      data={queue.equipments.queue}
-                      renderItem={({item}) => (
-                        <View style={styles.item}>
-                          <ToolItem
-                            loading
-                            tool={{
-                              img_uri: item.imgs[0],
-                              n_serie: item.serial,
-                              status: 'active',
-                              tipoLabel: item.tipoValue,
-                            }}
-                            onPress={() => {}}
-                          />
-                        </View>
-                      )}
-                      keyExtractor={(item, index) => `${index}`}
-                    />
+                    {queue.equipments.queue.map((item, index) => (
+                      <View style={styles.item} key={index}>
+                        <ToolItem
+                          loading
+                          tool={{
+                            img_uri: item.imgs[0],
+                            n_serie: item.serial,
+                            status: 'active',
+                            tipoLabel: item.tipoValue,
+                          }}
+                          onPress={() => {}}
+                        />
+                      </View>
+                    ))}
                   </>
                 ) : (
                   <></>

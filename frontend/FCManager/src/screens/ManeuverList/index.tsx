@@ -148,9 +148,6 @@ function ManeuverList({navigation}: any) {
         .catch(err => console.log(err));
     } else {
       const maneuversJSON = await AsyncStorage.getItem('manobras');
-      console.log('--------------------------------------------');
-      console.log(maneuversJSON);
-      console.log('--------------------------------------------');
       const maneuvers: ManobraItem[] = maneuversJSON
         ? JSON.parse(maneuversJSON)
         : [];
@@ -238,7 +235,7 @@ function ManeuverList({navigation}: any) {
           ) : (
             <ScrollView>
               <View>
-                <FlatList
+                {/* <FlatList
                   data={lista.filter(
                     item =>
                       !queue.closedManeuvers.queue.find(
@@ -268,7 +265,36 @@ function ManeuverList({navigation}: any) {
                     </View>
                   )}
                   keyExtractor={item => item.id}
-                />
+                /> */}
+                {lista
+                  .filter(
+                    item =>
+                      !queue.closedManeuvers.queue.find(
+                        queueItem => queueItem.id === item.id,
+                      ),
+                  )
+                  .map(item => (
+                    <View style={styles.item} key={item.id}>
+                      <ManeuverItem
+                        highlight={
+                          !item.datetimeFim && item.usuario.id === usuario?.id
+                        }
+                        maneuver={{
+                          user: `${item.usuario.nome} ${item.usuario.sobrenome}`,
+                          status: !item.datetimeFim ? 'active' : 'deactive',
+                          title: item.titulo,
+                          date: item.datetimeFim ? item.datetimeFim : undefined,
+                        }}
+                        onPress={() => {
+                          if (conected) {
+                            openItem(item.id);
+                          } else if (!item.datetimeFim) {
+                            setSelectedManeuver(item);
+                          }
+                        }}
+                      />
+                    </View>
+                  ))}
                 {queue.maneuvers.queue.filter(item => !item.datetimeFim)
                   .length !== 0 ? (
                   <>
@@ -279,12 +305,10 @@ function ManeuverList({navigation}: any) {
                         align="center"
                       />
                     </View>
-                    <FlatList
-                      data={queue.maneuvers.queue.filter(
-                        item => !item.datetimeFim,
-                      )}
-                      renderItem={({item}) => (
-                        <View style={styles.item}>
+                    {queue.maneuvers.queue
+                      .filter(item => !item.datetimeFim)
+                      .map((item, index) => (
+                        <View style={styles.item} key={index}>
                           <ManeuverItem
                             highlight={true}
                             maneuver={{
@@ -300,9 +324,7 @@ function ManeuverList({navigation}: any) {
                             }}
                           />
                         </View>
-                      )}
-                      keyExtractor={(item, index) => `${index}`}
-                    />
+                      ))}
                   </>
                 ) : (
                   <></>
@@ -317,12 +339,10 @@ function ManeuverList({navigation}: any) {
                         align="center"
                       />
                     </View>
-                    <FlatList
-                      data={queue.maneuvers.queue.filter(
-                        item => item.datetimeFim,
-                      )}
-                      renderItem={({item}) => (
-                        <View style={styles.item}>
+                    {queue.maneuvers.queue
+                      .filter(item => item.datetimeFim)
+                      .map((item, index) => (
+                        <View style={styles.item} key={index}>
                           <ManeuverItem
                             highlight
                             disablePressable
@@ -335,28 +355,22 @@ function ManeuverList({navigation}: any) {
                             onPress={() => {}}
                           />
                         </View>
-                      )}
-                      keyExtractor={(item, index) => `${index}`}
-                    />
-                    <FlatList
-                      data={queue.closedManeuvers.queue}
-                      renderItem={({item}) => (
-                        <View style={styles.item}>
-                          <ManeuverItem
-                            highlight
-                            disablePressable
-                            maneuver={{
-                              user: `${usuario?.nome} ${usuario?.sobrenome}`,
-                              status: item.datetimeFim ? 'deactive' : 'active',
-                              title: item.titulo,
-                              date: item.datetimeFim,
-                            }}
-                            onPress={() => {}}
-                          />
-                        </View>
-                      )}
-                      keyExtractor={(item, index) => `${index}`}
-                    />
+                      ))}
+                    {queue.closedManeuvers.queue.map((item, index) => (
+                      <View style={styles.item} key={index}>
+                        <ManeuverItem
+                          highlight
+                          disablePressable
+                          maneuver={{
+                            user: `${usuario?.nome} ${usuario?.sobrenome}`,
+                            status: item.datetimeFim ? 'deactive' : 'active',
+                            title: item.titulo,
+                            date: item.datetimeFim,
+                          }}
+                          onPress={() => {}}
+                        />
+                      </View>
+                    ))}
                   </>
                 ) : (
                   <></>

@@ -1,12 +1,5 @@
 import React, {useState} from 'react';
-import {
-  FlatList,
-  Pressable,
-  PressableProps,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import {Pressable, PressableProps, StyleSheet, Text, View} from 'react-native';
 import colors from '../../styles/variables';
 import ArrowDown from '../../assets/icons/arrowDown.svg';
 import ArrowUp from '../../assets/icons/arrowUp.svg';
@@ -80,20 +73,19 @@ function Dropdown({
       </Pressable>
 
       {open && (
-        <FlatList
+        <View
           style={[
             styles.list,
             color === 'gray' ? {backgroundColor: colors.white_2} : {},
-          ]}
-          data={items}
-          renderItem={item => (
+          ]}>
+          {items.map((item, index) => (
             <DropdownItem
-              label={item.item.label}
-              onPress={() => onItemSelect(item.item)}
+              key={index.toString()}
+              label={item.label}
+              onPress={() => onItemSelect(item)}
             />
-          )}
-          keyExtractor={(item, index) => index.toString()}
-        />
+          ))}
+        </View>
       )}
     </View>
   );
@@ -132,7 +124,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     display: 'flex',
     flexDirection: 'column',
-    gap: 300,
   },
   item: {
     paddingVertical: 2,
