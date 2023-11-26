@@ -64,7 +64,7 @@ class UsuarioController {
 
   public async new(req: Request, res: Response) {
     // informações básicas do usuário
-    const { nome, sobrenome, email, telefone, matricula, cpf, isAdmin, isNew } = req.body;
+    const { nome, sobrenome, email, telefone, matricula, cpf, isAdmin } = req.body;
 
     const invalidFieldsAlert = Validations.verifyFields({
       nome,
@@ -87,8 +87,6 @@ class UsuarioController {
 
     const isAdminValidation = Validations.users.isAdminValidation(isAdmin, res);
     if (isAdminValidation) return isAdminValidation;
-
-    
 
     try {
       const passwordHash = await encryptPassword(cpf);
@@ -233,18 +231,13 @@ class UsuarioController {
   }
 
   public async login(req: Request, res: Response) {
-    const { email, senha, isNew } = req.body;
+    const { email, senha } = req.body;
 
     const invalidFieldsAlert = Validations.verifyFields({ email, senha }, res);
     if (invalidFieldsAlert) return invalidFieldsAlert;
 
-    if (isNew == true) {
-      isNew == false;
-
-      return res.status(200).json({msg: "Usuário novo"})
-    }
-
     try {
+      let newUser = false;
       const usuario = await usuarioSchema.findOne({ email });
       if (!usuario) {
         return res.status(404).json({ error: "Usuário não encontrado." });
@@ -254,11 +247,8 @@ class UsuarioController {
       if (validation && validation['errorResponse']) return validation['errorResponse'];
 
       if (usuario.isNew === true) {
-
-        const newUser = await usuarioSchema.findOneAndUpdate({ isNew: false});
-
-
-        return res.status(200).json({isNew: true, msg: newUser + "foi alterado"});
+        newUser = true;
+        await usuarioSchema.findOneAndUpdate({ _id: usuario._id }, { isNew: false });
       }
 
       const token = generateToken({ id: usuario.id, isAdmin: usuario.isAdmin });
@@ -274,7 +264,7 @@ class UsuarioController {
           cpf: usuario.cpf,
           foto: usuario.foto,
           isAdmin: usuario.isAdmin,
-          isNew: true,
+          isNew: newUser,
           manobrasAtivas: usuario.manobrasAtivas ? usuario.manobrasAtivas : 0,
         },
         token
