@@ -177,6 +177,10 @@ class Usuario {
     await AsyncStorage.removeItem('token');
     await AsyncStorage.removeItem('usuario');
   }
+
+  async sendCode() {
+    console.log('mandando código');
+  }
 }
 
 export default new Usuario();
