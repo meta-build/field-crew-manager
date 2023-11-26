@@ -4,7 +4,7 @@ import AdmConfigController from '../controllers/AdmConfigController';
 
 const routes = Router();
 
-routes.get('/admin', tokenValidation.adminUserVerification, AdmConfigController.get);
+routes.get('/admin', tokenValidation.anyUserVerification, AdmConfigController.get);
 
 routes.post('/admin', tokenValidation.adminUserVerification, AdmConfigController.new);
 
