@@ -4,6 +4,7 @@ import {
   FlatList,
   SafeAreaView,
   StyleSheet,
+  Text,
   View,
 } from 'react-native';
 
@@ -21,6 +22,8 @@ import {UsuarioItem} from '../../types';
 import Usuario from '../../services/Usuario';
 import useContexto from '../../hooks/useContexto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import BottomModal from '../../components/BottomModal';
+import Title from '../../components/Title';
 
 const {width, height} = Dimensions.get('window');
 
@@ -149,6 +152,22 @@ function UserList({navigation}: any) {
         </View>
         <Navbar selected="Usuários" navigation={navigation} />
       </SafeAreaView>
+
+      <BottomModal
+        onPressOutside={() => setCantOpenModal(false)}
+        visible={cantOpenModal}>
+        <View style={styles.cantOpenView}>
+          <Title color="green" text="Sem conexão" align="center" />
+          <Text style={styles.cantOpenText}>
+            Não é possível abrir itens quando não há conexão.
+          </Text>
+          <Btn
+            title="Ok"
+            styleType="filled"
+            onPress={() => setCantOpenModal(false)}
+          />
+        </View>
+      </BottomModal>
     </>
   );
 }
@@ -178,6 +197,14 @@ const styles = StyleSheet.create({
   },
   equipsList: {
     flex: 1,
+  },
+  cantOpenText: {
+    fontSize: 16,
+    color: colors.dark_gray,
+    textAlign: 'center',
+  },
+  cantOpenView: {
+    gap: 24,
   },
 });
 
