@@ -36,14 +36,11 @@ const usuarioSchema = new mongoose.Schema({
   isAdmin: {
     type: Boolean
   },
-<<<<<<< Updated upstream
-=======
 
   isNew: {
     type: Boolean
-  }
->>>>>>> Stashed changes
-
+  },
+  
   manobrasAtivas: {
     type: Number
   },

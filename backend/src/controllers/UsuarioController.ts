@@ -7,7 +7,6 @@ import { uploadImg } from "../utils/imageUploader";
 import encryptPassword from "../utils/encryptPassword";
 
 import generateToken from "../middlewares/generateToken";
-import manobraSchema from "../models/manobraSchema";
 
 interface RequestFiles extends Request {
   files: any[] | any;
@@ -65,7 +64,7 @@ class UsuarioController {
 
   public async new(req: Request, res: Response) {
     // informações básicas do usuário
-    const { nome, sobrenome, email, telefone, matricula, cpf, isAdmin } = req.body;
+    const { nome, sobrenome, email, telefone, matricula, cpf, isAdmin, isNew } = req.body;
 
     const invalidFieldsAlert = Validations.verifyFields({
       nome,
@@ -89,6 +88,8 @@ class UsuarioController {
     const isAdminValidation = Validations.users.isAdminValidation(isAdmin, res);
     if (isAdminValidation) return isAdminValidation;
 
+    
+
     try {
       const passwordHash = await encryptPassword(cpf);
 
@@ -100,13 +101,9 @@ class UsuarioController {
         matricula,
         cpf,
         isAdmin,
-<<<<<<< Updated upstream
+        isNew: true,
         senha: passwordHash,
         manobrasAtivas: 0,
-=======
-        isNew: true,
-        senha: passwordHash
->>>>>>> Stashed changes
       });
 
       const id = usuario._id;
@@ -256,6 +253,14 @@ class UsuarioController {
       const validation = await Validations.users.passwordValidation(usuario.id, senha, res);
       if (validation && validation['errorResponse']) return validation['errorResponse'];
 
+      if (usuario.isNew === true) {
+
+        const newUser = await usuarioSchema.findOneAndUpdate({ isNew: false});
+
+
+        return res.status(200).json({isNew: true, msg: newUser + "foi alterado"});
+      }
+
       const token = generateToken({ id: usuario.id, isAdmin: usuario.isAdmin });
 
       return res.status(200).json({
@@ -269,12 +274,8 @@ class UsuarioController {
           cpf: usuario.cpf,
           foto: usuario.foto,
           isAdmin: usuario.isAdmin,
-<<<<<<< Updated upstream
+          isNew: true,
           manobrasAtivas: usuario.manobrasAtivas ? usuario.manobrasAtivas : 0,
-=======
-          isNew: usuario.isNew,
-          manobraAtiva
->>>>>>> Stashed changes
         },
         token
       });
