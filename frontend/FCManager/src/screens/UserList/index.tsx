@@ -28,7 +28,7 @@ import Title from '../../components/Title';
 const {width, height} = Dimensions.get('window');
 
 function UserList({navigation}: any) {
-  const {queue, conected} = useContexto();
+  const {conected} = useContexto();
 
   const [loadingList, setLoadingList] = useState(false);
 
@@ -36,9 +36,14 @@ function UserList({navigation}: any) {
   const [lista, setLista] = useState<UsuarioItem[]>([]);
 
   const [cantOpenModal, setCantOpenModal] = useState(false);
+  const [cantCreateModal, setCantCreateModal] = useState(false);
 
   const openUserForm = () => {
-    navigation.navigate('UserForm');
+    if (conected) {
+      navigation.navigate('UserForm');
+    } else {
+      setCantCreateModal(true);
+    }
   };
 
   const openItem = (serie: string) => {
@@ -165,6 +170,22 @@ function UserList({navigation}: any) {
             title="Ok"
             styleType="filled"
             onPress={() => setCantOpenModal(false)}
+          />
+        </View>
+      </BottomModal>
+
+      <BottomModal
+        onPressOutside={() => setCantCreateModal(false)}
+        visible={cantCreateModal}>
+        <View style={styles.cantOpenView}>
+          <Title color="green" text="Sem conexão" align="center" />
+          <Text style={styles.cantOpenText}>
+            Não é possível criar novos usuários sem conexão com a internet.
+          </Text>
+          <Btn
+            title="Ok"
+            styleType="filled"
+            onPress={() => setCantCreateModal(false)}
           />
         </View>
       </BottomModal>
