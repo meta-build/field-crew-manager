@@ -7,7 +7,6 @@ import Equipamento from '../services/Equipamento';
 import Manobra from '../services/Manobra';
 
 import {
-  EquipamentoItem,
   EquipamentoItemOff,
   ManobraItemOff,
   Usuario as UsuarioType,
@@ -33,12 +32,22 @@ interface ContextProps {
       clearEquipments: () => Promise<void>;
       queue: EquipamentoItemOff[];
       updatingQueue: boolean;
+      getBannedEquipmentIDs: () => Promise<string[]>;
     };
     maneuvers: {
       addManeuver: (maneuver: ManobraItemOff) => Promise<void>;
       setManeuvers: (maneuvers: ManobraItemOff[]) => Promise<void>;
       removeManeuver: (index: number) => Promise<void>;
       clearManeuvers: () => Promise<void>;
+      closeManeuver: (index: number) => Promise<void>;
+      queue: ManobraItemOff[];
+      updatingQueue: boolean;
+    };
+    closedManeuvers: {
+      addClosedManeuver: (maneuver: ManobraItemOff) => Promise<void>;
+      setClosedManeuvers: (maneuvers: ManobraItemOff[]) => Promise<void>;
+      removeClosedManeuver: (index: number) => Promise<void>;
+      clearClosedManeuvers: () => Promise<void>;
       queue: ManobraItemOff[];
       updatingQueue: boolean;
     };
@@ -63,9 +72,14 @@ function ContextoProvider({children}: any) {
 
   const [maneuverQueue, setManeuverQueue] = useState<ManobraItemOff[]>([]);
 
-  const [updatingEquipmentQueue, setUpdatingEquipmentQueue] = useState(false);
+  const [closedManeuverQueue, setClosedManeuverQueue] = useState<
+    ManobraItemOff[]
+  >([]);
 
+  const [updatingEquipmentQueue, setUpdatingEquipmentQueue] = useState(false);
   const [updatingManeuverQueue, setUpdatingManeuverQueue] = useState(false);
+  const [updatingClosedManeuverQueue, setUpdatingClosedManeuverQueue] =
+    useState(false);
 
   const addEquipment = async (equipment: EquipamentoItemOff) => {
     const equipmentQueueTemp = [...equipmentQueue, equipment];
@@ -99,6 +113,15 @@ function ContextoProvider({children}: any) {
     await AsyncStorage.setItem('createEquipmentQueue', JSON.stringify([]));
   };
 
+  const getBannedEquipmentIDs = async () => {
+    const bannedEquipmentsJSON = await AsyncStorage.getItem('bannedEquipments');
+    const bannedEquipments = bannedEquipmentsJSON
+      ? JSON.parse(bannedEquipmentsJSON)
+      : [];
+
+    return bannedEquipments;
+  };
+
   const updateEquipments = async () => {
     setUpdatingEquipmentQueue(true);
     for (let i = 0; i < equipmentQueue.length; i++) {
@@ -127,18 +150,31 @@ function ContextoProvider({children}: any) {
   };
 
   const addManeuver = async (maneuver: ManobraItemOff) => {
-    const maneuverQueueTemp = [...maneuverQueue, maneuver];
+    const maneuverQueueTemp = [
+      ...maneuverQueue,
+      {...maneuver, index: maneuverQueue.length},
+    ];
     setManeuverQueue(maneuverQueueTemp);
     await AsyncStorage.setItem(
       'createManeuverQueue',
       JSON.stringify(maneuverQueueTemp),
+    );
+
+    const bannedEquipmentsJSON = await AsyncStorage.getItem('bannedEquipments');
+    const bannedEquipments = bannedEquipmentsJSON
+      ? JSON.parse(bannedEquipmentsJSON)
+      : [];
+    bannedEquipments.push(...maneuver.equipamentos);
+    await AsyncStorage.setItem(
+      'bannedEquipments',
+      JSON.stringify(bannedEquipments),
     );
   };
 
   const setManeuvers = async (maneuvers: ManobraItemOff[]) => {
     setManeuverQueue(maneuvers);
     await AsyncStorage.setItem(
-      'createEquipmentQueue',
+      'createManeuverQueue',
       JSON.stringify(maneuvers),
     );
   };
@@ -148,14 +184,39 @@ function ContextoProvider({children}: any) {
     maneuverQueueTemp.splice(index, 1);
     setManeuverQueue(maneuverQueueTemp);
     await AsyncStorage.setItem(
-      'createEquipmentQueue',
+      'createManeuverQueue',
       JSON.stringify(maneuverQueueTemp),
     );
   };
 
   const clearManeuvers = async () => {
-    setEquipmentQueue([]);
-    await AsyncStorage.setItem('createEquipmentQueue', JSON.stringify([]));
+    setManeuverQueue([]);
+    await AsyncStorage.setItem('createManeuverQueue', JSON.stringify([]));
+  };
+
+  const closeManeuver = async (index: number) => {
+    try {
+      const datetimeFim = new Date().toISOString();
+      const maneuverTemp = maneuverQueue[index];
+
+      const maneuverQueueTemp = [...maneuverQueue];
+      maneuverQueueTemp[index] = {...maneuverTemp, datetimeFim};
+      await setManeuvers(maneuverQueueTemp);
+
+      const bannedEquipmentsJSON = await AsyncStorage.getItem(
+        'bannedEquipments',
+      );
+      const bannedEquipments = JSON.parse(
+        bannedEquipmentsJSON as string,
+      ) as string[];
+      bannedEquipments.filter(id => !maneuverTemp.equipamentos.includes(id));
+      await AsyncStorage.setItem(
+        'bannedEquipments',
+        JSON.stringify(bannedEquipments),
+      );
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   const updateManeuvers = async () => {
@@ -167,8 +228,12 @@ function ContextoProvider({children}: any) {
       }
       const maneuver = maneuverQueue[i];
       try {
-        await Manobra.new(maneuver);
-        removeManeuver(i);
+        const res = await Manobra.new(maneuver);
+
+        if (maneuver.datetimeFim) {
+          await Manobra.finalize(res.id);
+        }
+        await removeManeuver(i);
       } catch (e) {
         console.log(e);
         setUpdatingManeuverQueue(false);
@@ -176,6 +241,67 @@ function ContextoProvider({children}: any) {
       }
     }
     setUpdatingManeuverQueue(false);
+  };
+
+  const addClosedManeuver = async (maneuver: ManobraItemOff) => {
+    const closedManeuverQueueTemp = [...closedManeuverQueue, maneuver];
+    setClosedManeuverQueue(closedManeuverQueueTemp);
+    await AsyncStorage.setItem(
+      'closedManeuverQueue',
+      JSON.stringify(closedManeuverQueueTemp),
+    );
+  };
+
+  const setClosedManeuvers = async (maneuvers: ManobraItemOff[]) => {
+    setClosedManeuverQueue(maneuvers);
+    await AsyncStorage.setItem(
+      'closedManeuverQueue',
+      JSON.stringify(maneuvers),
+    );
+  };
+
+  const removeClosedManeuver = async (index: number) => {
+    const closedManeuverQueueTemp = [...closedManeuverQueue];
+    closedManeuverQueueTemp.splice(index, 1);
+    setClosedManeuverQueue(closedManeuverQueueTemp);
+    await AsyncStorage.setItem(
+      'closedManeuverQueue',
+      JSON.stringify(closedManeuverQueueTemp),
+    );
+  };
+
+  const clearClosedManeuvers = async () => {
+    setClosedManeuverQueue([]);
+    await AsyncStorage.setItem('closedManeuverQueue', JSON.stringify([]));
+  };
+
+  const updateClosedManeuvers = async () => {
+    setUpdatingClosedManeuverQueue(true);
+    for (let i = 0; i < closedManeuverQueue.length; i++) {
+      if (!conected) {
+        setUpdatingClosedManeuverQueue(false);
+        break;
+      }
+      const maneuver = closedManeuverQueue[i];
+      try {
+        console.log(
+          '-------------------------------------------------------------------',
+        );
+        console.log(maneuver);
+        console.log(
+          '-------------------------------------------------------------------',
+        );
+        if (maneuver.id) {
+          await Manobra.finalize(maneuver.id);
+          await removeClosedManeuver(i);
+        }
+      } catch (e) {
+        console.log(e);
+        setUpdatingClosedManeuverQueue(false);
+        break;
+      }
+    }
+    setUpdatingClosedManeuverQueue(false);
   };
 
   useEffect(() => {
@@ -211,10 +337,15 @@ function ContextoProvider({children}: any) {
   }, []);
 
   useEffect(() => {
-    if (conected) {
-      updateEquipments();
-      updateManeuvers();
-    }
+    const update = async () => {
+      if (conected) {
+        await updateEquipments();
+        await updateManeuvers();
+        await updateClosedManeuvers();
+      }
+    };
+
+    update();
   }, [conected]);
 
   // fazer requisição get aqui!!! não fazer nos outros componentes, use useEffect!!!!
@@ -233,6 +364,7 @@ function ContextoProvider({children}: any) {
             clearEquipments,
             queue: equipmentQueue,
             updatingQueue: updatingEquipmentQueue,
+            getBannedEquipmentIDs,
           },
           maneuvers: {
             addManeuver,
@@ -241,6 +373,15 @@ function ContextoProvider({children}: any) {
             clearManeuvers,
             queue: maneuverQueue,
             updatingQueue: updatingManeuverQueue,
+            closeManeuver,
+          },
+          closedManeuvers: {
+            addClosedManeuver,
+            clearClosedManeuvers,
+            queue: closedManeuverQueue,
+            removeClosedManeuver,
+            setClosedManeuvers,
+            updatingQueue: updatingClosedManeuverQueue,
           },
         },
       }}>

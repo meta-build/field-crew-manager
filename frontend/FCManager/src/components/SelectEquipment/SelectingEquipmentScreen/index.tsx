@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import {FlatList, Modal, StyleSheet, View} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from '../../Header/Index';
 import InputText from '../../InputText';
 import LoadingToolList from '../../LoadingToolList';
-import {EquipamentoItem} from '../../../types';
 import ToolItem from '../../ToolItem';
 import Btn from '../../Button';
 
@@ -12,7 +12,7 @@ import colors from '../../../styles/variables';
 
 import Equipamento from '../../../services/Equipamento';
 import useContexto from '../../../hooks/useContexto';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {EquipamentoItem} from '../../../types';
 
 interface Props {
   open: boolean;
@@ -22,7 +22,7 @@ interface Props {
 }
 
 function SelectingEquipmentScreen(props: Props) {
-  const {conected} = useContexto();
+  const {conected, queue} = useContexto();
 
   const [tipoName, setTipoName] = useState('');
   const [lista, setLista] = useState<EquipamentoItem[]>([]);
@@ -53,7 +53,7 @@ function SelectingEquipmentScreen(props: Props) {
   const getEquipamentos = async () => {
     setLoadingList(true);
     if (conected) {
-      await Equipamento.getAll('ativo', '', '').then(res => {
+      await Equipamento.getAll('ativo', '', undefined).then(res => {
         const equips = res.values.filter(equip =>
           filtrarNome(equip.tipo.value),
         );
@@ -62,13 +62,15 @@ function SelectingEquipmentScreen(props: Props) {
     } else {
       const equipsJSON = await AsyncStorage.getItem('equips');
       const equipsTemp: EquipamentoItem[] = JSON.parse(equipsJSON as string);
+      const bannedEquipsIDs = await queue.equipments.getBannedEquipmentIDs();
 
       setLista(
         equipsTemp.filter(equipment => {
           const filtroNome = filtrarNome(equipment.tipo.value);
           const filtroStatus = equipment.status === 'ativo';
+          const filtroBannedID = !bannedEquipsIDs.includes(equipment.id);
 
-          return filtroNome && filtroStatus;
+          return filtroNome && filtroStatus && filtroBannedID;
         }),
       );
     }

@@ -7,6 +7,7 @@ import colors from '../../styles/variables';
 
 import api from '../../services/api';
 import useContexto from '../../hooks/useContexto';
+import {EquipamentoItemOff, ManobraItemOff} from '../../types';
 
 import {UsuarioContext} from '../../contexts/Contexto';
 import Btn from '../../components/Button';
@@ -17,7 +18,6 @@ import Title from '../../components/Title';
 import Usuario from '../../services/Usuario';
 
 import * as Keychain from 'react-native-keychain';
-import {EquipamentoItemOff} from '../../types';
 
 const logo = require('../../assets/images/loading-logo.png');
 
@@ -34,10 +34,7 @@ function Loading({navigation}: any) {
   const [failPassword, setFailPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const getData = async () => {
-    const tokenStorage = await AsyncStorage.getItem('token');
-    const userStorage = await AsyncStorage.getItem('usuario');
-
+  const loadQueues = async () => {
     const equipmentQueueStorageJSON = await AsyncStorage.getItem(
       'createEquipmentQueue',
     );
@@ -48,6 +45,35 @@ function Loading({navigation}: any) {
         equipmentQueueStorage as EquipamentoItemOff[],
       );
     }
+
+    const newManeuverQueueStorageJSON = await AsyncStorage.getItem(
+      'createManeuverQueue',
+    );
+
+    if (newManeuverQueueStorageJSON) {
+      const newManeuverQueueStorage = JSON.parse(newManeuverQueueStorageJSON);
+      queue.maneuvers.setManeuvers(newManeuverQueueStorage as ManobraItemOff[]);
+    }
+
+    const closedManeuverQueueStorageJSON = await AsyncStorage.getItem(
+      'closedManeuverQueue',
+    );
+
+    if (closedManeuverQueueStorageJSON) {
+      const closedManeuverQueueStorage = JSON.parse(
+        closedManeuverQueueStorageJSON,
+      );
+      queue.closedManeuvers.setClosedManeuvers(
+        closedManeuverQueueStorage as ManobraItemOff[],
+      );
+    }
+  };
+
+  const getData = async () => {
+    const tokenStorage = await AsyncStorage.getItem('token');
+    const userStorage = await AsyncStorage.getItem('usuario');
+
+    await loadQueues();
 
     if (!tokenStorage || !userStorage) {
       navigation.navigate('Home');

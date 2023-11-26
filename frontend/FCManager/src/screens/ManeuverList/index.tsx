@@ -8,6 +8,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from '../../components/Header/Index';
 import InputText from '../../components/InputText';
@@ -25,21 +26,21 @@ import colors from '../../styles/variables';
 import FilterIcon from '../../assets/icons/filterGreen.svg';
 import MapIcon from '../../assets/icons/map.svg';
 
-import {ManobraItem} from '../../types';
+import {ManobraItem, ManobraItemOff} from '../../types';
 
 import Manobra from '../../services/Manobra';
 import useContexto from '../../hooks/useContexto';
+import useDistanceCalculator from '../../hooks/useDistanceCalculator';
 
 import MapModal from './MapModal';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import useDistanceCalculator from '../../hooks/useDistanceCalculator';
+import {UsuarioContext} from '../../contexts/Contexto';
 
 const {width, height} = Dimensions.get('window');
 
 type StatusType = 'todos' | 'concluido' | 'emAndamento';
 
 function ManeuverList({navigation}: any) {
-  const {usuario, location, conected, queue} = useContexto();
+  const {usuario, setUsuario, location, conected, queue} = useContexto();
 
   const distanceCalculator = useDistanceCalculator();
 
@@ -57,6 +58,9 @@ function ManeuverList({navigation}: any) {
   const [distMaxStr, setDistMaxStr] = useState('2');
 
   const [lista, setLista] = useState<ManobraItem[]>([]);
+  const [selectedManeuver, setSelectedManeuver] = useState<
+    ManobraItemOff | ManobraItem | undefined
+  >();
 
   const [filterCount, setFilterCount] = useState(1);
 
@@ -117,6 +121,8 @@ function ManeuverList({navigation}: any) {
   const getManobras = async () => {
     setLoadingList(true);
     if (conected) {
+      await downloadManobras();
+
       await Manobra.getAll(
         distMaxFilter
           ? {
@@ -142,7 +148,9 @@ function ManeuverList({navigation}: any) {
         .catch(err => console.log(err));
     } else {
       const maneuversJSON = await AsyncStorage.getItem('manobras');
+      console.log('--------------------------------------------');
       console.log(maneuversJSON);
+      console.log('--------------------------------------------');
       const maneuvers: ManobraItem[] = maneuversJSON
         ? JSON.parse(maneuversJSON)
         : [];
@@ -174,17 +182,18 @@ function ManeuverList({navigation}: any) {
       cancelFilter();
       setMapModal(false);
       getManobras();
-
-      if (conected) {
-        downloadManobras();
-      }
-
-      // ver se usuário possui manobra em andamento
     });
+
     getManobras();
     return onFocus;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [titulo, navigation, conected, queue.maneuvers.queue]);
+  }, [
+    titulo,
+    navigation,
+    conected,
+    queue.maneuvers.queue,
+    queue.closedManeuvers.queue,
+  ]);
 
   return (
     <>
@@ -230,7 +239,12 @@ function ManeuverList({navigation}: any) {
             <ScrollView>
               <View>
                 <FlatList
-                  data={lista}
+                  data={lista.filter(
+                    item =>
+                      !queue.closedManeuvers.queue.find(
+                        queueItem => queueItem.id === item.id,
+                      ),
+                  )}
                   renderItem={({item}) => (
                     <View style={styles.item}>
                       <ManeuverItem
@@ -243,13 +257,20 @@ function ManeuverList({navigation}: any) {
                           title: item.titulo,
                           date: item.datetimeFim ? item.datetimeFim : undefined,
                         }}
-                        onPress={() => openItem(item.id)}
+                        onPress={() => {
+                          if (conected) {
+                            openItem(item.id);
+                          } else if (!item.datetimeFim) {
+                            setSelectedManeuver(item);
+                          }
+                        }}
                       />
                     </View>
                   )}
                   keyExtractor={item => item.id}
                 />
-                {queue.maneuvers.queue.length !== 0 ? (
+                {queue.maneuvers.queue.filter(item => !item.datetimeFim)
+                  .length !== 0 ? (
                   <>
                     <View style={{marginBottom: 12}}>
                       <Title
@@ -259,16 +280,76 @@ function ManeuverList({navigation}: any) {
                       />
                     </View>
                     <FlatList
-                      data={queue.maneuvers.queue}
+                      data={queue.maneuvers.queue.filter(
+                        item => !item.datetimeFim,
+                      )}
                       renderItem={({item}) => (
                         <View style={styles.item}>
                           <ManeuverItem
                             highlight={true}
                             maneuver={{
                               user: `${usuario?.nome} ${usuario?.sobrenome}`,
+                              status: item.datetimeFim ? 'deactive' : 'active',
+                              title: item.titulo,
+                              date: item.datetimeFim,
+                            }}
+                            onPress={() => {
+                              if (!item.datetimeFim) {
+                                setSelectedManeuver(item);
+                              }
+                            }}
+                          />
+                        </View>
+                      )}
+                      keyExtractor={(item, index) => `${index}`}
+                    />
+                  </>
+                ) : (
+                  <></>
+                )}
+                {queue.maneuvers.queue.filter(item => item.datetimeFim)
+                  .length !== 0 || queue.closedManeuvers.queue.length !== 0 ? (
+                  <>
+                    <View style={{marginBottom: 12}}>
+                      <Title
+                        color="gray"
+                        text="Manobras na fila (conclusão)"
+                        align="center"
+                      />
+                    </View>
+                    <FlatList
+                      data={queue.maneuvers.queue.filter(
+                        item => item.datetimeFim,
+                      )}
+                      renderItem={({item}) => (
+                        <View style={styles.item}>
+                          <ManeuverItem
+                            highlight
+                            disablePressable
+                            maneuver={{
+                              user: `${usuario?.nome} ${usuario?.sobrenome}`,
                               status: 'active',
                               title: item.titulo,
-                              date: undefined,
+                              date: item.datetimeFim,
+                            }}
+                            onPress={() => {}}
+                          />
+                        </View>
+                      )}
+                      keyExtractor={(item, index) => `${index}`}
+                    />
+                    <FlatList
+                      data={queue.closedManeuvers.queue}
+                      renderItem={({item}) => (
+                        <View style={styles.item}>
+                          <ManeuverItem
+                            highlight
+                            disablePressable
+                            maneuver={{
+                              user: `${usuario?.nome} ${usuario?.sobrenome}`,
+                              status: item.datetimeFim ? 'deactive' : 'active',
+                              title: item.titulo,
+                              date: item.datetimeFim,
                             }}
                             onPress={() => {}}
                           />
@@ -365,6 +446,50 @@ function ManeuverList({navigation}: any) {
           styleType="filled"
           title="Ok"
         />
+      </BottomModal>
+
+      <BottomModal
+        onPressOutside={() => setSelectedManeuver(undefined)}
+        visible={Boolean(selectedManeuver)}>
+        <View style={{gap: 12}}>
+          <Title
+            color="green"
+            text={`Concluir manobra: ${selectedManeuver?.titulo}?`}
+            align="center"
+          />
+          <Text style={[styles.alertTxt, {marginVertical: 12}]}>
+            Ela será adicionada na fila e atualizado no servidor quando
+            conectado.
+          </Text>
+          <Btn
+            onPress={async () => {
+              if (selectedManeuver?.id) {
+                await queue.closedManeuvers.addClosedManeuver(
+                  selectedManeuver as ManobraItemOff,
+                );
+              } else {
+                const maneuverIndexObj = selectedManeuver as ManobraItemOff;
+                await queue.maneuvers.closeManeuver(
+                  maneuverIndexObj?.index as number,
+                );
+                const tempUser = {
+                  ...usuario,
+                  manobrasAtivas: (usuario?.manobrasAtivas as number) - 1,
+                } as UsuarioContext;
+                setUsuario(tempUser);
+                await AsyncStorage.setItem('usuario', JSON.stringify(tempUser));
+              }
+              setSelectedManeuver(undefined);
+            }}
+            styleType="filled"
+            title="Concluir manobra"
+          />
+          <Btn
+            onPress={() => setSelectedManeuver(undefined)}
+            styleType="outlined"
+            title="Cancelar"
+          />
+        </View>
       </BottomModal>
 
       <BottomModal

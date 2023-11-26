@@ -38,7 +38,7 @@ import Tipo from '../../services/Tipo';
 const {width, height} = Dimensions.get('window');
 
 function ToolList({navigation}: any) {
-  const {location, conected, queue, offline} = useContexto();
+  const {location, conected, queue} = useContexto();
   const distanceFilter = useDistanceCalculator();
 
   const [filterModal, setFilterModal] = useState(false);
@@ -105,7 +105,6 @@ function ToolList({navigation}: any) {
   const DownloadEquipamentos = async () => {
     try {
       const equips = await Equipamento.getAll('todos', '', undefined);
-      offline.equipments.setList(equips.values);
       await AsyncStorage.setItem('equips', JSON.stringify(equips.values));
 
       const tipos = await Tipo.getAll();
@@ -138,6 +137,7 @@ function ToolList({navigation}: any) {
     } else {
       try {
         const equipsJSON = await AsyncStorage.getItem('equips');
+        console.log(equipsJSON);
         const equips: EquipamentoItem[] = JSON.parse(equipsJSON as string);
         setLista(
           equips.filter(equip => {

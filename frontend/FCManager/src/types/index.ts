@@ -90,12 +90,15 @@ interface ManobraItem {
 }
 
 interface ManobraItemOff {
+  id?: string;
   titulo: string;
   descricao: string;
   equipamentos: string[];
   datetimeInicio: string;
   latitude: number;
   longitude: number;
+  datetimeFim?: string;
+  index?: number;
 }
 
 interface ErrorType {

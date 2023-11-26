@@ -6,8 +6,10 @@ import Badget from '../Badget';
 import ArrowRight from '../../assets/icons/arrowRightGreen.svg';
 import CheckboxIcon from '../../assets/icons/box.svg';
 import CheckedboxIcon from '../../assets/icons/filledBoxChecked.svg';
+import OptionsIcon from '../../assets/icons/options.svg';
 
 import colors from '../../styles/variables';
+import useContexto from '../../hooks/useContexto';
 
 interface Props extends PressableProps {
   maneuver: {
@@ -19,9 +21,12 @@ interface Props extends PressableProps {
   checkbox?: boolean;
   checked?: boolean;
   highlight?: boolean;
+  disablePressable?: boolean;
 }
 
 function ManeuverItem({maneuver, ...props}: Props) {
+  const {conected} = useContexto();
+
   const convertBadgeText = () => {
     if (maneuver.status === 'active') {
       return 'Em andamento';
@@ -70,7 +75,15 @@ function ManeuverItem({maneuver, ...props}: Props) {
           />
         </View>
       </View>
-      {!props.checkbox ? (
+      {!conected ? (
+        maneuver.status === 'active' && !props.disablePressable ? (
+          <OptionsIcon color={colors.green_1} width={10} height={15} />
+        ) : (
+          <></>
+        )
+      ) : maneuver.status === 'active' && !conected ? (
+        <></>
+      ) : !props.checkbox ? (
         <ArrowRight width={10} height={15} />
       ) : !props.checked ? (
         <CheckboxIcon width={16} height={16} />
