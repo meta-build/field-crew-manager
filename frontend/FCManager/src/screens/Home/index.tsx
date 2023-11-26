@@ -25,7 +25,7 @@ const image = require('../../assets/images/home-image.png');
 const {width, height} = Dimensions.get('window');
 
 const Home = ({navigation}: any) => {
-  const {setUsuario} = useContexto();
+  const {setUsuario, setTempMail} = useContexto();
 
   const [loginMailModal, setLoginMailModal] = useState(false);
   const [loginPasswordModal, setloginPasswordModal] = useState(false);
@@ -132,6 +132,11 @@ const Home = ({navigation}: any) => {
   }
 
   function goToForgotPswd() {
+    setTempMail(email);
+    setEmail('');
+    setPassword('');
+    setloginPasswordModal(false);
+    setLoginMailModal(false);
     navigation.navigate('SendMail');
   }
 

@@ -27,7 +27,7 @@ interface Props {
 function AuthModal(props: Props) {
   const nav = useNavigation();
 
-  const {usuario, setUsuario} = useContexto();
+  const {usuario, setUsuario, setTempMail} = useContexto();
 
   const [password, setPassword] = useState('');
 
@@ -65,11 +65,13 @@ function AuthModal(props: Props) {
     setUsuario(undefined);
     setModal(false);
     setPassword('');
+    setTempMail('');
     nav.navigate('Home' as never);
     props.onClose();
   };
 
   function goToForgotPswd() {
+    setTempMail(usuario?.email as string);
     Usuario.exit();
     setUsuario(undefined);
     setModal(false);

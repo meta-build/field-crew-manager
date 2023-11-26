@@ -17,6 +17,8 @@ interface UsuarioContext extends UsuarioType {
 }
 
 interface ContextProps {
+  tempMail: string;
+  setTempMail: React.Dispatch<React.SetStateAction<string>>;
   usuario: UsuarioContext | undefined;
   setUsuario: React.Dispatch<React.SetStateAction<UsuarioContext | undefined>>;
   location: {
@@ -58,6 +60,7 @@ const Contexto = createContext({} as ContextProps);
 
 function ContextoProvider({children}: any) {
   const [usuario, setUsuario] = useState<UsuarioContext>();
+  const [tempMail, setTempMail] = useState('');
 
   const [location, setLocation] = useState({
     latitude: 0,
@@ -290,13 +293,6 @@ function ContextoProvider({children}: any) {
       }
       const maneuver = closedManeuverQueue[i];
       try {
-        console.log(
-          '-------------------------------------------------------------------',
-        );
-        console.log(maneuver);
-        console.log(
-          '-------------------------------------------------------------------',
-        );
         if (maneuver.id) {
           await Manobra.finalize(maneuver.id);
           await removeClosedManeuver(i);
@@ -358,6 +354,8 @@ function ContextoProvider({children}: any) {
   return (
     <Contexto.Provider
       value={{
+        tempMail,
+        setTempMail,
         usuario,
         setUsuario,
         location,

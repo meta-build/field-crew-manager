@@ -23,7 +23,7 @@ import Link from '../../components/Link';
 const logo = require('../../assets/images/loading-logo.png');
 
 function Loading({navigation}: any) {
-  const {setUsuario, queue} = useContexto();
+  const {setUsuario, queue, setTempMail} = useContexto();
 
   const [password, setPassword] = useState('');
   const [nome, setNome] = useState('');
@@ -83,6 +83,7 @@ function Loading({navigation}: any) {
       setUser(userStorage);
       const usuario = await JSON.parse(userStorage);
       setNome(usuario.nome);
+      setTempMail(usuario.email);
       setModal(true);
     }
   };
@@ -116,6 +117,7 @@ function Loading({navigation}: any) {
   const exitUser = () => {
     Usuario.exit();
     setModal(false);
+    setTempMail('');
     navigation.navigate('Home');
   };
 
