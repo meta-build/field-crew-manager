@@ -19,21 +19,31 @@ import colors from '../../styles/variables';
 import {UsuarioItem} from '../../types';
 
 import Usuario from '../../services/Usuario';
+import useContexto from '../../hooks/useContexto';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const {width, height} = Dimensions.get('window');
 
 function UserList({navigation}: any) {
+  const {queue, conected} = useContexto();
+
   const [loadingList, setLoadingList] = useState(false);
 
   const [name, setName] = useState('');
   const [lista, setLista] = useState<UsuarioItem[]>([]);
+
+  const [cantOpenModal, setCantOpenModal] = useState(false);
 
   const openUserForm = () => {
     navigation.navigate('UserForm');
   };
 
   const openItem = (serie: string) => {
-    navigation.navigate('UserProfile', {id: serie});
+    if (conected) {
+      navigation.navigate('UserProfile', {id: serie});
+    } else {
+      setCantOpenModal(true);
+    }
   };
 
   const cancelFilter = () => {
@@ -46,27 +56,54 @@ function UserList({navigation}: any) {
     return regex.test(titulo);
   };
 
+  const downloadUsuarios = async () => {
+    try {
+      const users = await Usuario.getAll();
+      await AsyncStorage.setItem('users', JSON.stringify(users.values));
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const getUsuarios = async () => {
     setLoadingList(true);
-    await Usuario.getAll().then(res => {
-      const users = res.values.filter(user =>
-        filtrarNome(`${user.nome} ${user.sobrenome}`),
-      );
-      setLista(users);
-    });
+    if (conected) {
+      await Usuario.getAll().then(res => {
+        const users = res.values.filter(user =>
+          filtrarNome(`${user.nome} ${user.sobrenome}`),
+        );
+        setLista(users);
+      });
+    } else {
+      try {
+        const usersJSON = await AsyncStorage.getItem('users');
+        const users: UsuarioItem[] = usersJSON ? JSON.parse(usersJSON) : [];
+
+        setLista(
+          users.filter(user => filtrarNome(`${user.nome} ${user.sobrenome}`)),
+        );
+      } catch (e) {
+        console.log(e);
+      }
+    }
     setLoadingList(false);
   };
 
   useEffect(() => {
     const onFocus = navigation.addListener('focus', () => {
       cancelFilter();
+      getUsuarios();
     });
 
+    if (conected) {
+      downloadUsuarios();
+    }
     getUsuarios();
+
     return onFocus;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, navigation]);
+  }, [name, navigation, conected]);
 
   return (
     <>
