@@ -12,7 +12,7 @@ import colors from '../../../styles/variables';
 
 const {width} = Dimensions.get('window');
 
-function Welcome() {
+function Welcome({navigation}: any) {
   const {usuario} = useContexto();
 
   return (
@@ -24,7 +24,13 @@ function Welcome() {
       />
       <ArrowsSVG width={48} color={colors.green_1} />
       <View style={styles.btnView}>
-        <Btn styleType="filled" title="Continuar" onPress={() => {}} />
+        <Btn
+          styleType="filled"
+          title="Continuar"
+          onPress={() => {
+            navigation.navigate('ChangePhoto');
+          }}
+        />
       </View>
     </SafeAreaView>
   );

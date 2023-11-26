@@ -25,6 +25,7 @@ import Loading from '../Loading';
 import AuthModal from '../AuthModal';
 import useContexto from '../../hooks/useContexto';
 import Welcome from '../FstLogin/Welcome';
+import ChangePhoto from '../FstLogin/ChangePhoto';
 
 const Stack = createNativeStackNavigator();
 
@@ -33,17 +34,17 @@ const ScreensContainer = () => {
 
   const [modal, setModal] = useState(false);
 
-  useEffect(() => {
-    AppState.addEventListener('change', appState => {
-      if (appState === 'background') {
-        if (usuario) {
-          setModal(true);
-        } else {
-          setModal(false);
-        }
-      }
-    });
-  }, [usuario]);
+  // useEffect(() => {
+  //   AppState.addEventListener('change', appState => {
+  //     if (appState === 'background') {
+  //       if (usuario) {
+  //         setModal(true);
+  //       } else {
+  //         setModal(false);
+  //       }
+  //     }
+  //   });
+  // }, [usuario]);
 
   return (
     <>
@@ -73,6 +74,7 @@ const ScreensContainer = () => {
             <Stack.Screen name="ManeuverForm" component={ManeuverForm} />
 
             <Stack.Screen name="Welcome" component={Welcome} />
+            <Stack.Screen name="ChangePhoto" component={ChangePhoto} />
           </Stack.Navigator>
         </SafeAreaView>
       </NavigationContainer>
