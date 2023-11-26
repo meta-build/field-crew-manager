@@ -182,6 +182,8 @@ function ManeuverList({navigation}: any) {
     });
 
     getManobras();
+
+    console.log(queue.maneuvers.queue);
     return onFocus;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -235,37 +237,6 @@ function ManeuverList({navigation}: any) {
           ) : (
             <ScrollView>
               <View>
-                {/* <FlatList
-                  data={lista.filter(
-                    item =>
-                      !queue.closedManeuvers.queue.find(
-                        queueItem => queueItem.id === item.id,
-                      ),
-                  )}
-                  renderItem={({item}) => (
-                    <View style={styles.item}>
-                      <ManeuverItem
-                        highlight={
-                          !item.datetimeFim && item.usuario.id === usuario?.id
-                        }
-                        maneuver={{
-                          user: `${item.usuario.nome} ${item.usuario.sobrenome}`,
-                          status: !item.datetimeFim ? 'active' : 'deactive',
-                          title: item.titulo,
-                          date: item.datetimeFim ? item.datetimeFim : undefined,
-                        }}
-                        onPress={() => {
-                          if (conected) {
-                            openItem(item.id);
-                          } else if (!item.datetimeFim) {
-                            setSelectedManeuver(item);
-                          }
-                        }}
-                      />
-                    </View>
-                  )}
-                  keyExtractor={item => item.id}
-                /> */}
                 {lista
                   .filter(
                     item =>
@@ -483,16 +454,17 @@ function ManeuverList({navigation}: any) {
                 );
               } else {
                 const maneuverIndexObj = selectedManeuver as ManobraItemOff;
+                console.log(maneuverIndexObj);
                 await queue.maneuvers.closeManeuver(
-                  maneuverIndexObj?.index as number,
+                  selectedManeuver as ManobraItemOff,
                 );
-                const tempUser = {
-                  ...usuario,
-                  manobrasAtivas: (usuario?.manobrasAtivas as number) - 1,
-                } as UsuarioContext;
-                setUsuario(tempUser);
-                await AsyncStorage.setItem('usuario', JSON.stringify(tempUser));
               }
+              const tempUser = {
+                ...usuario,
+                manobrasAtivas: (usuario?.manobrasAtivas as number) - 1,
+              } as UsuarioContext;
+              setUsuario(tempUser);
+              await AsyncStorage.setItem('usuario', JSON.stringify(tempUser));
               setSelectedManeuver(undefined);
             }}
             styleType="filled"

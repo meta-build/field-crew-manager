@@ -39,7 +39,7 @@ interface ContextProps {
       setManeuvers: (maneuvers: ManobraItemOff[]) => Promise<void>;
       removeManeuver: (index: number) => Promise<void>;
       clearManeuvers: () => Promise<void>;
-      closeManeuver: (index: number) => Promise<void>;
+      closeManeuver: (maneuver: ManobraItemOff) => Promise<void>;
       queue: ManobraItemOff[];
       updatingQueue: boolean;
     };
@@ -194,13 +194,14 @@ function ContextoProvider({children}: any) {
     await AsyncStorage.setItem('createManeuverQueue', JSON.stringify([]));
   };
 
-  const closeManeuver = async (index: number) => {
+  const closeManeuver = async (maneuver: ManobraItemOff) => {
     try {
       const datetimeFim = new Date().toISOString();
-      const maneuverTemp = maneuverQueue[index];
+      const maneuverTemp = {...maneuver, datetimeFim};
 
       const maneuverQueueTemp = [...maneuverQueue];
-      maneuverQueueTemp[index] = {...maneuverTemp, datetimeFim};
+      maneuverQueueTemp[maneuverTemp.index as number] = maneuverTemp;
+
       await setManeuvers(maneuverQueueTemp);
 
       const bannedEquipmentsJSON = await AsyncStorage.getItem(
@@ -226,14 +227,17 @@ function ContextoProvider({children}: any) {
         setUpdatingManeuverQueue(false);
         break;
       }
-      const maneuver = maneuverQueue[i];
+      const maneuver = {...maneuverQueue[i]};
       try {
         const res = await Manobra.new(maneuver);
 
         if (maneuver.datetimeFim) {
+          console.log(maneuver, res.id);
           await Manobra.finalize(res.id);
+          await removeManeuver(i);
+        } else {
+          await removeManeuver(i);
         }
-        await removeManeuver(i);
       } catch (e) {
         console.log(e);
         setUpdatingManeuverQueue(false);
@@ -262,7 +266,9 @@ function ContextoProvider({children}: any) {
 
   const removeClosedManeuver = async (index: number) => {
     const closedManeuverQueueTemp = [...closedManeuverQueue];
+    console.log(closedManeuverQueueTemp);
     closedManeuverQueueTemp.splice(index, 1);
+    console.log(closedManeuverQueueTemp);
     setClosedManeuverQueue(closedManeuverQueueTemp);
     await AsyncStorage.setItem(
       'closedManeuverQueue',
