@@ -99,7 +99,7 @@ const Home = ({navigation}: any) => {
 
         setLoading(false);
         closeLoginModals();
-        if (false) {
+        if (retorno.isNew) {
           goToWelcome();
         } else {
           goToList();

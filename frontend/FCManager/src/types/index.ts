@@ -46,6 +46,7 @@ interface Usuario {
   cpf: string;
   foto: string;
   isAdmin: boolean;
+  isNew?: boolean;
 }
 
 interface UsuarioItem {
@@ -123,5 +124,5 @@ export type {
   ManobraItem,
   ManobraItemOff,
   ErrorType,
-  BufferType
+  BufferType,
 };
