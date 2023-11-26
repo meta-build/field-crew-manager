@@ -27,6 +27,7 @@ import useContexto from '../../hooks/useContexto';
 import Welcome from '../FstLogin/Welcome';
 import ChangePhoto from '../FstLogin/ChangePhoto';
 import FstPassword from '../FstLogin/FstPassword';
+import WelcomeFinal from '../FstLogin/WelcomeFinal';
 
 const Stack = createNativeStackNavigator();
 
@@ -35,17 +36,17 @@ const ScreensContainer = () => {
 
   const [modal, setModal] = useState(false);
 
-  // useEffect(() => {
-  //   AppState.addEventListener('change', appState => {
-  //     if (appState === 'background') {
-  //       if (usuario) {
-  //         setModal(true);
-  //       } else {
-  //         setModal(false);
-  //       }
-  //     }
-  //   });
-  // }, [usuario]);
+  useEffect(() => {
+    AppState.addEventListener('change', appState => {
+      if (appState === 'background') {
+        if (usuario) {
+          setModal(true);
+        } else {
+          setModal(false);
+        }
+      }
+    });
+  }, [usuario]);
 
   return (
     <>
@@ -77,6 +78,7 @@ const ScreensContainer = () => {
             <Stack.Screen name="Welcome" component={Welcome} />
             <Stack.Screen name="ChangePhoto" component={ChangePhoto} />
             <Stack.Screen name="FstPassword" component={FstPassword} />
+            <Stack.Screen name="WelcomeFinal" component={WelcomeFinal} />
           </Stack.Navigator>
         </SafeAreaView>
       </NavigationContainer>

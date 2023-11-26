@@ -6,10 +6,9 @@ import useContexto from '../../../hooks/useContexto';
 
 import Title from '../../../components/Title';
 import Btn from '../../../components/Button';
-import InputProfileImage from '../../../components/InputProfileImage';
+import InputText from '../../../components/InputText';
 
 import Usuario from '../../../services/Usuario';
-import InputText from '../../../components/InputText';
 import colors from '../../../styles/variables';
 
 const {width} = Dimensions.get('window');
@@ -25,7 +24,6 @@ const AlertMsg = ({children}: any) => {
 function FstPassword({navigation}: any) {
   const {usuario} = useContexto();
 
-  const [senhaAntiga, setSenhaAntiga] = useState(usuario?.cpf as string);
   const [senhaNova, setSenhaNova] = useState('');
   const [confirmsenhaNova, setConfirmSenhaNova] = useState('');
 
@@ -40,7 +38,7 @@ function FstPassword({navigation}: any) {
       if (senhaNova !== confirmsenhaNova) {
         setDontMatch(true);
       } else {
-        await Usuario.updatePassowrd(senhaAntiga, senhaNova);
+        await Usuario.updatePassowrd(usuario?.cpf as string, senhaNova);
       }
     } catch (e) {
       console.log(e);

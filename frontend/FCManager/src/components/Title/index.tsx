@@ -4,7 +4,7 @@ import colors from '../../styles/variables';
 
 interface Props {
   text: string;
-  color: 'green' | 'gray' | 'lightGreen';
+  color: 'green' | 'gray' | 'lightGreen' | 'white';
   align?: 'left' | 'center' | 'right' | 'justify';
 }
 
@@ -23,6 +23,9 @@ function Title({text, color, align = 'left'}: Props) {
     },
     lightGreen: {
       color: colors.green_1,
+    },
+    white: {
+      color: colors.white,
     },
   });
 
