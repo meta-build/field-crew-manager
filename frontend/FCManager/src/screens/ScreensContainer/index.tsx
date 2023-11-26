@@ -26,6 +26,7 @@ import AuthModal from '../AuthModal';
 import useContexto from '../../hooks/useContexto';
 import Welcome from '../FstLogin/Welcome';
 import ChangePhoto from '../FstLogin/ChangePhoto';
+import FstPassword from '../FstLogin/FstPassword';
 
 const Stack = createNativeStackNavigator();
 
@@ -75,6 +76,7 @@ const ScreensContainer = () => {
 
             <Stack.Screen name="Welcome" component={Welcome} />
             <Stack.Screen name="ChangePhoto" component={ChangePhoto} />
+            <Stack.Screen name="FstPassword" component={FstPassword} />
           </Stack.Navigator>
         </SafeAreaView>
       </NavigationContainer>

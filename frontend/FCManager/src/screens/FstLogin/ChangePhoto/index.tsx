@@ -6,10 +6,8 @@ import useContexto from '../../../hooks/useContexto';
 
 import Title from '../../../components/Title';
 import Btn from '../../../components/Button';
-
-import ArrowsSVG from '../../../assets/icons/arrows.svg';
-import colors from '../../../styles/variables';
 import InputProfileImage from '../../../components/InputProfileImage';
+
 import Usuario from '../../../services/Usuario';
 
 const {width} = Dimensions.get('window');
