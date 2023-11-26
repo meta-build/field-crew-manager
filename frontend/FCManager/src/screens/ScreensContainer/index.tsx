@@ -24,6 +24,7 @@ import ManeuverForm from '../ManeuverForm';
 import Loading from '../Loading';
 import AuthModal from '../AuthModal';
 import useContexto from '../../hooks/useContexto';
+import Welcome from '../FstLogin/Welcome';
 
 const Stack = createNativeStackNavigator();
 
@@ -70,6 +71,8 @@ const ScreensContainer = () => {
             <Stack.Screen name="ManeuverList" component={ManeuverList} />
             <Stack.Screen name="ManeuverProfile" component={ManeuverProfile} />
             <Stack.Screen name="ManeuverForm" component={ManeuverForm} />
+
+            <Stack.Screen name="Welcome" component={Welcome} />
           </Stack.Navigator>
         </SafeAreaView>
       </NavigationContainer>

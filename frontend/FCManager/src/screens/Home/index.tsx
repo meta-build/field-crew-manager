@@ -98,7 +98,11 @@ const Home = ({navigation}: any) => {
 
         setLoading(false);
         closeLoginModals();
-        goToList();
+        if (true) {
+          goToWelcome();
+        } else {
+          goToList();
+        }
       } else if ('errorNum' in retorno) {
         if (retorno.errorNum === 401) {
           //  se senha incorreta
@@ -120,6 +124,10 @@ const Home = ({navigation}: any) => {
 
   function goToList(): void {
     navigation.navigate('ToolList');
+  }
+
+  function goToWelcome() {
+    navigation.navigate('Welcome');
   }
 
   return (
