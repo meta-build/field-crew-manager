@@ -32,6 +32,7 @@ import SendMail from '../ForgotPassword/SendMail';
 import InsertCode from '../ForgotPassword/InsertCode';
 import UpdatePassword from '../ForgotPassword/UpdatePassword';
 import ChangePasswordConfirmed from '../ForgotPassword/ChangePasswordConfirmed';
+import AdmConfig from '../AdmConfig';
 
 const Stack = createNativeStackNavigator();
 
@@ -73,6 +74,7 @@ const ScreensContainer = () => {
             <Stack.Screen name="UserProfile" component={UserProfile} />
             <Stack.Screen name="UserForm" component={UserForm} />
             <Stack.Screen name="OwnUserProfile" component={OwnUserProfile} />
+            <Stack.Screen name="AdmConfig" component={AdmConfig} />
             <Stack.Screen name="UpdateUserData" component={UpdateUserData} />
             <Stack.Screen name="ChangePassword" component={ChangePassword} />
             <Stack.Screen name="ManeuverList" component={ManeuverList} />
