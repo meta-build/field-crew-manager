@@ -19,6 +19,8 @@ interface UsuarioContext extends UsuarioType {
 interface ContextProps {
   tempMail: string;
   setTempMail: React.Dispatch<React.SetStateAction<string>>;
+  code: string;
+  setCode: React.Dispatch<React.SetStateAction<string>>;
   usuario: UsuarioContext | undefined;
   setUsuario: React.Dispatch<React.SetStateAction<UsuarioContext | undefined>>;
   location: {
@@ -61,6 +63,7 @@ const Contexto = createContext({} as ContextProps);
 function ContextoProvider({children}: any) {
   const [usuario, setUsuario] = useState<UsuarioContext>();
   const [tempMail, setTempMail] = useState('');
+  const [code, setCode] = useState('');
 
   const [location, setLocation] = useState({
     latitude: 0,
@@ -356,6 +359,8 @@ function ContextoProvider({children}: any) {
       value={{
         tempMail,
         setTempMail,
+        code,
+        setCode,
         usuario,
         setUsuario,
         location,

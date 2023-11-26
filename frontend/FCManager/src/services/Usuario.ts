@@ -181,6 +181,13 @@ class Usuario {
   async sendCode() {
     console.log('mandando código');
   }
+
+  async forgotPassword(code: string, password?: string) {
+    console.log('código ', code);
+    console.log('senha ', password);
+
+    return true;
+  }
 }
 
 export default new Usuario();

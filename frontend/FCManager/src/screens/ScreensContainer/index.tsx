@@ -29,6 +29,7 @@ import ChangePhoto from '../FstLogin/ChangePhoto';
 import FstPassword from '../FstLogin/FstPassword';
 import WelcomeFinal from '../FstLogin/WelcomeFinal';
 import SendMail from '../ForgotPassword/SendMail';
+import InsertCode from '../ForgotPassword/InsertCode';
 
 const Stack = createNativeStackNavigator();
 
@@ -82,6 +83,7 @@ const ScreensContainer = () => {
             <Stack.Screen name="WelcomeFinal" component={WelcomeFinal} />
 
             <Stack.Screen name="SendMail" component={SendMail} />
+            <Stack.Screen name="InsertCode" component={InsertCode} />
           </Stack.Navigator>
         </SafeAreaView>
       </NavigationContainer>
