@@ -18,6 +18,7 @@ import Title from '../../components/Title';
 import Usuario from '../../services/Usuario';
 
 import * as Keychain from 'react-native-keychain';
+import Link from '../../components/Link';
 
 const logo = require('../../assets/images/loading-logo.png');
 
@@ -118,6 +119,13 @@ function Loading({navigation}: any) {
     navigation.navigate('Home');
   };
 
+  function goToForgotPswd() {
+    Usuario.exit();
+    setModal(false);
+    navigation.push('Home');
+    navigation.navigate('SendMail');
+  }
+
   useEffect(() => {
     getData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -157,11 +165,11 @@ function Loading({navigation}: any) {
           <InputText
             color={'gray'}
             isPassword
-            style={styles.inputText}
             error={failPassword}
             placeholder="Senha"
             onChange={e => setPassword(e.nativeEvent.text)}
           />
+          <Link onPress={() => goToForgotPswd()} text="Esqueci minha senha" />
         </View>
 
         <View style={styles.btnContainer}>
@@ -208,9 +216,6 @@ const styles = StyleSheet.create({
   modalLabel: {
     color: colors.dark_gray,
     marginBottom: 6,
-  },
-  inputText: {
-    marginBottom: 24,
   },
   btnContainer: {
     width: '100%',

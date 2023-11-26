@@ -28,6 +28,7 @@ import Welcome from '../FstLogin/Welcome';
 import ChangePhoto from '../FstLogin/ChangePhoto';
 import FstPassword from '../FstLogin/FstPassword';
 import WelcomeFinal from '../FstLogin/WelcomeFinal';
+import SendMail from '../ForgotPassword/SendMail';
 
 const Stack = createNativeStackNavigator();
 
@@ -79,6 +80,8 @@ const ScreensContainer = () => {
             <Stack.Screen name="ChangePhoto" component={ChangePhoto} />
             <Stack.Screen name="FstPassword" component={FstPassword} />
             <Stack.Screen name="WelcomeFinal" component={WelcomeFinal} />
+
+            <Stack.Screen name="SendMail" component={SendMail} />
           </Stack.Navigator>
         </SafeAreaView>
       </NavigationContainer>

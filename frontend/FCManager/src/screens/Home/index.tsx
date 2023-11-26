@@ -17,6 +17,7 @@ import Usuario from '../../services/Usuario';
 
 import useContexto from '../../hooks/useContexto';
 import {UsuarioContext} from '../../contexts/Contexto';
+import Link from '../../components/Link';
 
 const logo = require('../../assets/images/logo-1.png');
 const image = require('../../assets/images/home-image.png');
@@ -98,7 +99,7 @@ const Home = ({navigation}: any) => {
 
         setLoading(false);
         closeLoginModals();
-        if (true) {
+        if (false) {
           goToWelcome();
         } else {
           goToList();
@@ -128,6 +129,10 @@ const Home = ({navigation}: any) => {
 
   function goToWelcome() {
     navigation.navigate('Welcome');
+  }
+
+  function goToForgotPswd() {
+    navigation.navigate('SendMail');
   }
 
   return (
@@ -171,7 +176,6 @@ const Home = ({navigation}: any) => {
           <InputText
             color={'gray'}
             placeholder="exemplo@dominio.com"
-            style={styles.inputText}
             error={failEmail}
             value={email}
             onChange={e => setEmail(e.nativeEvent.text)}
@@ -207,13 +211,12 @@ const Home = ({navigation}: any) => {
           <InputText
             color={'gray'}
             isPassword
-            style={styles.inputText}
             error={failPassword}
             placeholder="Senha"
             onChange={e => setPassword(e.nativeEvent.text)}
           />
+          <Link onPress={() => goToForgotPswd()} text="Esqueci minha senha" />
         </View>
-
         <View style={styles.btnContainer}>
           <Btn
             onPress={() => submitPassword()}
@@ -260,14 +263,11 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   loginView: {
-    marginTop: 18,
+    marginVertical: 18,
   },
   modalText: {
     marginBottom: 8,
     marginTop: 35,
-  },
-  inputText: {
-    marginBottom: 24,
   },
   modalLabel: {
     color: colors.dark_gray,

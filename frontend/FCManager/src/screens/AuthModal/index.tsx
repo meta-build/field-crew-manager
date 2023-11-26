@@ -15,6 +15,7 @@ import Title from '../../components/Title';
 import Usuario from '../../services/Usuario';
 
 import * as Keychain from 'react-native-keychain';
+import Link from '../../components/Link';
 
 const logo = require('../../assets/images/loading-logo.png');
 
@@ -68,6 +69,16 @@ function AuthModal(props: Props) {
     props.onClose();
   };
 
+  function goToForgotPswd() {
+    Usuario.exit();
+    setUsuario(undefined);
+    setModal(false);
+    setPassword('');
+    props.onClose();
+    nav.navigate('Home' as never);
+    nav.navigate('SendMail' as never);
+  }
+
   return (
     <>
       <Modal visible={props.visible} onRequestClose={() => {}}>
@@ -105,11 +116,11 @@ function AuthModal(props: Props) {
           <InputText
             color={'gray'}
             isPassword
-            style={styles.inputText}
             error={failPassword}
             placeholder="Senha"
             onChange={e => setPassword(e.nativeEvent.text)}
           />
+          <Link onPress={() => goToForgotPswd()} text="Esqueci minha senha" />
         </View>
 
         <View style={styles.btnContainer}>
@@ -129,8 +140,6 @@ function AuthModal(props: Props) {
 const styles = StyleSheet.create({
   view: {
     backgroundColor: colors.green_1,
-    // width,
-    // height,
     flex: 1,
     padding: 18,
     flexDirection: 'column',
@@ -147,7 +156,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   loginView: {
-    marginTop: 18,
+    marginVertical: 18,
   },
   modalError: {
     color: colors.alert_1,
@@ -156,9 +165,6 @@ const styles = StyleSheet.create({
   modalLabel: {
     color: colors.dark_gray,
     marginBottom: 6,
-  },
-  inputText: {
-    marginBottom: 24,
   },
   btnContainer: {
     width: '100%',
