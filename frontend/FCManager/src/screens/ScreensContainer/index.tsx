@@ -31,6 +31,7 @@ import WelcomeFinal from '../FstLogin/WelcomeFinal';
 import SendMail from '../ForgotPassword/SendMail';
 import InsertCode from '../ForgotPassword/InsertCode';
 import UpdatePassword from '../ForgotPassword/UpdatePassword';
+import ChangePasswordConfirmed from '../ForgotPassword/ChangePasswordConfirmed';
 
 const Stack = createNativeStackNavigator();
 
@@ -86,6 +87,10 @@ const ScreensContainer = () => {
             <Stack.Screen name="SendMail" component={SendMail} />
             <Stack.Screen name="InsertCode" component={InsertCode} />
             <Stack.Screen name="UpdatePassword" component={UpdatePassword} />
+            <Stack.Screen
+              name="ChangePasswordConfirmed"
+              component={ChangePasswordConfirmed}
+            />
           </Stack.Navigator>
         </SafeAreaView>
       </NavigationContainer>
