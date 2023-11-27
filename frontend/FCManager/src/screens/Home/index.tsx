@@ -18,6 +18,7 @@ import Usuario from '../../services/Usuario';
 import useContexto from '../../hooks/useContexto';
 import {UsuarioContext} from '../../contexts/Contexto';
 import Link from '../../components/Link';
+import Admin from '../../services/Admin';
 
 const logo = require('../../assets/images/logo-1.png');
 const image = require('../../assets/images/home-image.png');
@@ -25,7 +26,7 @@ const image = require('../../assets/images/home-image.png');
 const {width, height} = Dimensions.get('window');
 
 const Home = ({navigation}: any) => {
-  const {setUsuario, setTempMail} = useContexto();
+  const {setUsuario, setTempMail, filter} = useContexto();
 
   const [loginMailModal, setLoginMailModal] = useState(false);
   const [loginPasswordModal, setloginPasswordModal] = useState(false);
@@ -99,6 +100,14 @@ const Home = ({navigation}: any) => {
 
         setLoading(false);
         closeLoginModals();
+
+        try {
+          const filterConfig = await Admin.get();
+          filter.set(filterConfig);
+        } catch (e) {
+          console.log(e);
+        }
+
         if (retorno.isNew) {
           goToWelcome();
         } else {

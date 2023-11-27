@@ -26,7 +26,7 @@ import colors from '../../styles/variables';
 import FilterIcon from '../../assets/icons/filterGreen.svg';
 import MapIcon from '../../assets/icons/map.svg';
 
-import {ManobraItem, ManobraItemOff} from '../../types';
+import {AdmConfig, ManobraItem, ManobraItemOff} from '../../types';
 
 import Manobra from '../../services/Manobra';
 import useContexto from '../../hooks/useContexto';
@@ -40,7 +40,8 @@ const {width, height} = Dimensions.get('window');
 type StatusType = 'todos' | 'concluido' | 'emAndamento';
 
 function ManeuverList({navigation}: any) {
-  const {usuario, setUsuario, location, conected, queue} = useContexto();
+  const {usuario, setUsuario, location, conected, queue, filter} =
+    useContexto();
 
   const distanceCalculator = useDistanceCalculator();
 
@@ -98,14 +99,15 @@ function ManeuverList({navigation}: any) {
   };
 
   const cancelFilter = () => {
-    setStatus('todos');
-    setTitulo('');
-    setFilterCount(1);
-    setDistMax(2);
-    setDistMaxStr('2');
-    setDistMaxFilter(true);
-    getManobras();
-    setFilterModal(false);
+    const configFilter = filter.value;
+    if (configFilter) {
+      setStatus(processStatusFilter(configFilter));
+      setDistMaxFilter(configFilter.defaultManeuverFilter.maxDistance.active);
+      setDistMax(configFilter.defaultManeuverFilter.maxDistance.maxDistance);
+      setDistMaxStr(
+        `${configFilter.defaultManeuverFilter.maxDistance.maxDistance}`,
+      );
+    }
   };
 
   const filtrarNome = (title: string) => {
@@ -172,6 +174,17 @@ function ManeuverList({navigation}: any) {
       );
     }
     setLoadingList(false);
+  };
+
+  const processStatusFilter = (config: AdmConfig): StatusType => {
+    switch (config.defaultManeuverFilter.maneuverStatus.value) {
+      case 'todos':
+        return 'todos';
+      case 'ativo':
+        return 'emAndamento';
+      default:
+        return 'concluido';
+    }
   };
 
   useEffect(() => {

@@ -113,6 +113,27 @@ interface BufferType {
   distance: number;
 }
 
+interface AdmConfig {
+  maxActiveManeuvers: number;
+  defaultManeuverFilter: {
+    maxDistance: {
+      active: boolean;
+      maxDistance: number;
+    };
+    maneuverStatus: {
+      value: 'todos' | 'ativo' | 'concluido';
+    };
+  };
+  defaultEquipmentFilter: {
+    maxDistance: {
+      active: boolean;
+      maxDistance: number;
+    };
+    equipmentStatus: {
+      value: 'todos' | 'ativo' | 'inativo';
+    };
+  };
+}
 export type {
   Tipo,
   Equipamento,
@@ -125,4 +146,5 @@ export type {
   ManobraItemOff,
   ErrorType,
   BufferType,
+  AdmConfig,
 };

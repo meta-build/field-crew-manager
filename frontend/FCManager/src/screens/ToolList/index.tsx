@@ -25,8 +25,6 @@ import colors from '../../styles/variables';
 import FilterIcon from '../../assets/icons/filterGreen.svg';
 import MapIcon from '../../assets/icons/map.svg';
 
-import Equipamento from '../../services/Equipamento';
-
 import {EquipamentoItem} from '../../types';
 
 import MapModal from './MapModal';
@@ -34,11 +32,12 @@ import MapModal from './MapModal';
 import useContexto from '../../hooks/useContexto';
 import useDistanceCalculator from '../../hooks/useDistanceCalculator';
 import Tipo from '../../services/Tipo';
+import Equipamento from '../../services/Equipamento';
 
 const {width, height} = Dimensions.get('window');
 
 function ToolList({navigation}: any) {
-  const {location, conected, queue} = useContexto();
+  const {location, conected, queue, filter} = useContexto();
   const distanceFilter = useDistanceCalculator();
 
   const [filterModal, setFilterModal] = useState(false);
@@ -87,14 +86,15 @@ function ToolList({navigation}: any) {
   };
 
   const cancelFilter = () => {
-    setStatus('todos');
-    setTipoName('');
-    setFilterCount(1);
-    setDistMax(2);
-    setDistMaxStr('2');
-    setDistMaxFilter(true);
-    getEquipamentos();
-    setFilterModal(false);
+    const configFilter = filter.value;
+    if (configFilter) {
+      setStatus(configFilter.defaultEquipmentFilter.equipmentStatus.value);
+      setDistMaxFilter(configFilter.defaultEquipmentFilter.maxDistance.active);
+      setDistMax(configFilter.defaultEquipmentFilter.maxDistance.maxDistance);
+      setDistMaxStr(
+        `${configFilter.defaultEquipmentFilter.maxDistance.maxDistance}`,
+      );
+    }
   };
 
   const filtrarNome = (titulo: string) => {

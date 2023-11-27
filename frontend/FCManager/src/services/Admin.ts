@@ -1,54 +1,14 @@
-interface Config {
-  maxActiveManeuvers: number;
-  defaultManeuverFilter: {
-    maxDistance: {
-      active: boolean;
-      maxDistance: number;
-    };
-    maneuverStatus: {
-      value: 'todos' | 'ativo' | 'concluido';
-    };
-  };
-  defaultEquipmentFilter: {
-    maxDistance: {
-      active: boolean;
-      maxDistance: number;
-    };
-    equipmentStatus: {
-      value: 'todos' | 'ativo' | 'inativo';
-    };
-  };
-}
-
-const obj: Config = {
-  maxActiveManeuvers: 10,
-  defaultManeuverFilter: {
-    maxDistance: {
-      active: false,
-      maxDistance: 1,
-    },
-    maneuverStatus: {
-      value: 'ativo',
-    },
-  },
-  defaultEquipmentFilter: {
-    maxDistance: {
-      active: true,
-      maxDistance: 1,
-    },
-    equipmentStatus: {
-      value: 'todos',
-    },
-  },
-};
+import {AdmConfig} from '../types';
+import api from './api';
 
 class Admin {
-  async get(): Promise<Config> {
-    return obj;
+  async get(): Promise<AdmConfig> {
+    const {data} = await api.apiJson.get('/admin');
+    return data;
   }
 
-  async apply(config: Config) {
-    console.log(config);
+  async apply(config: AdmConfig) {
+    await api.apiJson.put('/admin', config);
   }
 }
 

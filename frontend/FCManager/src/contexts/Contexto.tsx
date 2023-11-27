@@ -7,6 +7,7 @@ import Equipamento from '../services/Equipamento';
 import Manobra from '../services/Manobra';
 
 import {
+  AdmConfig,
   EquipamentoItemOff,
   ManobraItemOff,
   Usuario as UsuarioType,
@@ -56,6 +57,10 @@ interface ContextProps {
       updatingQueue: boolean;
     };
   };
+  filter: {
+    value: AdmConfig | undefined;
+    set: (config: AdmConfig) => Promise<void>;
+  };
 }
 
 const Contexto = createContext({} as ContextProps);
@@ -64,6 +69,7 @@ function ContextoProvider({children}: any) {
   const [usuario, setUsuario] = useState<UsuarioContext>();
   const [tempMail, setTempMail] = useState('');
   const [code, setCode] = useState('');
+  const [filter, setFilter] = useState<AdmConfig>();
 
   const [location, setLocation] = useState({
     latitude: 0,
@@ -86,6 +92,11 @@ function ContextoProvider({children}: any) {
   const [updatingManeuverQueue, setUpdatingManeuverQueue] = useState(false);
   const [updatingClosedManeuverQueue, setUpdatingClosedManeuverQueue] =
     useState(false);
+
+  const setConfig = async (config: AdmConfig) => {
+    setFilter(config);
+    await AsyncStorage.setItem('admConfig', JSON.stringify(config));
+  };
 
   const addEquipment = async (equipment: EquipamentoItemOff) => {
     const equipmentQueueTemp = [...equipmentQueue, equipment];
@@ -392,6 +403,10 @@ function ContextoProvider({children}: any) {
             setClosedManeuvers,
             updatingQueue: updatingClosedManeuverQueue,
           },
+        },
+        filter: {
+          value: filter,
+          set: setConfig,
         },
       }}>
       {children}

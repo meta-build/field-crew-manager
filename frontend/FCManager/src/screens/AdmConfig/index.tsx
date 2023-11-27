@@ -21,6 +21,7 @@ import SwitchBtn from '../../components/SwitchBtn';
 
 import colors from '../../styles/variables';
 import Admin from '../../services/Admin';
+import OverlayLoading from '../../components/OverlayLoading';
 
 const {width, height} = Dimensions.get('window');
 
@@ -57,8 +58,8 @@ const equipamentoOptions: EquipamentoOption[] = [
 ];
 
 function AdmConfig({navigation}: any) {
-  const [maxManobras, setMaxManobras] = useState(5);
-  const [maxManobrasStr, setMaxManobrasStr] = useState('5');
+  const [maxManobras, setMaxManobras] = useState(0);
+  const [maxManobrasStr, setMaxManobrasStr] = useState('');
 
   const [manobraStatus, setManobraStatus] = useState<ManobraOption>(
     manobraOptions[0],
@@ -70,11 +71,11 @@ function AdmConfig({navigation}: any) {
 
   const [manobraDistMax, setManobraDistMax] = useState(false);
   const [manobraDistMaxKm, setManobraDistMaxKm] = useState(0);
-  const [manobraDistMaxKmStr, setManobraDistMaxKmStr] = useState('0');
+  const [manobraDistMaxKmStr, setManobraDistMaxKmStr] = useState('');
 
   const [equipamentoDistMax, setEquipamentoDistMax] = useState(false);
   const [equipamentoDistMaxKm, setEquipamentoDistMaxKm] = useState(0);
-  const [equipamentoDistMaxKmStr, setEquipamentoDistMaxKmStr] = useState('0');
+  const [equipamentoDistMaxKmStr, setEquipamentoDistMaxKmStr] = useState('');
 
   const [confirmModal, setConfirmModal] = useState(false);
 
@@ -84,6 +85,7 @@ function AdmConfig({navigation}: any) {
   const [maxManeuversAlert, setMaxManeuversAlert] = useState(false);
 
   const [loading, setLoading] = useState(false);
+  const [loadingOverlay, setLoadingOverlay] = useState(false);
 
   const create = async () => {
     setLoading(true);
@@ -135,6 +137,7 @@ function AdmConfig({navigation}: any) {
 
   useEffect(() => {
     const onFocus = navigation.addListener('focus', async () => {
+      setLoadingOverlay(true);
       const config = await Admin.get();
       setMaxManobras(config.maxActiveManeuvers);
       setMaxManobrasStr(`${config.maxActiveManeuvers}`);
@@ -164,6 +167,7 @@ function AdmConfig({navigation}: any) {
       setEquipamentoDistMaxKmStr(
         `${config.defaultEquipmentFilter.maxDistance.maxDistance}`,
       );
+      setLoadingOverlay(false);
     });
 
     return onFocus;
@@ -171,6 +175,13 @@ function AdmConfig({navigation}: any) {
 
   return (
     <>
+      <OverlayLoading
+        visible={loadingOverlay}
+        onClose={() => {
+          setLoadingOverlay(false);
+          cancel();
+        }}
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <SafeAreaView style={styles.container}>
@@ -277,7 +288,7 @@ function AdmConfig({navigation}: any) {
                   <Text style={styles.label}>Distância máxima</Text>
                   <View style={styles.bufferView}>
                     <SwitchBtn
-                      onPress={() => setEquipamentoDistMax(!manobraDistMax)}
+                      onPress={() => setEquipamentoDistMax(!equipamentoDistMax)}
                       value={equipamentoDistMax}
                     />
                     <InputText

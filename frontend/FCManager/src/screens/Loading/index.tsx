@@ -7,7 +7,7 @@ import colors from '../../styles/variables';
 
 import api from '../../services/api';
 import useContexto from '../../hooks/useContexto';
-import {EquipamentoItemOff, ManobraItemOff} from '../../types';
+import {AdmConfig, EquipamentoItemOff, ManobraItemOff} from '../../types';
 
 import {UsuarioContext} from '../../contexts/Contexto';
 import Btn from '../../components/Button';
@@ -23,7 +23,7 @@ import Link from '../../components/Link';
 const logo = require('../../assets/images/loading-logo.png');
 
 function Loading({navigation}: any) {
-  const {setUsuario, queue, setTempMail} = useContexto();
+  const {setUsuario, queue, setTempMail, filter} = useContexto();
 
   const [password, setPassword] = useState('');
   const [nome, setNome] = useState('');
@@ -34,6 +34,16 @@ function Loading({navigation}: any) {
   const [modal, setModal] = useState(false);
   const [failPassword, setFailPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const loadConfig = async () => {
+    const configJson = await AsyncStorage.getItem('admConfig');
+
+    const filterConfig = configJson
+      ? JSON.parse(configJson as string)
+      : ({} as AdmConfig);
+
+    filter.set(filterConfig);
+  };
 
   const loadQueues = async () => {
     const equipmentQueueStorageJSON = await AsyncStorage.getItem(
@@ -75,6 +85,7 @@ function Loading({navigation}: any) {
     const userStorage = await AsyncStorage.getItem('usuario');
 
     await loadQueues();
+    await loadConfig();
 
     if (!tokenStorage || !userStorage) {
       navigation.navigate('Home');
