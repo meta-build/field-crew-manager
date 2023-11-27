@@ -10,6 +10,7 @@ import Title from '../../../../components/Title';
 import Badget from '../../../../components/Badget';
 import Btn from '../../../../components/Button';
 import BottomModal from '../../../../components/BottomModal';
+
 import useContexto from '../../../../hooks/useContexto';
 
 interface Props {
@@ -20,7 +21,7 @@ interface Props {
 }
 
 function ManeuverModal(props: Props) {
-  const {usuario} = useContexto();
+  const {usuario, conected} = useContexto();
   const nav = useNavigation();
 
   const convertBadgeText = () => {
@@ -73,7 +74,15 @@ function ManeuverModal(props: Props) {
             styleType="filled"
             title="Abrir"
             onPress={() => openManeuver(props.maneuver?.id as string)}
+            enable={conected}
           />
+          {!conected ? (
+            <Text style={[styles.value, {textAlign: 'center'}]}>
+              Sem conexão.
+            </Text>
+          ) : (
+            <></>
+          )}
         </View>
       </View>
     </BottomModal>
@@ -103,6 +112,7 @@ const styles = StyleSheet.create({
   },
   btnView: {
     marginVertical: 12,
+    gap: 12,
   },
 });
 

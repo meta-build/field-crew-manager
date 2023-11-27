@@ -8,17 +8,26 @@ interface Props {
   checked: boolean;
   text: string;
   onPress: (event: GestureResponderEvent) => void;
+  disabled?: boolean;
 }
 
-function Checkbox({checked, text, onPress}: Props) {
+function Checkbox({checked, text, onPress, disabled}: Props) {
   return (
     <Pressable onPress={onPress} style={styles.container}>
       {checked ? (
-        <BoxChecked width={14} height={14} />
+        <BoxChecked
+          color={disabled ? colors.gray : colors.dark_gray}
+          width={14}
+          height={14}
+        />
       ) : (
-        <Box width={14} height={14} />
+        <Box
+          color={disabled ? colors.gray : colors.dark_gray}
+          width={14}
+          height={14}
+        />
       )}
-      <Text style={styles.text}>{text}</Text>
+      <Text style={disabled ? styles.textDisabled : styles.text}>{text}</Text>
     </Pressable>
   );
 }
@@ -31,6 +40,9 @@ const styles = StyleSheet.create({
   },
   text: {
     color: colors.dark_gray,
+  },
+  textDisabled: {
+    color: colors.gray,
   },
 });
 

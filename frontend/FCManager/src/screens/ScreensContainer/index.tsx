@@ -24,6 +24,15 @@ import ManeuverForm from '../ManeuverForm';
 import Loading from '../Loading';
 import AuthModal from '../AuthModal';
 import useContexto from '../../hooks/useContexto';
+import Welcome from '../FstLogin/Welcome';
+import ChangePhoto from '../FstLogin/ChangePhoto';
+import FstPassword from '../FstLogin/FstPassword';
+import WelcomeFinal from '../FstLogin/WelcomeFinal';
+import SendMail from '../ForgotPassword/SendMail';
+import InsertCode from '../ForgotPassword/InsertCode';
+import UpdatePassword from '../ForgotPassword/UpdatePassword';
+import ChangePasswordConfirmed from '../ForgotPassword/ChangePasswordConfirmed';
+import AdmConfig from '../AdmConfig';
 
 const Stack = createNativeStackNavigator();
 
@@ -65,11 +74,25 @@ const ScreensContainer = () => {
             <Stack.Screen name="UserProfile" component={UserProfile} />
             <Stack.Screen name="UserForm" component={UserForm} />
             <Stack.Screen name="OwnUserProfile" component={OwnUserProfile} />
+            <Stack.Screen name="AdmConfig" component={AdmConfig} />
             <Stack.Screen name="UpdateUserData" component={UpdateUserData} />
             <Stack.Screen name="ChangePassword" component={ChangePassword} />
             <Stack.Screen name="ManeuverList" component={ManeuverList} />
             <Stack.Screen name="ManeuverProfile" component={ManeuverProfile} />
             <Stack.Screen name="ManeuverForm" component={ManeuverForm} />
+
+            <Stack.Screen name="Welcome" component={Welcome} />
+            <Stack.Screen name="ChangePhoto" component={ChangePhoto} />
+            <Stack.Screen name="FstPassword" component={FstPassword} />
+            <Stack.Screen name="WelcomeFinal" component={WelcomeFinal} />
+
+            <Stack.Screen name="SendMail" component={SendMail} />
+            <Stack.Screen name="InsertCode" component={InsertCode} />
+            <Stack.Screen name="UpdatePassword" component={UpdatePassword} />
+            <Stack.Screen
+              name="ChangePasswordConfirmed"
+              component={ChangePasswordConfirmed}
+            />
           </Stack.Navigator>
         </SafeAreaView>
       </NavigationContainer>

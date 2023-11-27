@@ -13,6 +13,16 @@ interface EquipamentoItem {
   longitude: number;
 }
 
+interface EquipamentoItemOff {
+  tipo: string;
+  tipoValue: string;
+  serial: string;
+  imgs: string[];
+  latitude: number;
+  longitude: number;
+  obs: string;
+}
+
 interface Equipamento {
   id: string;
   tipo: Tipo;
@@ -36,6 +46,7 @@ interface Usuario {
   cpf: string;
   foto: string;
   isAdmin: boolean;
+  isNew?: boolean;
 }
 
 interface UsuarioItem {
@@ -79,6 +90,18 @@ interface ManobraItem {
   longitude: number;
 }
 
+interface ManobraItemOff {
+  id?: string;
+  titulo: string;
+  descricao: string;
+  equipamentos: string[];
+  datetimeInicio: string;
+  latitude: number;
+  longitude: number;
+  datetimeFim?: string;
+  index?: number;
+}
+
 interface ErrorType {
   errorNum: number;
   errorMsg: string;
@@ -90,14 +113,38 @@ interface BufferType {
   distance: number;
 }
 
+interface AdmConfig {
+  maxActiveManeuvers: number;
+  defaultManeuverFilter: {
+    maxDistance: {
+      active: boolean;
+      maxDistance: number;
+    };
+    maneuverStatus: {
+      value: 'todos' | 'ativo' | 'concluido';
+    };
+  };
+  defaultEquipmentFilter: {
+    maxDistance: {
+      active: boolean;
+      maxDistance: number;
+    };
+    equipmentStatus: {
+      value: 'todos' | 'ativo' | 'inativo';
+    };
+  };
+}
 export type {
   Tipo,
   Equipamento,
   EquipamentoItem,
+  EquipamentoItemOff,
   Usuario,
   UsuarioItem,
   Manobra,
   ManobraItem,
+  ManobraItemOff,
   ErrorType,
-  BufferType
+  BufferType,
+  AdmConfig,
 };

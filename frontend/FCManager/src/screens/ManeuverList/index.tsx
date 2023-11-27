@@ -3,10 +3,12 @@ import {
   Dimensions,
   FlatList,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from '../../components/Header/Index';
 import InputText from '../../components/InputText';
@@ -24,23 +26,29 @@ import colors from '../../styles/variables';
 import FilterIcon from '../../assets/icons/filterGreen.svg';
 import MapIcon from '../../assets/icons/map.svg';
 
-import {ManobraItem} from '../../types';
+import {AdmConfig, ManobraItem, ManobraItemOff} from '../../types';
 
 import Manobra from '../../services/Manobra';
 import useContexto from '../../hooks/useContexto';
+import useDistanceCalculator from '../../hooks/useDistanceCalculator';
 
 import MapModal from './MapModal';
+import {UsuarioContext} from '../../contexts/Contexto';
 
 const {width, height} = Dimensions.get('window');
 
 type StatusType = 'todos' | 'concluido' | 'emAndamento';
 
 function ManeuverList({navigation}: any) {
-  const {usuario, location} = useContexto();
+  const {usuario, setUsuario, location, conected, queue, filter} =
+    useContexto();
+
+  const distanceCalculator = useDistanceCalculator();
 
   const [filterModal, setFilterModal] = useState(false);
   const [alertModal, setAlertModal] = useState(false);
   const [mapModal, setMapModal] = useState(false);
+  const [warningModal, setWarningModal] = useState(false);
 
   const [loadingList, setLoadingList] = useState(false);
 
@@ -51,6 +59,9 @@ function ManeuverList({navigation}: any) {
   const [distMaxStr, setDistMaxStr] = useState('2');
 
   const [lista, setLista] = useState<ManobraItem[]>([]);
+  const [selectedManeuver, setSelectedManeuver] = useState<
+    ManobraItemOff | ManobraItem | undefined
+  >();
 
   const [filterCount, setFilterCount] = useState(1);
 
@@ -67,7 +78,11 @@ function ManeuverList({navigation}: any) {
   };
 
   const openItem = (serie: string) => {
-    navigation.navigate('ManeuverProfile', {id: serie});
+    if (conected) {
+      navigation.navigate('ManeuverProfile', {id: serie});
+    } else {
+      setWarningModal(true);
+    }
   };
 
   const confirmFilter = () => {
@@ -84,14 +99,15 @@ function ManeuverList({navigation}: any) {
   };
 
   const cancelFilter = () => {
-    setStatus('todos');
-    setTitulo('');
-    setFilterCount(1);
-    setDistMax(2);
-    setDistMaxStr('2');
-    setDistMaxFilter(true);
-    getManobras();
-    setFilterModal(false);
+    const configFilter = filter.value;
+    if (configFilter) {
+      setStatus(processStatusFilter(configFilter));
+      setDistMaxFilter(configFilter.defaultManeuverFilter.maxDistance.active);
+      setDistMax(configFilter.defaultManeuverFilter.maxDistance.maxDistance);
+      setDistMaxStr(
+        `${configFilter.defaultManeuverFilter.maxDistance.maxDistance}`,
+      );
+    }
   };
 
   const filtrarNome = (title: string) => {
@@ -99,19 +115,46 @@ function ManeuverList({navigation}: any) {
     return regex.test(title);
   };
 
+  const downloadManobras = async () => {
+    const maneuvers = await Manobra.getAll(undefined);
+    await AsyncStorage.setItem('manobras', JSON.stringify(maneuvers.values));
+  };
+
   const getManobras = async () => {
     setLoadingList(true);
-    await Manobra.getAll(
-      distMaxFilter
-        ? {
-            latitude: location.latitude,
-            longitude: location.longitude,
-            distance: distMax,
-          }
-        : undefined,
-    )
-      .then(res => {
-        const manobras = res.values.filter(manobra => {
+    if (conected) {
+      await downloadManobras();
+
+      await Manobra.getAll(
+        distMaxFilter
+          ? {
+              latitude: location.latitude,
+              longitude: location.longitude,
+              distance: distMax,
+            }
+          : undefined,
+      )
+        .then(res => {
+          const manobras = res.values.filter(manobra => {
+            const tituloFilter = filtrarNome(manobra.titulo);
+            const statusFilter =
+              status === 'todos'
+                ? true
+                : status === 'concluido'
+                ? manobra.datetimeFim
+                : !manobra.datetimeFim;
+            return tituloFilter && statusFilter;
+          });
+          setLista(manobras);
+        })
+        .catch(err => console.log(err));
+    } else {
+      const maneuversJSON = await AsyncStorage.getItem('manobras');
+      const maneuvers: ManobraItem[] = maneuversJSON
+        ? JSON.parse(maneuversJSON)
+        : [];
+      setLista(
+        maneuvers.filter(manobra => {
           const tituloFilter = filtrarNome(manobra.titulo);
           const statusFilter =
             status === 'todos'
@@ -119,12 +162,29 @@ function ManeuverList({navigation}: any) {
               : status === 'concluido'
               ? manobra.datetimeFim
               : !manobra.datetimeFim;
-          return tituloFilter && statusFilter;
-        });
-        setLista(manobras);
-      })
-      .catch(err => console.log(err));
+          const distFilter = distMaxFilter
+            ? distanceCalculator(location, distMax, {
+                latitude: manobra.latitude,
+                longitude: manobra.longitude,
+              })
+            : true;
+
+          return tituloFilter && statusFilter && distFilter;
+        }),
+      );
+    }
     setLoadingList(false);
+  };
+
+  const processStatusFilter = (config: AdmConfig): StatusType => {
+    switch (config.defaultManeuverFilter.maneuverStatus.value) {
+      case 'todos':
+        return 'todos';
+      case 'ativo':
+        return 'emAndamento';
+      default:
+        return 'concluido';
+    }
   };
 
   useEffect(() => {
@@ -132,13 +192,20 @@ function ManeuverList({navigation}: any) {
       cancelFilter();
       setMapModal(false);
       getManobras();
-
-      // ver se usuário possui manobra em andamento
     });
+
     getManobras();
+
+    console.log(queue.maneuvers.queue);
     return onFocus;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [titulo, navigation]);
+  }, [
+    titulo,
+    navigation,
+    conected,
+    queue.maneuvers.queue,
+    queue.closedManeuvers.queue,
+  ]);
 
   return (
     <>
@@ -181,27 +248,119 @@ function ManeuverList({navigation}: any) {
           {loadingList ? (
             <LoadingManeuverList />
           ) : (
-            <FlatList
-              style={styles.equipsList}
-              data={lista}
-              renderItem={({item}) => (
-                <View style={styles.item}>
-                  <ManeuverItem
-                    highlight={
-                      !item.datetimeFim && item.usuario.id === usuario?.id
-                    }
-                    maneuver={{
-                      user: `${item.usuario.nome} ${item.usuario.sobrenome}`,
-                      status: !item.datetimeFim ? 'active' : 'deactive',
-                      title: item.titulo,
-                      date: item.datetimeFim ? item.datetimeFim : undefined,
-                    }}
-                    onPress={() => openItem(item.id)}
-                  />
-                </View>
-              )}
-              keyExtractor={item => item.id}
-            />
+            <ScrollView>
+              <View>
+                {lista
+                  .filter(
+                    item =>
+                      !queue.closedManeuvers.queue.find(
+                        queueItem => queueItem.id === item.id,
+                      ),
+                  )
+                  .map(item => (
+                    <View style={styles.item} key={item.id}>
+                      <ManeuverItem
+                        highlight={
+                          !item.datetimeFim && item.usuario.id === usuario?.id
+                        }
+                        maneuver={{
+                          user: `${item.usuario.nome} ${item.usuario.sobrenome}`,
+                          status: !item.datetimeFim ? 'active' : 'deactive',
+                          title: item.titulo,
+                          date: item.datetimeFim ? item.datetimeFim : undefined,
+                        }}
+                        onPress={() => {
+                          if (conected) {
+                            openItem(item.id);
+                          } else if (!item.datetimeFim) {
+                            setSelectedManeuver(item);
+                          }
+                        }}
+                      />
+                    </View>
+                  ))}
+                {queue.maneuvers.queue.filter(item => !item.datetimeFim)
+                  .length !== 0 ? (
+                  <>
+                    <View style={{marginBottom: 12}}>
+                      <Title
+                        color="gray"
+                        text="Manobras na fila (criação)"
+                        align="center"
+                      />
+                    </View>
+                    {queue.maneuvers.queue
+                      .filter(item => !item.datetimeFim)
+                      .map((item, index) => (
+                        <View style={styles.item} key={index}>
+                          <ManeuverItem
+                            highlight={true}
+                            maneuver={{
+                              user: `${usuario?.nome} ${usuario?.sobrenome}`,
+                              status: item.datetimeFim ? 'deactive' : 'active',
+                              title: item.titulo,
+                              date: item.datetimeFim,
+                            }}
+                            onPress={() => {
+                              if (!item.datetimeFim) {
+                                setSelectedManeuver(item);
+                              }
+                            }}
+                          />
+                        </View>
+                      ))}
+                  </>
+                ) : (
+                  <></>
+                )}
+                {queue.maneuvers.queue.filter(item => item.datetimeFim)
+                  .length !== 0 || queue.closedManeuvers.queue.length !== 0 ? (
+                  <>
+                    <View style={{marginBottom: 12}}>
+                      <Title
+                        color="gray"
+                        text="Manobras na fila (conclusão)"
+                        align="center"
+                      />
+                    </View>
+                    {queue.maneuvers.queue
+                      .filter(item => item.datetimeFim)
+                      .map((item, index) => (
+                        <View style={styles.item} key={index}>
+                          <ManeuverItem
+                            highlight
+                            disablePressable
+                            maneuver={{
+                              user: `${usuario?.nome} ${usuario?.sobrenome}`,
+                              status: 'active',
+                              title: item.titulo,
+                              date: item.datetimeFim,
+                            }}
+                            onPress={() => {}}
+                          />
+                        </View>
+                      ))}
+                    {queue.closedManeuvers.queue.map((item, index) => (
+                      <View style={styles.item} key={index}>
+                        <ManeuverItem
+                          highlight
+                          disablePressable
+                          maneuver={{
+                            user: `${usuario?.nome} ${usuario?.sobrenome}`,
+                            status: item.datetimeFim ? 'deactive' : 'active',
+                            title: item.titulo,
+                            date: item.datetimeFim,
+                          }}
+                          onPress={() => {}}
+                        />
+                      </View>
+                    ))}
+                  </>
+                ) : (
+                  <></>
+                )}
+              </View>
+            </ScrollView>
           )}
         </View>
         <Navbar selected="Manobras" navigation={navigation} />
@@ -287,6 +446,67 @@ function ManeuverList({navigation}: any) {
         />
       </BottomModal>
 
+      <BottomModal
+        onPressOutside={() => setSelectedManeuver(undefined)}
+        visible={Boolean(selectedManeuver)}>
+        <View style={{gap: 12}}>
+          <Title
+            color="green"
+            text={`Concluir manobra: ${selectedManeuver?.titulo}?`}
+            align="center"
+          />
+          <Text style={[styles.alertTxt, {marginVertical: 12}]}>
+            Ela será adicionada na fila e atualizado no servidor quando
+            conectado.
+          </Text>
+          <Btn
+            onPress={async () => {
+              if (selectedManeuver?.id) {
+                await queue.closedManeuvers.addClosedManeuver(
+                  selectedManeuver as ManobraItemOff,
+                );
+              } else {
+                const maneuverIndexObj = selectedManeuver as ManobraItemOff;
+                console.log(maneuverIndexObj);
+                await queue.maneuvers.closeManeuver(
+                  selectedManeuver as ManobraItemOff,
+                );
+              }
+              const tempUser = {
+                ...usuario,
+                manobrasAtivas: (usuario?.manobrasAtivas as number) - 1,
+              } as UsuarioContext;
+              setUsuario(tempUser);
+              await AsyncStorage.setItem('usuario', JSON.stringify(tempUser));
+              setSelectedManeuver(undefined);
+            }}
+            styleType="filled"
+            title="Concluir manobra"
+          />
+          <Btn
+            onPress={() => setSelectedManeuver(undefined)}
+            styleType="outlined"
+            title="Cancelar"
+          />
+        </View>
+      </BottomModal>
+
+      <BottomModal
+        onPressOutside={() => setWarningModal(false)}
+        visible={warningModal}>
+        <View style={styles.cantOpenView}>
+          <Title color="green" text="Sem conexão" align="center" />
+          <Text style={styles.cantOpenText}>
+            Não é possível abrir itens quando não há conexão.
+          </Text>
+          <Btn
+            title="Ok"
+            styleType="filled"
+            onPress={() => setWarningModal(false)}
+          />
+        </View>
+      </BottomModal>
+
       <MapModal
         visible={mapModal}
         onClose={() => setMapModal(false)}
@@ -370,6 +590,14 @@ const styles = StyleSheet.create({
   },
   unactiveContainer: {
     opacity: 0.5,
+  },
+  cantOpenText: {
+    fontSize: 16,
+    color: colors.dark_gray,
+    textAlign: 'center',
+  },
+  cantOpenView: {
+    gap: 24,
   },
 });
 

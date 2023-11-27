@@ -67,6 +67,7 @@ function SelectEquipment({
           equipments.map(equipment =>
             equipment ? (
               <Pressable
+                key={equipment.id}
                 style={styles.equipment}
                 onPress={() => onRemoveEquipment(equipment)}>
                 <Text style={[styles.badgetText, styles.equipmentText]}>

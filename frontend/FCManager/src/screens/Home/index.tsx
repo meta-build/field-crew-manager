@@ -17,6 +17,8 @@ import Usuario from '../../services/Usuario';
 
 import useContexto from '../../hooks/useContexto';
 import {UsuarioContext} from '../../contexts/Contexto';
+import Link from '../../components/Link';
+import Admin from '../../services/Admin';
 
 const logo = require('../../assets/images/logo-1.png');
 const image = require('../../assets/images/home-image.png');
@@ -24,7 +26,7 @@ const image = require('../../assets/images/home-image.png');
 const {width, height} = Dimensions.get('window');
 
 const Home = ({navigation}: any) => {
-  const {setUsuario} = useContexto();
+  const {setUsuario, setTempMail, filter} = useContexto();
 
   const [loginMailModal, setLoginMailModal] = useState(false);
   const [loginPasswordModal, setloginPasswordModal] = useState(false);
@@ -98,7 +100,19 @@ const Home = ({navigation}: any) => {
 
         setLoading(false);
         closeLoginModals();
-        goToList();
+
+        try {
+          const filterConfig = await Admin.get();
+          filter.set(filterConfig);
+        } catch (e) {
+          console.log(e);
+        }
+
+        if (retorno.isNew) {
+          goToWelcome();
+        } else {
+          goToList();
+        }
       } else if ('errorNum' in retorno) {
         if (retorno.errorNum === 401) {
           //  se senha incorreta
@@ -120,6 +134,19 @@ const Home = ({navigation}: any) => {
 
   function goToList(): void {
     navigation.navigate('ToolList');
+  }
+
+  function goToWelcome() {
+    navigation.navigate('Welcome');
+  }
+
+  function goToForgotPswd() {
+    setTempMail(email);
+    setEmail('');
+    setPassword('');
+    setloginPasswordModal(false);
+    setLoginMailModal(false);
+    navigation.navigate('SendMail');
   }
 
   return (
@@ -163,7 +190,6 @@ const Home = ({navigation}: any) => {
           <InputText
             color={'gray'}
             placeholder="exemplo@dominio.com"
-            style={styles.inputText}
             error={failEmail}
             value={email}
             onChange={e => setEmail(e.nativeEvent.text)}
@@ -199,13 +225,12 @@ const Home = ({navigation}: any) => {
           <InputText
             color={'gray'}
             isPassword
-            style={styles.inputText}
             error={failPassword}
             placeholder="Senha"
             onChange={e => setPassword(e.nativeEvent.text)}
           />
+          {/* <Link onPress={() => goToForgotPswd()} text="Esqueci minha senha" /> */}
         </View>
-
         <View style={styles.btnContainer}>
           <Btn
             onPress={() => submitPassword()}
@@ -252,14 +277,12 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   loginView: {
-    marginTop: 18,
+    marginVertical: 18,
+    gap: 12,
   },
   modalText: {
     marginBottom: 8,
     marginTop: 35,
-  },
-  inputText: {
-    marginBottom: 24,
   },
   modalLabel: {
     color: colors.dark_gray,

@@ -7,6 +7,7 @@ import colors from '../../styles/variables';
 
 import api from '../../services/api';
 import useContexto from '../../hooks/useContexto';
+import {AdmConfig, EquipamentoItemOff, ManobraItemOff} from '../../types';
 
 import {UsuarioContext} from '../../contexts/Contexto';
 import Btn from '../../components/Button';
@@ -17,11 +18,12 @@ import Title from '../../components/Title';
 import Usuario from '../../services/Usuario';
 
 import * as Keychain from 'react-native-keychain';
+import Link from '../../components/Link';
 
 const logo = require('../../assets/images/loading-logo.png');
 
 function Loading({navigation}: any) {
-  const {setUsuario} = useContexto();
+  const {setUsuario, queue, setTempMail, filter} = useContexto();
 
   const [password, setPassword] = useState('');
   const [nome, setNome] = useState('');
@@ -33,9 +35,57 @@ function Loading({navigation}: any) {
   const [failPassword, setFailPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const loadConfig = async () => {
+    const configJson = await AsyncStorage.getItem('admConfig');
+
+    const filterConfig = configJson
+      ? JSON.parse(configJson as string)
+      : ({} as AdmConfig);
+
+    filter.set(filterConfig);
+  };
+
+  const loadQueues = async () => {
+    const equipmentQueueStorageJSON = await AsyncStorage.getItem(
+      'createEquipmentQueue',
+    );
+
+    if (equipmentQueueStorageJSON) {
+      const equipmentQueueStorage = JSON.parse(equipmentQueueStorageJSON);
+      queue.equipments.setEquipments(
+        equipmentQueueStorage as EquipamentoItemOff[],
+      );
+    }
+
+    const newManeuverQueueStorageJSON = await AsyncStorage.getItem(
+      'createManeuverQueue',
+    );
+
+    if (newManeuverQueueStorageJSON) {
+      const newManeuverQueueStorage = JSON.parse(newManeuverQueueStorageJSON);
+      queue.maneuvers.setManeuvers(newManeuverQueueStorage as ManobraItemOff[]);
+    }
+
+    const closedManeuverQueueStorageJSON = await AsyncStorage.getItem(
+      'closedManeuverQueue',
+    );
+
+    if (closedManeuverQueueStorageJSON) {
+      const closedManeuverQueueStorage = JSON.parse(
+        closedManeuverQueueStorageJSON,
+      );
+      queue.closedManeuvers.setClosedManeuvers(
+        closedManeuverQueueStorage as ManobraItemOff[],
+      );
+    }
+  };
+
   const getData = async () => {
     const tokenStorage = await AsyncStorage.getItem('token');
     const userStorage = await AsyncStorage.getItem('usuario');
+
+    await loadQueues();
+    await loadConfig();
 
     if (!tokenStorage || !userStorage) {
       navigation.navigate('Home');
@@ -44,6 +94,7 @@ function Loading({navigation}: any) {
       setUser(userStorage);
       const usuario = await JSON.parse(userStorage);
       setNome(usuario.nome);
+      setTempMail(usuario.email);
       setModal(true);
     }
   };
@@ -77,8 +128,16 @@ function Loading({navigation}: any) {
   const exitUser = () => {
     Usuario.exit();
     setModal(false);
+    setTempMail('');
     navigation.navigate('Home');
   };
+
+  function goToForgotPswd() {
+    Usuario.exit();
+    setModal(false);
+    navigation.push('Home');
+    navigation.navigate('SendMail');
+  }
 
   useEffect(() => {
     getData();
@@ -119,11 +178,11 @@ function Loading({navigation}: any) {
           <InputText
             color={'gray'}
             isPassword
-            style={styles.inputText}
             error={failPassword}
             placeholder="Senha"
             onChange={e => setPassword(e.nativeEvent.text)}
           />
+          {/* <Link onPress={() => goToForgotPswd()} text="Esqueci minha senha" /> */}
         </View>
 
         <View style={styles.btnContainer}>
@@ -143,8 +202,6 @@ function Loading({navigation}: any) {
 const styles = StyleSheet.create({
   view: {
     backgroundColor: colors.green_1,
-    // width,
-    // height,
     flex: 1,
     padding: 18,
     flexDirection: 'column',
@@ -161,7 +218,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   loginView: {
-    marginTop: 18,
+    marginVertical: 18,
   },
   modalError: {
     color: colors.alert_1,
@@ -170,9 +227,6 @@ const styles = StyleSheet.create({
   modalLabel: {
     color: colors.dark_gray,
     marginBottom: 6,
-  },
-  inputText: {
-    marginBottom: 24,
   },
   btnContainer: {
     width: '100%',

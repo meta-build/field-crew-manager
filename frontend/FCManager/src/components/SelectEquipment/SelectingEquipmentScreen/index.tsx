@@ -1,16 +1,18 @@
 import React, {useEffect, useState} from 'react';
 import {FlatList, Modal, StyleSheet, View} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from '../../Header/Index';
 import InputText from '../../InputText';
 import LoadingToolList from '../../LoadingToolList';
-import {EquipamentoItem} from '../../../types';
 import ToolItem from '../../ToolItem';
 import Btn from '../../Button';
 
 import colors from '../../../styles/variables';
 
 import Equipamento from '../../../services/Equipamento';
+import useContexto from '../../../hooks/useContexto';
+import {EquipamentoItem} from '../../../types';
 
 interface Props {
   open: boolean;
@@ -20,6 +22,8 @@ interface Props {
 }
 
 function SelectingEquipmentScreen(props: Props) {
+  const {conected, queue} = useContexto();
+
   const [tipoName, setTipoName] = useState('');
   const [lista, setLista] = useState<EquipamentoItem[]>([]);
   const [loadingList, setLoadingList] = useState(false);
@@ -48,10 +52,28 @@ function SelectingEquipmentScreen(props: Props) {
 
   const getEquipamentos = async () => {
     setLoadingList(true);
-    await Equipamento.getAll('ativo', '', '').then(res => {
-      const equips = res.values.filter(equip => filtrarNome(equip.tipo.value));
-      setLista(equips);
-    });
+    if (conected) {
+      await Equipamento.getAll('ativo', '', undefined).then(res => {
+        const equips = res.values.filter(equip =>
+          filtrarNome(equip.tipo.value),
+        );
+        setLista(equips);
+      });
+    } else {
+      const equipsJSON = await AsyncStorage.getItem('equips');
+      const equipsTemp: EquipamentoItem[] = JSON.parse(equipsJSON as string);
+      const bannedEquipsIDs = await queue.equipments.getBannedEquipmentIDs();
+
+      setLista(
+        equipsTemp.filter(equipment => {
+          const filtroNome = filtrarNome(equipment.tipo.value);
+          const filtroStatus = equipment.status === 'ativo';
+          const filtroBannedID = !bannedEquipsIDs.includes(equipment.id);
+
+          return filtroNome && filtroStatus && filtroBannedID;
+        }),
+      );
+    }
     setLoadingList(false);
   };
 

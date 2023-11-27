@@ -1,12 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {
   Dimensions,
-  FlatList,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from '../../components/Header/Index';
 import InputText from '../../components/InputText';
@@ -17,27 +18,31 @@ import Title from '../../components/Title';
 import Dropdown from '../../components/Dropdown';
 import LoadingToolList from '../../components/LoadingToolList';
 import Navbar from '../../components/Navbar';
+import SwitchBtn from '../../components/SwitchBtn';
 
 import colors from '../../styles/variables';
 
 import FilterIcon from '../../assets/icons/filterGreen.svg';
 import MapIcon from '../../assets/icons/map.svg';
 
-import Equipamento from '../../services/Equipamento';
-
 import {EquipamentoItem} from '../../types';
 
 import MapModal from './MapModal';
-import SwitchBtn from '../../components/SwitchBtn';
+
 import useContexto from '../../hooks/useContexto';
+import useDistanceCalculator from '../../hooks/useDistanceCalculator';
+import Tipo from '../../services/Tipo';
+import Equipamento from '../../services/Equipamento';
 
 const {width, height} = Dimensions.get('window');
 
 function ToolList({navigation}: any) {
-  const {location} = useContexto();
+  const {location, conected, queue, filter} = useContexto();
+  const distanceFilter = useDistanceCalculator();
 
   const [filterModal, setFilterModal] = useState(false);
   const [mapModal, setMapModal] = useState(false);
+  const [cantOpenModal, setCantOpenModal] = useState(false);
 
   const [loadingList, setLoadingList] = useState(false);
 
@@ -60,7 +65,11 @@ function ToolList({navigation}: any) {
   };
 
   const openItem = (serie: string) => {
-    navigation.navigate('ToolProfile', {id: serie});
+    if (conected) {
+      navigation.navigate('ToolProfile', {id: serie});
+    } else {
+      setCantOpenModal(true);
+    }
   };
 
   const confirmFilter = () => {
@@ -77,14 +86,15 @@ function ToolList({navigation}: any) {
   };
 
   const cancelFilter = () => {
-    setStatus('todos');
-    setTipoName('');
-    setFilterCount(1);
-    setDistMax(2);
-    setDistMaxStr('2');
-    setDistMaxFilter(true);
-    getEquipamentos();
-    setFilterModal(false);
+    const configFilter = filter.value;
+    if (configFilter) {
+      setStatus(configFilter.defaultEquipmentFilter.equipmentStatus.value);
+      setDistMaxFilter(configFilter.defaultEquipmentFilter.maxDistance.active);
+      setDistMax(configFilter.defaultEquipmentFilter.maxDistance.maxDistance);
+      setDistMaxStr(
+        `${configFilter.defaultEquipmentFilter.maxDistance.maxDistance}`,
+      );
+    }
   };
 
   const filtrarNome = (titulo: string) => {
@@ -92,22 +102,60 @@ function ToolList({navigation}: any) {
     return regex.test(titulo);
   };
 
+  const DownloadEquipamentos = async () => {
+    try {
+      const equips = await Equipamento.getAll('todos', '', undefined);
+      await AsyncStorage.setItem('equips', JSON.stringify(equips.values));
+
+      const tipos = await Tipo.getAll();
+      await AsyncStorage.setItem('tipos', JSON.stringify(tipos));
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const getEquipamentos = async () => {
     setLoadingList(true);
-    await Equipamento.getAll(
-      status,
-      '',
-      distMaxFilter
-        ? {
-            latitude: location.latitude,
-            longitude: location.longitude,
-            distance: distMax,
-          }
-        : undefined,
-    ).then(res => {
-      const equips = res.values.filter(equip => filtrarNome(equip.tipo.value));
-      setLista(equips);
-    });
+
+    if (conected) {
+      await Equipamento.getAll(
+        status,
+        '',
+        distMaxFilter
+          ? {
+              latitude: location.latitude,
+              longitude: location.longitude,
+              distance: distMax,
+            }
+          : undefined,
+      ).then(res => {
+        const equips = res.values.filter(equip =>
+          filtrarNome(equip.tipo.value),
+        );
+        setLista(equips);
+      });
+    } else {
+      try {
+        const equipsJSON = await AsyncStorage.getItem('equips');
+        const equips: EquipamentoItem[] = JSON.parse(equipsJSON as string);
+        setLista(
+          equips.filter(equip => {
+            const filtroNome = filtrarNome(equip.tipo.value);
+            const filtroStatus =
+              status === 'todos' ? true : equip.status === status;
+            const filtroDistancia = distMaxFilter
+              ? distanceFilter(location, distMax, {
+                  latitude: equip.latitude,
+                  longitude: equip.longitude,
+                })
+              : true;
+            return filtroNome && filtroStatus && filtroDistancia;
+          }),
+        );
+      } catch (e) {
+        console.log(e);
+      }
+    }
     setLoadingList(false);
   };
 
@@ -115,6 +163,9 @@ function ToolList({navigation}: any) {
     const onFocus = navigation.addListener('focus', () => {
       cancelFilter();
       getEquipamentos();
+      if (conected) {
+        DownloadEquipamentos();
+      }
     });
 
     getEquipamentos();
@@ -122,7 +173,12 @@ function ToolList({navigation}: any) {
     return onFocus;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tipoName, navigation]);
+  }, [tipoName, navigation, conected]);
+
+  useEffect(() => {
+    getEquipamentos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queue.equipments.queue]);
 
   return (
     <>
@@ -165,24 +221,50 @@ function ToolList({navigation}: any) {
           {loadingList ? (
             <LoadingToolList />
           ) : (
-            <FlatList
-              style={styles.equipsList}
-              data={lista}
-              renderItem={({item}) => (
-                <View style={styles.item}>
-                  <ToolItem
-                    tool={{
-                      img_uri: item.img,
-                      n_serie: item.serial,
-                      status: item.status === 'ativo' ? 'active' : 'deactive',
-                      tipoLabel: item.tipo.value,
-                    }}
-                    onPress={() => openItem(item.id)}
-                  />
-                </View>
-              )}
-              keyExtractor={item => item.id}
-            />
+            <ScrollView>
+              <View>
+                {lista.map(item => (
+                  <View style={styles.item} key={item.id}>
+                    <ToolItem
+                      tool={{
+                        img_uri: item.img,
+                        n_serie: item.serial,
+                        status: item.status === 'ativo' ? 'active' : 'deactive',
+                        tipoLabel: item.tipo.value,
+                      }}
+                      onPress={() => openItem(item.id)}
+                    />
+                  </View>
+                ))}
+                {queue.equipments.queue.length !== 0 ? (
+                  <>
+                    <View style={{marginBottom: 12}}>
+                      <Title
+                        color="gray"
+                        text="Equipamentos na fila"
+                        align="center"
+                      />
+                    </View>
+                    {queue.equipments.queue.map((item, index) => (
+                      <View style={styles.item} key={index}>
+                        <ToolItem
+                          loading
+                          tool={{
+                            img_uri: item.imgs[0],
+                            n_serie: item.serial,
+                            status: 'active',
+                            tipoLabel: item.tipoValue,
+                          }}
+                          onPress={() => {}}
+                        />
+                      </View>
+                    ))}
+                  </>
+                ) : (
+                  <></>
+                )}
+              </View>
+            </ScrollView>
           )}
         </View>
         <Navbar selected="Equipamentos" navigation={navigation} />
@@ -251,6 +333,22 @@ function ToolList({navigation}: any) {
         </View>
       </BottomModal>
 
+      <BottomModal
+        onPressOutside={() => setCantOpenModal(false)}
+        visible={cantOpenModal}>
+        <View style={styles.cantOpenView}>
+          <Title color="green" text="Sem conexão" align="center" />
+          <Text style={styles.cantOpenText}>
+            Não é possível abrir itens quando não há conexão.
+          </Text>
+          <Btn
+            title="Ok"
+            styleType="filled"
+            onPress={() => setCantOpenModal(false)}
+          />
+        </View>
+      </BottomModal>
+
       <MapModal
         visible={mapModal}
         onClose={() => setMapModal(false)}
@@ -312,9 +410,6 @@ const styles = StyleSheet.create({
     bottom: -8,
     left: -8,
   },
-  equipsList: {
-    flex: 1,
-  },
   bufferContainer: {
     flexDirection: 'row',
     alignSelf: 'stretch',
@@ -326,6 +421,14 @@ const styles = StyleSheet.create({
   },
   unactiveContainer: {
     opacity: 0.5,
+  },
+  cantOpenText: {
+    fontSize: 16,
+    color: colors.dark_gray,
+    textAlign: 'center',
+  },
+  cantOpenView: {
+    gap: 24,
   },
 });
 

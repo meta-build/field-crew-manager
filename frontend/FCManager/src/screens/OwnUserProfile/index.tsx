@@ -30,6 +30,10 @@ function OwnUserProfile({navigation}: any) {
     navigation.navigate('ChangePassword', {id: usuario?.id});
   };
 
+  const openAdmConfig = () => {
+    navigation.navigate('AdmConfig');
+  };
+
   const openExitModal = () => {
     setExitModal(true);
   };
@@ -69,6 +73,14 @@ function OwnUserProfile({navigation}: any) {
               label="Trocar senha"
               onPress={() => openChangePassword()}
             />
+            {usuario?.isAdmin ? (
+              <OptionBtn
+                label="Configurações de Administrador"
+                onPress={() => openAdmConfig()}
+              />
+            ) : (
+              <></>
+            )}
           </View>
           <View style={styles.space} />
           <View>

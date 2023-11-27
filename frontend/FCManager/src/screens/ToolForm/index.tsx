@@ -10,6 +10,7 @@ import {
   LogBox,
   Platform,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from '../../components/Header/Index';
 import InputImage from '../../components/InputImage';
@@ -28,6 +29,8 @@ import Equipamento from '../../services/Equipamento';
 import Tipo from '../../services/Tipo';
 import useContexto from '../../hooks/useContexto';
 
+import {Tipo as TipoType} from '../../types';
+
 const {width, height} = Dimensions.get('window');
 
 LogBox.ignoreAllLogs();
@@ -41,7 +44,7 @@ const AlertMsg = ({children}: any) => {
 };
 
 function ToolForm({navigation, route}: any) {
-  const {location} = useContexto();
+  const {location, conected, queue} = useContexto();
 
   const params = route.params;
 
@@ -51,6 +54,7 @@ function ToolForm({navigation, route}: any) {
   const [newTypeCheck, setNewTypeCheck] = useState(false);
   const [newType, setNewType] = useState('');
   const [selectedTypeValue, setSelectedTypeValue] = useState('');
+  const [selectedTypeLabel, setSelectedTypeLabel] = useState('');
 
   const [latitude, setLatitude] = useState(location.latitude);
   const [longitude, setLongitude] = useState(location.longitude);
@@ -106,23 +110,37 @@ function ToolForm({navigation, route}: any) {
         console.log('erro ao criar equip', err);
       }
     } else {
-      Equipamento.new({
-        imgs,
-        obs,
-        serial,
-        tipo,
-        latitude,
-        longitude,
-      })
-        .then(res => {
-          setLoading(false);
-          navigation.push('ToolList');
-          navigation.navigate('ToolProfile', {id: res.id});
+      if (conected) {
+        Equipamento.new({
+          imgs,
+          obs,
+          serial,
+          tipo,
+          latitude,
+          longitude,
         })
-        .catch(err => {
-          setLoading(false);
-          console.log('erro ao criar equip', err);
+          .then(res => {
+            setLoading(false);
+            navigation.push('ToolList');
+            navigation.navigate('ToolProfile', {id: res.id});
+          })
+          .catch(err => {
+            setLoading(false);
+            console.log('erro ao criar equip', err);
+          });
+      } else {
+        await queue.equipments.addEquipment({
+          imgs,
+          obs,
+          serial,
+          tipo,
+          latitude,
+          longitude,
+          tipoValue: selectedTypeLabel,
         });
+        setLoading(false);
+        navigation.navigate('ToolList');
+      }
     }
   };
 
@@ -145,13 +163,28 @@ function ToolForm({navigation, route}: any) {
 
   useEffect(() => {
     const onFocus = navigation.addListener('focus', async () => {
-      Tipo.getAll().then(res => {
-        const tipos: {value: string; label: string}[] = res.map(tipo => ({
-          label: tipo.value,
-          value: tipo.id,
-        }));
-        setTypes(tipos);
-      });
+      if (conected) {
+        Tipo.getAll().then(res => {
+          const tipos: {value: string; label: string}[] = res.map(tipo => ({
+            label: tipo.value,
+            value: tipo.id,
+          }));
+          setTypes(tipos);
+        });
+      } else {
+        try {
+          const tiposJSON = await AsyncStorage.getItem('tipos');
+          const tipos: {value: string; label: string}[] = JSON.parse(
+            tiposJSON as string,
+          ).map((tipo: TipoType) => ({
+            label: tipo.value,
+            value: tipo.id,
+          }));
+          setTypes(tipos);
+        } catch (e) {
+          console.log(e);
+        }
+      }
 
       if (params?.id) {
         setLoadingOverlay(true);
@@ -237,19 +270,34 @@ function ToolForm({navigation, route}: any) {
                     items={types}
                     placeholder="Tipo"
                     color="gray"
-                    onSelect={value => setSelectedTypeValue(value)}
+                    onSelect={(value, label) => {
+                      setSelectedTypeValue(value);
+                      setSelectedTypeLabel(label);
+                    }}
                     value={selectedTypeValue}
                   />
                 )}
                 <Checkbox
                   checked={newTypeCheck}
                   onPress={() => {
-                    setNewTypeCheck(!newTypeCheck);
-                    setSelectedTypeValue('');
-                    setNewType('');
+                    if (conected) {
+                      setNewTypeCheck(!newTypeCheck);
+                      setSelectedTypeValue('');
+                      setSelectedTypeLabel('');
+                      setNewType('');
+                    }
                   }}
+                  disabled={!conected}
                   text="Novo tipo de equipamento"
                 />
+                {!conected ? (
+                  <Text style={{color: colors.dark_gray}}>
+                    Sem conexão: Não é possível criar um novo tipo de
+                    equipamento.
+                  </Text>
+                ) : (
+                  <></>
+                )}
                 {typeAlert ? (
                   <AlertMsg>Selecione 1 tipo de equipamento.</AlertMsg>
                 ) : (
@@ -325,6 +373,15 @@ function ToolForm({navigation, route}: any) {
           }
           align="center"
         />
+        {!conected ? (
+          <Text style={styles.warningText}>
+            Você está sem conexão com a internet. O seu cadastro ficará na fila
+            até que a conexão seja restabelecida. Assim que isso acontecer, o
+            cadastro será enviado automaticamente para o servidor.
+          </Text>
+        ) : (
+          <></>
+        )}
         <View style={styles.confirmBtnView}>
           <Btn
             styleType="filled"
@@ -387,6 +444,12 @@ const styles = StyleSheet.create({
   },
   alert: {
     color: colors.alert_1,
+  },
+  warningText: {
+    color: colors.dark_gray,
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 12,
   },
 });
 

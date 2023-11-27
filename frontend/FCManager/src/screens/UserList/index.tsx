@@ -4,6 +4,7 @@ import {
   FlatList,
   SafeAreaView,
   StyleSheet,
+  Text,
   View,
 } from 'react-native';
 
@@ -19,21 +20,38 @@ import colors from '../../styles/variables';
 import {UsuarioItem} from '../../types';
 
 import Usuario from '../../services/Usuario';
+import useContexto from '../../hooks/useContexto';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import BottomModal from '../../components/BottomModal';
+import Title from '../../components/Title';
 
 const {width, height} = Dimensions.get('window');
 
 function UserList({navigation}: any) {
+  const {conected} = useContexto();
+
   const [loadingList, setLoadingList] = useState(false);
 
   const [name, setName] = useState('');
   const [lista, setLista] = useState<UsuarioItem[]>([]);
 
+  const [cantOpenModal, setCantOpenModal] = useState(false);
+  const [cantCreateModal, setCantCreateModal] = useState(false);
+
   const openUserForm = () => {
-    navigation.navigate('UserForm');
+    if (conected) {
+      navigation.navigate('UserForm');
+    } else {
+      setCantCreateModal(true);
+    }
   };
 
   const openItem = (serie: string) => {
-    navigation.navigate('UserProfile', {id: serie});
+    if (conected) {
+      navigation.navigate('UserProfile', {id: serie});
+    } else {
+      setCantOpenModal(true);
+    }
   };
 
   const cancelFilter = () => {
@@ -46,27 +64,54 @@ function UserList({navigation}: any) {
     return regex.test(titulo);
   };
 
+  const downloadUsuarios = async () => {
+    try {
+      const users = await Usuario.getAll();
+      await AsyncStorage.setItem('users', JSON.stringify(users.values));
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const getUsuarios = async () => {
     setLoadingList(true);
-    await Usuario.getAll().then(res => {
-      const users = res.values.filter(user =>
-        filtrarNome(`${user.nome} ${user.sobrenome}`),
-      );
-      setLista(users);
-    });
+    if (conected) {
+      await Usuario.getAll().then(res => {
+        const users = res.values.filter(user =>
+          filtrarNome(`${user.nome} ${user.sobrenome}`),
+        );
+        setLista(users);
+      });
+    } else {
+      try {
+        const usersJSON = await AsyncStorage.getItem('users');
+        const users: UsuarioItem[] = usersJSON ? JSON.parse(usersJSON) : [];
+
+        setLista(
+          users.filter(user => filtrarNome(`${user.nome} ${user.sobrenome}`)),
+        );
+      } catch (e) {
+        console.log(e);
+      }
+    }
     setLoadingList(false);
   };
 
   useEffect(() => {
     const onFocus = navigation.addListener('focus', () => {
       cancelFilter();
+      getUsuarios();
     });
 
+    if (conected) {
+      downloadUsuarios();
+    }
     getUsuarios();
+
     return onFocus;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, navigation]);
+  }, [name, navigation, conected]);
 
   return (
     <>
@@ -112,6 +157,38 @@ function UserList({navigation}: any) {
         </View>
         <Navbar selected="Usuários" navigation={navigation} />
       </SafeAreaView>
+
+      <BottomModal
+        onPressOutside={() => setCantOpenModal(false)}
+        visible={cantOpenModal}>
+        <View style={styles.cantOpenView}>
+          <Title color="green" text="Sem conexão" align="center" />
+          <Text style={styles.cantOpenText}>
+            Não é possível abrir itens quando não há conexão.
+          </Text>
+          <Btn
+            title="Ok"
+            styleType="filled"
+            onPress={() => setCantOpenModal(false)}
+          />
+        </View>
+      </BottomModal>
+
+      <BottomModal
+        onPressOutside={() => setCantCreateModal(false)}
+        visible={cantCreateModal}>
+        <View style={styles.cantOpenView}>
+          <Title color="green" text="Sem conexão" align="center" />
+          <Text style={styles.cantOpenText}>
+            Não é possível criar novos usuários sem conexão com a internet.
+          </Text>
+          <Btn
+            title="Ok"
+            styleType="filled"
+            onPress={() => setCantCreateModal(false)}
+          />
+        </View>
+      </BottomModal>
     </>
   );
 }
@@ -141,6 +218,14 @@ const styles = StyleSheet.create({
   },
   equipsList: {
     flex: 1,
+  },
+  cantOpenText: {
+    fontSize: 16,
+    color: colors.dark_gray,
+    textAlign: 'center',
+  },
+  cantOpenView: {
+    gap: 24,
   },
 });
 
