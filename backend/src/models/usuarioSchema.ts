@@ -37,6 +37,10 @@ const usuarioSchema = new mongoose.Schema({
     type: Boolean
   },
 
+  isNew: {
+    type: Boolean
+  },
+  
   manobrasAtivas: {
     type: Number
   },

@@ -7,7 +7,7 @@ import { uploadImg } from "../utils/imageUploader";
 import encryptPassword from "../utils/encryptPassword";
 
 import generateToken from "../middlewares/generateToken";
-import manobraSchema from "../models/manobraSchema";
+import usuarioCodeSchema from "../models/usuarioCodeSchema";
 
 interface RequestFiles extends Request {
   files: any[] | any;
@@ -100,6 +100,7 @@ class UsuarioController {
         matricula,
         cpf,
         isAdmin,
+        isNew: true,
         senha: passwordHash,
         manobrasAtivas: 0,
       });
@@ -237,6 +238,7 @@ class UsuarioController {
     if (invalidFieldsAlert) return invalidFieldsAlert;
 
     try {
+      let newUser = false;
       const usuario = await usuarioSchema.findOne({ email });
       if (!usuario) {
         return res.status(404).json({ error: "Usuário não encontrado." });
@@ -244,6 +246,11 @@ class UsuarioController {
 
       const validation = await Validations.users.passwordValidation(usuario.id, senha, res);
       if (validation && validation['errorResponse']) return validation['errorResponse'];
+
+      if (usuario.isNew === true) {
+        newUser = true;
+        await usuarioSchema.findOneAndUpdate({ _id: usuario._id }, { isNew: false });
+      }
 
       const token = generateToken({ id: usuario.id, isAdmin: usuario.isAdmin });
 
@@ -258,6 +265,7 @@ class UsuarioController {
           cpf: usuario.cpf,
           foto: usuario.foto,
           isAdmin: usuario.isAdmin,
+          isNew: newUser,
           manobrasAtivas: usuario.manobrasAtivas ? usuario.manobrasAtivas : 0,
         },
         token
@@ -269,6 +277,74 @@ class UsuarioController {
       console.log(err);
       return res.status(500).json({
         error: err
+      });
+    }
+  }
+
+  public async enviarCodigo(req: Request, res: Response) {
+    const { email } = req.body;
+
+    const invalidFieldsAlert = Validations.verifyFields({ email }, res);
+    if (invalidFieldsAlert) return invalidFieldsAlert;
+
+    try {
+      const usuario = await usuarioSchema.findOne({ email });
+      if (!usuario) {
+        return res.status(404).json({ error: "E-mail não encontrado." });
+      }
+
+      let codigo = Math.floor(Math.random() * 100000).toString().padStart(5, '0');
+
+      await usuarioCodeSchema.create({
+        codigo,
+        usuario: email,
+      });
+
+      return res.sendStatus(200);
+    } catch (error) {
+      if (error.name == "CastError") {
+        return { errorResponse: res.status(404).json({ error: 'Usuário não encontrado.' }) };
+      }
+      return res.status(500).json({
+        error
+      });
+    }
+  }
+
+  public async receberCodigo(req: Request, res: Response) {
+    const { email, codigo, novaSenha } = req.body;
+
+    const invalidFieldsAlert = Validations.verifyFields({ email, codigo }, res);
+    if (invalidFieldsAlert) return invalidFieldsAlert;
+
+    try {
+      const usuario = await usuarioSchema.findOne({ email });
+      if (!usuario) {
+        return res.status(404).json({ error: "E-mail não encontrado." });
+      }
+      
+      const usuarioCodigo = await usuarioCodeSchema.findOne({ usuario: email });
+      if (!usuarioCodigo) {
+        return res.status(404).json({ error: "Solicitação não encontrada." });
+      }
+
+      if (usuarioCodigo.codigo === codigo) {
+        if (novaSenha) {
+          const novaSenhaCripto = await encryptPassword(novaSenha);
+          await usuarioSchema.findOneAndUpdate({_id: usuario._id}, { senha: novaSenhaCripto });
+          await usuarioCodeSchema.findOneAndDelete({usuario: email});
+        }
+
+        return res.sendStatus(200);
+      } else {
+        return res.status(401).json({ error: "Código incorreto"});
+      }
+    } catch (error) {
+      if (error.name == "CastError") {
+        return { errorResponse: res.status(404).json({ error: 'Usuário não encontrado.' }) };
+      }
+      return res.status(500).json({
+        error
       });
     }
   }
