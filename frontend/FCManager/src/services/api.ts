@@ -1,7 +1,7 @@
 import axios, {AxiosInstance} from 'axios';
 
 class Api {
-  private url: string = 'https://fcmanager-backend-4-sprint.onrender.com/';
+  private url: string = 'https://fcmanager-backend.onrender.com';
 
   public apiJson: AxiosInstance = axios.create({
     baseURL: this.url,
