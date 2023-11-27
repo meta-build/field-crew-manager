@@ -7,7 +7,10 @@ import { uploadImg } from "../utils/imageUploader";
 import encryptPassword from "../utils/encryptPassword";
 
 import generateToken from "../middlewares/generateToken";
-import manobraSchema from "../models/manobraSchema";
+import { sendEmail } from '../utils/sendMail';
+import { generateRandomCode } from "../utils/generateCode";
+
+require('dotenv').config();
 
 interface RequestFiles extends Request {
   files: any[] | any;
@@ -279,6 +282,44 @@ class UsuarioController {
       return res.status(500).json({
         error: err
       });
+    }
+  }
+  public async esqueciSenha(req: Request, res: Response) {
+    const { id_usuario } = req.params;
+
+    try {
+      // Verifica se o usuário existe
+      const usuario = await usuarioSchema.findOne({ _id: id_usuario });
+
+      if (!usuario) {
+        return res.status(404).json({ error: 'Usuário não encontrado.' });
+      }
+
+      // Gera um código de autenticação aleatório
+      const codigo = generateRandomCode(8);
+
+      // Atualiza o documento do usuário no MongoDB com o código gerado
+      await usuarioSchema.findByIdAndUpdate(id_usuario, { codigoEsqueciSenha: codigo });
+
+      // Configuração do e-mail
+      const emailOptions = {
+        from: process.env.USER_MAIL,
+        to: usuario.email, // Agora o e-mail vai para o usuário que está tentando fazer login
+        subject: 'Recuperação de Senha',
+        text: `Seu código de recuperação de senha é: ${codigo}`,
+        html: `<p>Seu código de recuperação de senha é: <strong>${codigo}</strong></p>`,
+      };
+
+      console.log('Dados de envio de e-mail:', emailOptions);
+
+      // Envia o e-mail
+      await sendEmail(emailOptions);
+
+      res.sendStatus(200);
+     
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Erro ao processar a solicitação." });
     }
   }
 }

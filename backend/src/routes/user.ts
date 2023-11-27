@@ -23,4 +23,6 @@ routes.post('/usuarios/login/email', UsuarioController.validateUserEmail);
 
 routes.post('/usuarios/login', UsuarioController.login);
 
+routes.post('/usuarios/esqueciSenha/:id_usuario', UsuarioController.esqueciSenha);
+
 export default routes;
