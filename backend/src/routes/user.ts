@@ -15,6 +15,10 @@ routes.delete('/usuarios/:id', tokenValidation.adminUserVerification, UsuarioCon
 
 routes.post('/usuarios', tokenValidation.adminUserVerification, UsuarioController.new);
 
+routes.post('/usuarios/esqueci-senha', UsuarioController.enviarCodigo);
+
+routes.put('/usuarios/esqueci-senha', UsuarioController.receberCodigo);
+
 routes.put('/usuarios/:id', formDataMiddleware, tokenValidation.anyUserVerification, UsuarioController.editarUsuario);
 
 routes.put('/usuarios/login/senha', tokenValidation.anyUserVerification, UsuarioController.editarSenha);
@@ -22,5 +26,6 @@ routes.put('/usuarios/login/senha', tokenValidation.anyUserVerification, Usuario
 routes.post('/usuarios/login/email', UsuarioController.validateUserEmail);
 
 routes.post('/usuarios/login', UsuarioController.login);
+
 
 export default routes;
