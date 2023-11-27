@@ -107,6 +107,31 @@ A entrega da primeira sprint do projeto marcou um importante marco, concentrando
 ##### Limite de cadastro de manobras ativas simultâneas
 ![5-gravacao-max-manobras](https://github.com/meta-build/field-crew-manager/assets/111146527/3d7ed258-b2d2-432c-9875-ec39351f3ff1)
 
+### Sprint 4
+<p>
+ A quarta entrega do projeto foi marcada pelo aprimoramento significativo da funcionalidade offline do aplicativo, permitindo o download eficiente de dados para uso sem conexão à internet. A implementação de uma fila offline de cadastro de equipamentos e manobras proporcionam uma experiência mais robusta. Contudo, é importante mencionar que, em modo offline, algumas limitações foram identificadas, como a impossibilidade de acessar detalhes específicos de itens e a criação de novos usuários. Além disso, a introdução de telas para o primeiro login dos usuários (permitindo a definição de nova senha e a seleção de uma foto de perfil) contribui para uma experiência personalizada desde o início. Por fim, a configuração administrativa se destaca com a capacidade de definir o número máximo de manobras ativas por usuário, bem como a personalização dos filtros padrão na listagem de equipamentos e manobras, proporcionando maior flexibilidade e controle na gestão do sistema.
+</p>
+
+#### Funcionalidades
+<ul>
+ <li>Suporte para sem conexão à internet</li>
+ <li>Download de dados de equipamentos e manobras</li>
+ <li>Fila de cadastro e conclusão de manobras e equipamentos</li>
+ <li>Atualização quando conexão for reestabelecida</li>
+ <li>Telas para primeiro login do usuário</li>
+ <li>Configuração do administrador: Definição de número máximo de manobras ativas por usuário e definição de filtros padrões em listagem de manobras e equipamentos</li>
+</ul>
+
+#### Apresentação das telas
+##### Funcionalidades offline
+![video-offline ‐ Feito com o Clipchamp](https://github.com/meta-build/field-crew-manager/assets/111146527/2dd4e138-700d-4d9a-a99b-8b8d9a1451e7)
+
+##### Primeiro login
+![primeiro-login](https://github.com/meta-build/field-crew-manager/assets/111146527/d3b9ca77-35cb-4e4f-8bf5-5108cffd22d8)
+
+##### Configuração do administrador
+![config-admin](https://github.com/meta-build/field-crew-manager/assets/111146527/25051a75-8a0d-4824-9065-0f6f083ca2dc)
+
 
 <!-- tecnologias -->
 ## :computer: Tecnologias utilizadas
