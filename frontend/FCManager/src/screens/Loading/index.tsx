@@ -182,7 +182,7 @@ function Loading({navigation}: any) {
             placeholder="Senha"
             onChange={e => setPassword(e.nativeEvent.text)}
           />
-          <Link onPress={() => goToForgotPswd()} text="Esqueci minha senha" />
+          {/* <Link onPress={() => goToForgotPswd()} text="Esqueci minha senha" /> */}
         </View>
 
         <View style={styles.btnContainer}>
@@ -202,8 +202,6 @@ function Loading({navigation}: any) {
 const styles = StyleSheet.create({
   view: {
     backgroundColor: colors.green_1,
-    // width,
-    // height,
     flex: 1,
     padding: 18,
     flexDirection: 'column',
@@ -220,7 +218,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   loginView: {
-    marginTop: 18,
+    marginVertical: 18,
   },
   modalError: {
     color: colors.alert_1,

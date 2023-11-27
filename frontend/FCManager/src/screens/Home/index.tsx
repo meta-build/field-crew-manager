@@ -229,7 +229,7 @@ const Home = ({navigation}: any) => {
             placeholder="Senha"
             onChange={e => setPassword(e.nativeEvent.text)}
           />
-          <Link onPress={() => goToForgotPswd()} text="Esqueci minha senha" />
+          {/* <Link onPress={() => goToForgotPswd()} text="Esqueci minha senha" /> */}
         </View>
         <View style={styles.btnContainer}>
           <Btn
@@ -278,6 +278,7 @@ const styles = StyleSheet.create({
   },
   loginView: {
     marginVertical: 18,
+    gap: 12,
   },
   modalText: {
     marginBottom: 8,
